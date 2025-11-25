@@ -35,6 +35,19 @@ COGS = [
 ]
 
 
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    """Global error handler for slash commands."""
+    if isinstance(error, discord.app_commands.MissingPermissions):
+        msg = f"❌ You need **{', '.join(error.missing_permissions)}** permission(s) to use this command."
+        if interaction.response.is_done():
+            await interaction.followup.send(msg, ephemeral=True)
+        else:
+            await interaction.response.send_message(msg, ephemeral=True)
+    else:
+        raise error
+
+
 @bot.event
 async def on_ready():
     """Called when the bot is ready and connected to Discord."""
