@@ -15,25 +15,35 @@ Make sure you have a `.env` file with your `DISCORD_BOT_TOKEN`.
 ## Project Structure
 
 ```
-bot/
-├── main.py              # Bot entry point - add/remove cogs here
-├── cogs/                # Features live here (each file = one feature area)
-│   ├── courses.py       # Course creation, weeks, progress tracking
-│   ├── enrollment.py    # /signup command and availability selection
-│   ├── scheduler.py     # Automatic cohort scheduling algorithm
-│   ├── cohorts.py       # Manual cohort creation with /cohort
-│   ├── meetings.py      # (disabled) Meeting reminders
+bot/                         # Discord bot (Python)
+├── main.py                  # Bot entry point - add/remove cogs here
+├── cogs/                    # Features live here (each file = one feature area)
+│   ├── courses.py           # Course creation, weeks, progress tracking
+│   ├── enrollment.py        # /signup command and availability selection
+│   ├── scheduler.py         # Automatic cohort scheduling algorithm
+│   ├── cohorts.py           # Manual cohort creation with /cohort
 │   └── ...
-├── utils/               # Shared helper functions
-│   ├── data.py          # Load/save user data and courses
-│   ├── timezone.py      # UTC <-> local time conversion
-│   ├── constants.py     # Day names, timezones
-│   ├── cohort_names.py  # Cohort name generator
+├── utils/                   # Shared helper functions
+│   ├── data.py              # Load/save user data and courses
+│   ├── timezone.py          # UTC <-> local time conversion
+│   ├── constants.py         # Day names, timezones
+│   ├── cohort_names.py      # Cohort name generator
 │   └── ...
-├── courses.json         # Course data (created automatically)
-├── user_data.json       # User signups and availability (created automatically)
-└── ...
+├── courses.json             # Course data (created automatically)
+└── user_data.json           # User signups (created automatically)
+
+activities/                  # Discord Activities (static HTML/JS, moving to React)
+├── facilitator-quiz/        # → /facilitator-quiz/
+├── some-other-activity/     # → /some-other-activity/
+├── _dev/                    # Local tunnel tooling (gitignored)
+└── package.json             # `npm run dev` serves all activities
 ```
+
+## Hosting
+
+Two Railway services:
+- **Bot**: Python Discord bot (`bot/`)
+- **Activities**: Static file server (`activities/`) - each subfolder is a route
 
 ## How to Add Features
 

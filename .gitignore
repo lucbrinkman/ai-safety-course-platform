@@ -7,6 +7,9 @@
 .env.local
 .env.*.local
 
+# Google credentials
+google_credentials.json
+
 # Python
 __pycache__/
 *.py[cod]
@@ -51,6 +54,9 @@ htmlcov/
 # Data files (optional - remove if you want to track)
 user_data.json
 courses.json
+
+# Activities dev tooling (contains tunnel token)
+activities/_dev/
 
 # OS
 .DS_Store

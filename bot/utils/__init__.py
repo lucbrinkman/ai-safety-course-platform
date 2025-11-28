@@ -9,6 +9,7 @@ from .data import (
     load_courses, save_courses, get_course, COURSES_FILE
 )
 from .cohort_names import COHORT_NAMES, CohortNameGenerator
+from .google_docs import extract_doc_id, fetch_google_doc, parse_doc_tabs
 
 __all__ = [
     'DAY_CODES',
@@ -27,4 +28,7 @@ __all__ = [
     'COURSES_FILE',
     'COHORT_NAMES',
     'CohortNameGenerator',
+    'extract_doc_id',
+    'fetch_google_doc',
+    'parse_doc_tabs',
 ]

@@ -1,433 +1,240 @@
 """
-Courses Cog
-Handles course content library, progress tracking, and week unlocking.
-Admins can add courses without code changes - bot auto-discovers them.
+Courses Cog - Google Docs backed course management.
+Each tab in the doc = one week. /add-course creates category + channels from doc.
 """
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-
-from utils import (
-    get_user_data, save_user_data,
-    load_courses, save_courses, get_course
-)
+from utils import get_user_data, save_user_data, load_courses, save_courses
+from utils.google_docs import extract_doc_id, fetch_google_doc, parse_doc_tabs
 
 
 class CoursesCog(commands.Cog):
-    """Cog for course content library and progress tracking."""
-
     def __init__(self, bot):
         self.bot = bot
 
-    # ============ ADMIN COMMANDS ============
-
-    @app_commands.command(name="add-course", description="[Admin] Add a new course to the library")
+    @app_commands.command(name="add-course", description="[Admin] Add course from Google Doc URL")
     @app_commands.checks.has_permissions(administrator=True)
-    async def add_course(self, interaction: discord.Interaction, course_id: str, name: str, description: str = ""):
-        """Create a new course with its category."""
+    async def add_course(self, interaction: discord.Interaction, url: str, course_id: str = None):
+        """Create course from Google Doc. Each tab becomes a week channel."""
         await interaction.response.defer(ephemeral=True)
 
+        doc_id = extract_doc_id(url)
+        if not doc_id:
+            return await interaction.followup.send("Invalid Google Docs URL")
+
+        doc, error = await fetch_google_doc(doc_id)
+        if error:
+            return await interaction.followup.send(f"❌ {error}")
+
+        tabs = parse_doc_tabs(doc, url)
+        if not tabs:
+            return await interaction.followup.send("No tabs found in document")
+
+        name = doc.get("title", "Untitled Course")
+        course_id = course_id or name.lower().replace(" ", "-")[:20]
         courses = load_courses()
 
         if course_id in courses:
-            await interaction.followup.send(f"Course `{course_id}` already exists!")
-            return
+            return await interaction.followup.send(f"Course `{course_id}` already exists!")
 
-        # Create category for the course
-        category = await interaction.guild.create_category(
-            name=f"📚 {name}",
-            reason=f"Course library for {course_id}"
-        )
+        # Create category
+        category = await interaction.guild.create_category(f"📚 {name}")
+        await category.set_permissions(interaction.guild.default_role, view_channel=False)
 
-        # Set default permissions - hidden from everyone except admins
-        await category.set_permissions(
-            interaction.guild.default_role,
-            view_channel=False
-        )
+        # Create week channels from tabs
+        weeks = []
+        for i, (title, tab_id, tab_url) in enumerate(tabs, 1):
+            channel_name = title.lower().replace(" ", "-").replace(":", "")[:50]
+            channel = await interaction.guild.create_text_channel(channel_name, category=category)
+            await channel.set_permissions(interaction.guild.default_role, view_channel=False)
 
-        # Save course data
-        courses[course_id] = {
-            "name": name,
-            "description": description,
-            "category_id": category.id,
-            "weeks": []
-        }
+            # Simple message with title and link to Google Doc tab
+            msg_content = f"# {title}\n\n📄 **Read the content here:** {tab_url}\n\n---\nReact ✅ when complete!"
+            complete_msg = await channel.send(msg_content)
+            await complete_msg.add_reaction("✅")
+            weeks.append({"number": i, "title": title, "tab_id": tab_id, "tab_url": tab_url, "channel_id": channel.id, "message_id": complete_msg.id})
+
+        courses[course_id] = {"name": name, "doc_url": url, "category_id": category.id, "weeks": weeks}
         save_courses(courses)
 
-        await interaction.followup.send(
-            f"✅ Course `{course_id}` created!\n"
-            f"**Name:** {name}\n"
-            f"**Category:** {category.mention}\n\n"
-            f"Now add weeks with `/add-week {course_id} 1 \"Week Title\"`"
-        )
+        await interaction.followup.send(f"✅ Created `{course_id}` with {len(weeks)} weeks from Google Doc")
 
-    @app_commands.command(name="add-week", description="[Admin] Add a week to a course")
+    @app_commands.command(name="sync-course", description="[Admin] Sync course content from Google Doc")
     @app_commands.checks.has_permissions(administrator=True)
-    async def add_week(self, interaction: discord.Interaction, course_id: str, week_number: int, title: str):
-        """Add a new week channel to a course."""
+    async def sync_course(self, interaction: discord.Interaction, course_id: str):
+        """Update channel content from Google Doc."""
         await interaction.response.defer(ephemeral=True)
-
         courses = load_courses()
 
         if course_id not in courses:
-            await interaction.followup.send(f"Course `{course_id}` not found! Use `/add-course` first.")
-            return
+            return await interaction.followup.send(f"Course `{course_id}` not found")
+
+        course = courses[course_id]
+        doc_id = extract_doc_id(course["doc_url"])
+        doc, error = await fetch_google_doc(doc_id)
+        if error:
+            return await interaction.followup.send(f"❌ {error}")
+
+        tabs = parse_doc_tabs(doc, course["doc_url"])
+        updated = 0
+        for week in course["weeks"]:
+            if week["number"] <= len(tabs):
+                title, tab_id, tab_url = tabs[week["number"] - 1]
+                channel = interaction.guild.get_channel(week["channel_id"])
+                if channel:
+                    await channel.purge(limit=100)
+                    msg_content = f"# {title}\n\n📄 **Read the content here:** {tab_url}\n\n---\nReact ✅ when complete!"
+                    complete_msg = await channel.send(msg_content)
+                    await complete_msg.add_reaction("✅")
+                    week["message_id"] = complete_msg.id
+                    week["title"] = title
+                    week["tab_id"] = tab_id
+                    week["tab_url"] = tab_url
+                    updated += 1
+        save_courses(courses)
+        await interaction.followup.send(f"✅ Synced {updated} weeks")
+
+    @app_commands.command(name="delete-course", description="[Admin] Delete course and channels")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def delete_course(self, interaction: discord.Interaction, course_id: str):
+        await interaction.response.defer(ephemeral=True)
+        courses = load_courses()
+
+        if course_id not in courses:
+            return await interaction.followup.send(f"Course `{course_id}` not found")
 
         course = courses[course_id]
 
-        # Check if week already exists
-        for week in course["weeks"]:
-            if week["number"] == week_number:
-                await interaction.followup.send(f"Week {week_number} already exists in `{course_id}`!")
-                return
+        # Delete category and all channels inside it
+        try:
+            cat = await interaction.guild.fetch_channel(course["category_id"])
+            for channel in cat.channels:
+                await channel.delete(reason=f"Deleting course {course_id}")
+            await cat.delete(reason=f"Deleting course {course_id}")
+        except discord.NotFound:
+            for week in course["weeks"]:
+                try:
+                    ch = await interaction.guild.fetch_channel(week["channel_id"])
+                    await ch.delete(reason=f"Deleting course {course_id}")
+                except discord.NotFound:
+                    pass
 
-        # Get category
-        category = interaction.guild.get_channel(course["category_id"])
-        if not category:
-            await interaction.followup.send(f"Course category not found! Was it deleted?")
-            return
-
-        # Create week channel
-        channel = await interaction.guild.create_text_channel(
-            name=f"week-{week_number}-{title.lower().replace(' ', '-')[:20]}",
-            category=category,
-            reason=f"Week {week_number} for {course_id}"
-        )
-
-        # Set permissions - hidden by default
-        await channel.set_permissions(
-            interaction.guild.default_role,
-            view_channel=False
-        )
-
-        # Post template content message
-        content_message = await channel.send(
-            f"# Week {week_number}: {title}\n\n"
-            f"## 📖 Core Reading\n"
-            f"*Add your readings here*\n\n"
-            f"## 🎥 Video Content\n"
-            f"*Add video links here*\n\n"
-            f"## 💡 Key Concepts\n"
-            f"- Concept 1\n"
-            f"- Concept 2\n\n"
-            f"## 🤔 Discussion Questions\n"
-            f"1. Question 1?\n"
-            f"2. Question 2?\n\n"
-            f"---\n"
-            f"## ✅ Mark Complete\n"
-            f"React with ✅ to this message when you've completed this week's content.\n"
-            f"This will unlock the next week!"
-        )
-
-        # Add checkmark reaction for easy clicking
-        await content_message.add_reaction("✅")
-
-        # Save week data
-        course["weeks"].append({
-            "number": week_number,
-            "title": title,
-            "channel_id": channel.id,
-            "message_id": content_message.id
-        })
-
-        # Sort weeks by number
-        course["weeks"].sort(key=lambda w: w["number"])
+        del courses[course_id]
         save_courses(courses)
+        await interaction.followup.send(f"✅ Deleted `{course_id}`")
 
-        await interaction.followup.send(
-            f"✅ Week {week_number} added to `{course_id}`!\n"
-            f"**Channel:** {channel.mention}\n"
-            f"**Title:** {title}\n\n"
-            f"Edit the channel content as needed. The ✅ reaction tracker is already set up."
-        )
-
-    @app_commands.command(name="list-courses", description="List all available courses")
+    @app_commands.command(name="list-courses", description="List all courses")
     async def list_courses(self, interaction: discord.Interaction):
-        """Show all courses and their weeks."""
         courses = load_courses()
-
         if not courses:
-            await interaction.response.send_message(
-                "No courses available yet. Admins can add courses with `/add-course`.",
-                ephemeral=True
-            )
-            return
+            return await interaction.response.send_message("No courses yet.", ephemeral=True)
 
-        embed = discord.Embed(
-            title="📚 Course Library",
-            color=discord.Color.blue()
-        )
-
-        for course_id, course in courses.items():
-            weeks_str = f"{len(course['weeks'])} weeks" if course['weeks'] else "No weeks yet"
-            embed.add_field(
-                name=f"{course_id} - {course['name']}",
-                value=f"{course['description']}\n*{weeks_str}*" if course['description'] else f"*{weeks_str}*",
-                inline=False
-            )
-
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        lines = [f"**{cid}** - {c['name']} ({len(c['weeks'])} weeks)" for cid, c in courses.items()]
+        await interaction.response.send_message("📚 **Courses**\n" + "\n".join(lines), ephemeral=True)
 
     @app_commands.command(name="my-progress", description="View your course progress")
     async def my_progress(self, interaction: discord.Interaction):
-        """Show user's progress in all enrolled courses."""
-        user_id = str(interaction.user.id)
-        user_data = get_user_data(user_id)
+        user_data = get_user_data(str(interaction.user.id))
+        if not user_data or not user_data.get("courses"):
+            return await interaction.response.send_message("Not enrolled in any courses.", ephemeral=True)
 
-        if not user_data:
-            await interaction.response.send_message(
-                "You haven't signed up yet! Use `/signup` to get started.",
-                ephemeral=True
-            )
-            return
-
-        enrolled_courses = user_data.get("courses", [])
-        progress = user_data.get("course_progress", {})
         courses = load_courses()
-
-        if not enrolled_courses:
-            await interaction.response.send_message(
-                "You're not enrolled in any courses. Use `/signup` to enroll.",
-                ephemeral=True
-            )
-            return
-
-        embed = discord.Embed(
-            title="📊 Your Course Progress",
-            color=discord.Color.green()
-        )
-
-        for course_id in enrolled_courses:
-            if course_id not in courses:
+        lines = []
+        for cid in user_data.get("courses", []):
+            if cid not in courses:
                 continue
+            course = courses[cid]
+            prog = user_data.get("course_progress", {}).get(cid, {})
+            done = len(prog.get("completed_weeks", []))
+            total = len(course["weeks"])
+            bar = "▓" * done + "░" * (total - done)
+            lines.append(f"**{course['name']}**: {bar} {done}/{total}")
 
-            course = courses[course_id]
-            total_weeks = len(course["weeks"])
-
-            if course_id in progress:
-                completed = progress[course_id].get("completed_weeks", [])
-                current = progress[course_id].get("current_week", 1)
-            else:
-                completed = []
-                current = 1
-
-            completed_count = len(completed)
-
-            # Progress bar
-            if total_weeks > 0:
-                filled = int((completed_count / total_weeks) * 10)
-                bar = "▓" * filled + "░" * (10 - filled)
-                progress_str = f"{bar} {completed_count}/{total_weeks}"
-            else:
-                progress_str = "No weeks available"
-
-            embed.add_field(
-                name=f"{course['name']}",
-                value=f"**Progress:** {progress_str}\n**Current Week:** {current}",
-                inline=False
-            )
-
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(name="delete-course", description="[Admin] Delete a course and all its channels")
-    @app_commands.checks.has_permissions(administrator=True)
-    async def delete_course(self, interaction: discord.Interaction, course_id: str):
-        """Delete a course and optionally its Discord channels."""
-        await interaction.response.defer(ephemeral=True)
-
-        courses = load_courses()
-
-        if course_id not in courses:
-            await interaction.followup.send(f"Course `{course_id}` not found!")
-            return
-
-        course = courses[course_id]
-
-        # Delete channels
-        for week in course["weeks"]:
-            channel = interaction.guild.get_channel(week["channel_id"])
-            if channel:
-                await channel.delete(reason=f"Deleting course {course_id}")
-
-        # Delete category
-        category = interaction.guild.get_channel(course["category_id"])
-        if category:
-            await category.delete(reason=f"Deleting course {course_id}")
-
-        # Remove from data
-        del courses[course_id]
-        save_courses(courses)
-
-        await interaction.followup.send(f"✅ Course `{course_id}` and all its channels have been deleted.")
-
-    # ============ REACTION TRACKING ============
+        await interaction.response.send_message("📊 **Progress**\n" + "\n".join(lines), ephemeral=True)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        """Track when users complete weeks by reacting with ✅."""
-        if payload.emoji.name != "✅":
-            return
-
-        # Ignore bot reactions
-        if payload.user_id == self.bot.user.id:
+        if payload.emoji.name != "✅" or payload.user_id == self.bot.user.id:
             return
 
         courses = load_courses()
-
-        # Find which course/week this message belongs to
-        for course_id, course in courses.items():
+        for cid, course in courses.items():
             for week in course["weeks"]:
                 if week["message_id"] == payload.message_id:
-                    await self._handle_week_completion(
-                        payload.user_id,
-                        payload.guild_id,
-                        course_id,
-                        course,
-                        week["number"]
-                    )
+                    await self._complete_week(payload, cid, course, week["number"])
                     return
 
-    async def _handle_week_completion(self, user_id: int, guild_id: int, course_id: str, course: dict, week_number: int):
-        """Handle a user completing a week."""
-        user_id_str = str(user_id)
-        user_data = get_user_data(user_id_str)
-
-        if not user_data:
+    async def _complete_week(self, payload, course_id: str, course: dict, week_num: int):
+        user_id = str(payload.user_id)
+        user_data = get_user_data(user_id)
+        if not user_data or course_id not in user_data.get("courses", []):
             return
 
-        # Check if user is enrolled in this course
-        if course_id not in user_data.get("courses", []):
-            return
+        prog = user_data.setdefault("course_progress", {}).setdefault(course_id, {"current_week": 1, "completed_weeks": []})
+        if week_num not in prog["completed_weeks"]:
+            prog["completed_weeks"].append(week_num)
+            prog["current_week"] = max(prog["current_week"], week_num + 1)
+            save_user_data(user_id, user_data)
 
-        # Initialize progress if needed
-        if "course_progress" not in user_data:
-            user_data["course_progress"] = {}
-        if course_id not in user_data["course_progress"]:
-            user_data["course_progress"][course_id] = {
-                "current_week": 1,
-                "completed_weeks": []
-            }
-
-        progress = user_data["course_progress"][course_id]
-
-        # Mark week as completed
-        if week_number not in progress["completed_weeks"]:
-            progress["completed_weeks"].append(week_number)
-            progress["completed_weeks"].sort()
-
-        # Update current week to next
-        next_week = week_number + 1
-        if next_week > progress["current_week"]:
-            progress["current_week"] = next_week
-
-        save_user_data(user_id_str, user_data)
-
-        # Unlock next week channel
-        guild = self.bot.get_guild(guild_id)
+        # Unlock next week
+        guild = self.bot.get_guild(payload.guild_id)
         if not guild:
             return
-
-        member = guild.get_member(user_id)
-        if not member:
+        try:
+            member = await guild.fetch_member(payload.user_id)
+        except discord.NotFound:
             return
 
-        # Find next week channel
-        for week in course["weeks"]:
-            if week["number"] == next_week:
-                channel = guild.get_channel(week["channel_id"])
-                if channel:
-                    await channel.set_permissions(
-                        member,
-                        view_channel=True,
-                        read_message_history=True
-                    )
-
-                    # DM user about unlock
+        for w in course["weeks"]:
+            if w["number"] == week_num + 1:
+                ch = guild.get_channel(w["channel_id"])
+                if ch:
+                    await ch.set_permissions(member, view_channel=True, read_message_history=True)
                     try:
-                        await member.send(
-                            f"🎉 **Week {week_number} complete!**\n\n"
-                            f"You've unlocked **Week {next_week}: {week['title']}** in {course['name']}.\n"
-                            f"Check it out: <#{channel.id}>"
-                        )
+                        await member.send(f"🎉 Week {week_num} done! Unlocked **{w['title']}**")
                     except discord.Forbidden:
-                        pass  # User has DMs disabled
+                        pass
                 break
 
-    # ============ ENROLLMENT INTEGRATION ============
-
     async def enroll_user_in_course(self, member: discord.Member, course_id: str):
-        """Grant a user access to week 1 of a course."""
+        """Grant user access to week 1 (and any completed weeks)."""
         courses = load_courses()
-
         if course_id not in courses:
             return False
 
         course = courses[course_id]
+        user_data = get_user_data(str(member.id))
+        prog = user_data.setdefault("course_progress", {}).setdefault(course_id, {"current_week": 1, "completed_weeks": []})
+        save_user_data(str(member.id), user_data)
 
-        # Initialize user progress
-        user_id = str(member.id)
-        user_data = get_user_data(user_id)
-
-        if "course_progress" not in user_data:
-            user_data["course_progress"] = {}
-
-        if course_id not in user_data["course_progress"]:
-            user_data["course_progress"][course_id] = {
-                "current_week": 1,
-                "completed_weeks": []
-            }
-            save_user_data(user_id, user_data)
-
-        # Get user's current progress
-        progress = user_data["course_progress"][course_id]
-        current_week = progress.get("current_week", 1)
-        completed_weeks = progress.get("completed_weeks", [])
-
-        # Grant access to all completed weeks plus current week
         for week in course["weeks"]:
-            if week["number"] <= current_week or week["number"] in completed_weeks:
-                channel = member.guild.get_channel(week["channel_id"])
-                if channel:
-                    await channel.set_permissions(
-                        member,
-                        view_channel=True,
-                        read_message_history=True
-                    )
-
+            if week["number"] <= prog["current_week"] or week["number"] in prog["completed_weeks"]:
+                ch = member.guild.get_channel(week["channel_id"])
+                if ch:
+                    await ch.set_permissions(member, view_channel=True)
         return True
 
     async def unenroll_user_from_course(self, member: discord.Member, course_id: str):
-        """Remove a user's access to all course channels."""
+        """Remove user access from all course channels."""
         courses = load_courses()
-
         if course_id not in courses:
             return False
-
-        course = courses[course_id]
-
-        # Remove access to all weeks
-        for week in course["weeks"]:
-            channel = member.guild.get_channel(week["channel_id"])
-            if channel:
-                await channel.set_permissions(
-                    member,
-                    overwrite=None  # Remove all overwrites for this user
-                )
-
+        for week in courses[course_id]["weeks"]:
+            ch = member.guild.get_channel(week["channel_id"])
+            if ch:
+                await ch.set_permissions(member, overwrite=None)
         return True
 
     async def sync_user_courses(self, member: discord.Member, new_courses: list, old_courses: list):
-        """Sync a user's course access when they update their enrollment."""
-        # Remove access from courses they left
-        for course_id in old_courses:
-            if course_id not in new_courses:
-                await self.unenroll_user_from_course(member, course_id)
-
-        # Add access to new courses
-        for course_id in new_courses:
-            if course_id not in old_courses:
-                await self.enroll_user_in_course(member, course_id)
+        """Sync user's course access on enrollment changes."""
+        for cid in old_courses:
+            if cid not in new_courses:
+                await self.unenroll_user_from_course(member, cid)
+        for cid in new_courses:
+            if cid not in old_courses:
+                await self.enroll_user_in_course(member, cid)
 
 
 async def setup(bot):
