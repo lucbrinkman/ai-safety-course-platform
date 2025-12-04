@@ -1,5 +1,5 @@
 """
-Shared constants used across the bot.
+Shared constants used across the platform.
 """
 
 # Day codes mapping for compact display

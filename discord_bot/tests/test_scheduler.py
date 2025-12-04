@@ -1,16 +1,16 @@
 """
-Unit tests for the scheduler cog.
-Tests the core scheduling algorithm functions.
+Unit tests for the scheduling algorithm.
+Tests the core scheduling functions in core/scheduling.py.
 """
 
 import pytest
 import sys
 from pathlib import Path
 
-# Add parent directory to path so we can import the cog
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add project root to path so we can import from core
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cogs.scheduler import (
+from core import (
     parse_interval_string,
     is_group_valid,
     calculate_total_available_time,

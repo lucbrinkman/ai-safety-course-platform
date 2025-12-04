@@ -1,13 +1,21 @@
 """
-Courses Cog - Google Docs backed course management.
-Each tab in the doc = one week. /add-course creates category + channels from doc.
+Courses Cog - Discord adapter for course management.
+Google Docs backed course management.
 """
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils import get_user_data, save_user_data, load_courses, save_courses
-from utils.google_docs import extract_doc_id, fetch_google_doc, parse_doc_tabs
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from core import (
+    load_courses, save_courses, get_course, get_user_data, save_user_data,
+    extract_doc_id, fetch_google_doc, parse_doc_tabs,
+    mark_week_complete, get_user_progress
+)
 
 
 class CoursesCog(commands.Cog):
@@ -146,7 +154,7 @@ class CoursesCog(commands.Cog):
             if cid not in courses:
                 continue
             course = courses[cid]
-            prog = user_data.get("course_progress", {}).get(cid, {})
+            prog = get_user_progress(str(interaction.user.id), cid)
             done = len(prog.get("completed_weeks", []))
             total = len(course["weeks"])
             bar = "▓" * done + "░" * (total - done)
@@ -172,13 +180,10 @@ class CoursesCog(commands.Cog):
         if not user_data or course_id not in user_data.get("courses", []):
             return
 
-        prog = user_data.setdefault("course_progress", {}).setdefault(course_id, {"current_week": 1, "completed_weeks": []})
-        if week_num not in prog["completed_weeks"]:
-            prog["completed_weeks"].append(week_num)
-            prog["current_week"] = max(prog["current_week"], week_num + 1)
-            save_user_data(user_id, user_data)
+        # Mark week complete using core function
+        mark_week_complete(user_id, course_id, week_num)
 
-        # Unlock next week
+        # Unlock next week (Discord-specific)
         guild = self.bot.get_guild(payload.guild_id)
         if not guild:
             return
@@ -205,9 +210,7 @@ class CoursesCog(commands.Cog):
             return False
 
         course = courses[course_id]
-        user_data = get_user_data(str(member.id))
-        prog = user_data.setdefault("course_progress", {}).setdefault(course_id, {"current_week": 1, "completed_weeks": []})
-        save_user_data(str(member.id), user_data)
+        prog = get_user_progress(str(member.id), course_id)
 
         for week in course["weeks"]:
             if week["number"] <= prog["current_week"] or week["number"] in prog["completed_weeks"]:

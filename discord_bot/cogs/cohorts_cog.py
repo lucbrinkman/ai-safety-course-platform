@@ -1,6 +1,6 @@
 """
-Cohorts Cog
-Handles manual cohort creation with availability matching and Discord events.
+Cohorts Cog - Discord adapter for cohort creation.
+Handles manual cohort creation with Discord channels and scheduled events.
 """
 
 import discord
@@ -9,12 +9,14 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 import pytz
 
-from utils import (
-    DAY_CODES, DAY_NAMES,
-    get_user_data,
-    utc_to_local_time,
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from core import (
+    get_user_data, get_course,
     CohortNameGenerator,
-    get_course
+    find_availability_overlap, format_local_time
 )
 
 
@@ -24,102 +26,6 @@ class CohortsCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.name_generator = CohortNameGenerator()
-
-    def _find_overlap(self, members: list[discord.Member]) -> tuple[str, int] | None:
-        """
-        Find a 1-hour slot where all members are available.
-        Returns (day_name, hour) in UTC or None if no overlap.
-        """
-        # Collect all availability
-        all_available = {}  # {(day, hour): [user_ids who are available]}
-        all_if_needed = {}  # {(day, hour): [user_ids who marked if-needed]}
-
-        for member in members:
-            user_data = get_user_data(str(member.id))
-            if not user_data:
-                continue
-
-            availability = user_data.get("availability", {})
-            if_needed = user_data.get("if_needed", {})
-
-            for day, slots in availability.items():
-                for slot in slots:
-                    hour = int(slot.split(":")[0])
-                    key = (day, hour)
-                    if key not in all_available:
-                        all_available[key] = []
-                    all_available[key].append(member.id)
-
-            for day, slots in if_needed.items():
-                for slot in slots:
-                    hour = int(slot.split(":")[0])
-                    key = (day, hour)
-                    if key not in all_if_needed:
-                        all_if_needed[key] = []
-                    all_if_needed[key].append(member.id)
-
-        # Find slots where everyone is available (prefer fully available over if-needed)
-        member_count = len(members)
-        member_ids = {m.id for m in members}
-
-        # First pass: look for slots where everyone is fully available
-        for (day, hour), user_ids in all_available.items():
-            if set(user_ids) == member_ids:
-                return (day, hour)
-
-        # Second pass: look for slots where everyone is available or if-needed
-        for (day, hour) in all_available.keys() | all_if_needed.keys():
-            available_ids = set(all_available.get((day, hour), []))
-            if_needed_ids = set(all_if_needed.get((day, hour), []))
-            combined = available_ids | if_needed_ids
-
-            if combined == member_ids:
-                return (day, hour)
-
-        return None
-
-    def _get_timezone_abbrev(self, tz_name: str, dt: datetime) -> str:
-        """Get timezone abbreviation for a datetime."""
-        try:
-            tz = pytz.timezone(tz_name)
-            return dt.astimezone(tz).strftime('%Z')
-        except:
-            return tz_name
-
-    def _format_local_time(self, day: str, hour: int, tz_name: str) -> tuple[str, str]:
-        """
-        Convert UTC day/hour to local time string.
-        Returns (day_name, time_string) e.g. ("Wednesday", "3:00-4:00pm EST")
-        """
-        local_day, local_hour = utc_to_local_time(day, hour, tz_name)
-
-        # Format hour as 12-hour time
-        if local_hour == 0:
-            start = "12:00am"
-            end = "1:00am"
-        elif local_hour < 12:
-            start = f"{local_hour}:00am"
-            end = f"{local_hour + 1}:00am" if local_hour + 1 < 12 else "12:00pm"
-        elif local_hour == 12:
-            start = "12:00pm"
-            end = "1:00pm"
-        else:
-            start = f"{local_hour - 12}:00pm"
-            end_hour = local_hour + 1
-            if end_hour == 24:
-                end = "12:00am"
-            elif end_hour > 12:
-                end = f"{end_hour - 12}:00pm"
-            else:
-                end = f"{end_hour}:00am"
-
-        time_str = f"{start[:-2]}-{end}"
-
-        # Get timezone abbreviation
-        now = datetime.now(pytz.UTC)
-        abbrev = self._get_timezone_abbrev(tz_name, now)
-
-        return (local_day, f"{local_day}s {time_str} {abbrev}")
 
     @app_commands.command(name="cohort", description="Create a cohort from selected members")
     @app_commands.checks.has_permissions(administrator=True)
@@ -176,8 +82,9 @@ class CohortsCog(commands.Cog):
             )
             return
 
-        # Find overlapping availability
-        overlap = self._find_overlap(members)
+        # Find overlapping availability using core function
+        member_ids = [str(m.id) for m in members]
+        overlap = find_availability_overlap(member_ids)
         if not overlap:
             await interaction.followup.send(
                 f"❌ No overlapping availability found for these {len(members)} members.\n"
@@ -284,7 +191,7 @@ class CohortsCog(commands.Cog):
             else:
                 member_list.append(f"• {member.mention}")
 
-        # Schedule with each member's timezone
+        # Schedule with each member's timezone using core function
         schedule_lines = []
         for member in members:
             user_data = get_user_data(str(member.id))
@@ -293,7 +200,7 @@ class CohortsCog(commands.Cog):
             # Get city name from timezone (simplified)
             city = tz_name.split("/")[-1].replace("_", " ")
 
-            local_day, time_str = self._format_local_time(utc_day, utc_hour, tz_name)
+            local_day, time_str = format_local_time(utc_day, utc_hour, tz_name)
             schedule_lines.append(f"• {member.mention} ({city}): {time_str}")
 
         # UTC reference

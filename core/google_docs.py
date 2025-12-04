@@ -1,23 +1,33 @@
 """Google Docs utilities for fetching document content by tabs."""
 
 import json
+import os
 import re
 import time
 import aiohttp
 import jwt
 from pathlib import Path
 
-CREDENTIALS_FILE = Path(__file__).parent.parent / "google_credentials.json"
+# Credentials file - can be overridden via GOOGLE_CREDENTIALS_FILE environment variable
+# Default: discord_bot/google_credentials.json (for backwards compatibility)
+_PROJECT_ROOT = Path(__file__).parent.parent
+CREDENTIALS_FILE = Path(os.environ.get(
+    'GOOGLE_CREDENTIALS_FILE',
+    _PROJECT_ROOT / 'discord_bot' / 'google_credentials.json'
+))
+
 
 def extract_doc_id(url: str) -> str | None:
     """Extract Google Doc ID from a URL."""
     match = re.search(r'/d/([a-zA-Z0-9_-]+)', url)
     return match.group(1) if match else None
 
+
 def make_tab_url(doc_url: str, tab_id: str) -> str:
     """Create a direct link to a specific tab in a Google Doc."""
     doc_id = extract_doc_id(doc_url)
     return f"https://docs.google.com/document/d/{doc_id}/edit?tab={tab_id}"
+
 
 async def _get_access_token() -> tuple[str | None, str | None]:
     """Get OAuth2 access token using service account credentials."""
@@ -48,6 +58,7 @@ async def _get_access_token() -> tuple[str | None, str | None]:
                 return data["access_token"], None
             return None, f"Token error: {data.get('error_description', data)}"
 
+
 async def fetch_google_doc(doc_id: str) -> tuple[dict | None, str | None]:
     """Fetch a Google Doc with all tabs. Returns (doc, error) tuple."""
     token, error = await _get_access_token()
@@ -72,6 +83,7 @@ async def fetch_google_doc(doc_id: str) -> tuple[dict | None, str | None]:
                     return None, f"Google API error ({code}): {message}"
     except aiohttp.ClientError as e:
         return None, f"Network error: {e}"
+
 
 def parse_doc_tabs(doc: dict, doc_url: str) -> list[tuple[str, str, str]]:
     """Parse Google Doc tabs. Returns list of (title, tab_id, tab_url) tuples."""

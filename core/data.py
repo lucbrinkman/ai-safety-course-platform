@@ -3,11 +3,16 @@ Data storage utilities for user and course data persistence.
 """
 
 import json
+import os
 from pathlib import Path
 
-# Data storage file paths
-DATA_FILE = Path(__file__).parent.parent / "user_data.json"
-COURSES_FILE = Path(__file__).parent.parent / "courses.json"
+# Data directory - can be overridden via DATA_DIR environment variable
+# Default: discord_bot/ directory (for backwards compatibility)
+_PROJECT_ROOT = Path(__file__).parent.parent
+DATA_DIR = Path(os.environ.get('DATA_DIR', _PROJECT_ROOT / 'discord_bot'))
+
+DATA_FILE = DATA_DIR / "user_data.json"
+COURSES_FILE = DATA_DIR / "courses.json"
 
 
 def load_data() -> dict:
@@ -20,6 +25,7 @@ def load_data() -> dict:
 
 def save_data(data: dict) -> None:
     """Save all user data to the JSON file."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
@@ -49,6 +55,7 @@ def load_courses() -> dict:
 
 def save_courses(data: dict) -> None:
     """Save all course data to the JSON file."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(COURSES_FILE, "w") as f:
         json.dump(data, f, indent=2)
 

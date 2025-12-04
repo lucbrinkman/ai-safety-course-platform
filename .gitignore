@@ -1,6 +1,7 @@
 # Project-specific
 /.claude
 /ASEP v2.0.md
+.jj/
 
 # Environment
 .env

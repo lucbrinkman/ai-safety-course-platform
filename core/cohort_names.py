@@ -3,10 +3,11 @@ Cohort name generation utility.
 """
 
 # Cohort names - CS/math/rationalist pioneers
-COHORT_NAMES = [ "Turing", "Lovelace", "Dijkstra", 
-                "Hopper", "Bayes", "Euler", 
-                "Gödel", "Hamming", "Chomsky",
-                ]
+COHORT_NAMES = [
+    "Turing", "Lovelace", "Dijkstra",
+    "Hopper", "Bayes", "Euler",
+    "Gödel", "Hamming", "Chomsky",
+]
 
 
 class CohortNameGenerator:

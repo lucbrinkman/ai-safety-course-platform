@@ -1,17 +1,20 @@
 """
-Enrollment Cog
-Handles user signup, availability selection, and profile management.
+Enrollment Cog - Discord adapter for user signup and profile management.
 """
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import (
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from core import (
     DAY_CODES, DAY_NAMES, TIMEZONES,
     local_to_utc_time, utc_to_local_time,
     get_user_data, save_user_data,
-    load_courses
+    load_courses, toggle_facilitator
 )
 
 
@@ -499,7 +502,7 @@ class EnrollmentCog(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="toggle-facilitator", description="Toggle your facilitator status")
-    async def toggle_facilitator(self, interaction: discord.Interaction):
+    async def toggle_facilitator_cmd(self, interaction: discord.Interaction):
         """Toggle whether you are marked as a facilitator."""
         user_id = str(interaction.user.id)
         user_data = get_user_data(user_id)
@@ -513,9 +516,8 @@ class EnrollmentCog(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)
 
-        current_status = user_data.get("is_facilitator", False)
-        user_data["is_facilitator"] = not current_status
-        save_user_data(user_id, user_data)
+        # Use core function to toggle
+        new_status = toggle_facilitator(user_id)
 
         role_message = ""
         if interaction.guild:
@@ -535,7 +537,7 @@ class EnrollmentCog(commands.Cog):
 
             if facilitator_role:
                 try:
-                    if not current_status:
+                    if new_status:
                         await interaction.user.add_roles(facilitator_role)
                         role_message = "\n✅ Facilitator role added"
                     else:
@@ -544,9 +546,9 @@ class EnrollmentCog(commands.Cog):
                 except discord.Forbidden:
                     role_message = "\n⚠️ Couldn't assign role (missing permissions)"
 
-        new_status = "✅ Facilitator" if not current_status else "❌ Not a facilitator"
+        status_str = "✅ Facilitator" if new_status else "❌ Not a facilitator"
         await interaction.followup.send(
-            f"Your status has been updated: **{new_status}**{role_message}"
+            f"Your status has been updated: **{status_str}**{role_message}"
         )
 
 

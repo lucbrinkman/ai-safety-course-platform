@@ -25,13 +25,13 @@ def create_bot() -> commands.Bot:
 bot = create_bot()
 
 
-# List of cogs to load
+# List of cogs to load (refactored as thin adapters, business logic in core/)
 COGS = [
-    "cogs.courses",
-    "cogs.enrollment",
-    "cogs.scheduler",
-    "cogs.cohorts",
-    # "cogs.meetings",  # Temporarily disabled
+    "cogs.courses_cog",
+    "cogs.enrollment_cog",
+    "cogs.scheduler_cog",
+    "cogs.cohorts_cog",
+    # "cogs.meetings_cog",  # Temporarily disabled
 ]
 
 
