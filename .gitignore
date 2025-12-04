@@ -59,6 +59,10 @@ courses.json
 # Activities dev tooling (contains tunnel token)
 activities/_dev/
 
+# Frontend (Node.js build tooling)
+node_modules/
+web_frontend/dist/
+
 # OS
 .DS_Store
 Thumbs.db
