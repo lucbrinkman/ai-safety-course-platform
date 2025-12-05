@@ -1,10 +1,16 @@
+import { Routes, Route } from 'react-router'
+import Layout from './components/Layout'
+import Home from './pages/Home'
+import NotFound from './pages/NotFound'
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-900">
-        AI Safety Course Platform
-      </h1>
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
 

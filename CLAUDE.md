@@ -124,8 +124,7 @@ from core import (
 ## Hosting
 
 Two Railway services:
-- Bot service: Runs `python discord_bot/main.py`
-- Activities service: Serves `activities/` as static files
+(removed because it was outdated)
 
 # jj
 
