@@ -1,14 +1,11 @@
 import { useState } from "react";
 import type { SignupFormData } from "../../types/signup";
 import { EMPTY_AVAILABILITY, getBrowserTimezone } from "../../types/signup";
-import StepIndicator from "./StepIndicator";
 import PersonalInfoStep from "./PersonalInfoStep";
 import AvailabilityStep from "./AvailabilityStep";
 import SuccessMessage from "./SuccessMessage";
 
 type Step = 1 | 2 | "complete";
-
-const STEPS = ["Personal Info", "Availability"];
 
 export default function SignupWizard() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
@@ -44,8 +41,6 @@ export default function SignupWizard() {
 
   return (
     <div>
-      <StepIndicator currentStep={currentStep} steps={STEPS} />
-
       {currentStep === 1 && (
         <PersonalInfoStep
           firstName={formData.firstName}
