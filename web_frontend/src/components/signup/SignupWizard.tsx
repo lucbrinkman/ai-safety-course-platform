@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { SignupFormData } from "../../types/signup";
-import { EMPTY_AVAILABILITY } from "../../types/signup";
+import { EMPTY_AVAILABILITY, getBrowserTimezone } from "../../types/signup";
 import StepIndicator from "./StepIndicator";
 import PersonalInfoStep from "./PersonalInfoStep";
 import AvailabilityStep from "./AvailabilityStep";
@@ -18,6 +18,7 @@ export default function SignupWizard() {
     discordConnected: false,
     discordUsername: undefined,
     availability: { ...EMPTY_AVAILABILITY },
+    timezone: getBrowserTimezone(),
   });
 
   const handleDiscordConnect = () => {
@@ -67,6 +68,10 @@ export default function SignupWizard() {
           availability={formData.availability}
           onAvailabilityChange={(data) =>
             setFormData((prev) => ({ ...prev, availability: data }))
+          }
+          timezone={formData.timezone}
+          onTimezoneChange={(tz) =>
+            setFormData((prev) => ({ ...prev, timezone: tz }))
           }
           onBack={() => setCurrentStep(1)}
           onSubmit={handleSubmit}
