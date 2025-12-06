@@ -28,47 +28,55 @@ function formatHour(hour: number): string {
 
 interface TimeSlotCellProps {
   day: DayName;
-  hour: number;
+  slot: number;
   isSelected: boolean;
   isPreview: boolean;
+  isHovered: boolean;
   selectionMode: "add" | "remove" | null;
   onMouseDown: () => void;
   onMouseEnter: () => void;
+  onMouseLeave: () => void;
   onTouchStart: () => void;
 }
 
 function TimeSlotCell({
   day,
-  hour,
+  slot,
   isSelected,
   isPreview,
+  isHovered,
   selectionMode,
   onMouseDown,
   onMouseEnter,
+  onMouseLeave,
   onTouchStart,
 }: TimeSlotCellProps) {
-  let bgClass = "bg-gray-200 hover:bg-gray-300";
+  let bgClass = "bg-gray-200";
 
-  if (isPreview) {
+  if (isHovered && !isPreview) {
+    // Hover state (only when not dragging)
+    bgClass = isSelected ? "bg-blue-400" : "bg-gray-300";
+  } else if (isPreview) {
     // During drag, show preview state
-    if (selectionMode === "add") {
-      bgClass = "bg-blue-300";
-    } else {
-      bgClass = "bg-red-200";
-    }
+    bgClass = selectionMode === "add" ? "bg-blue-300" : "bg-red-200";
   } else if (isSelected) {
     bgClass = "bg-blue-500";
   }
 
   return (
     <div
-      data-day={day}
-      data-hour={hour}
-      className={`h-6 border border-gray-300 cursor-pointer select-none touch-none transition-colors ${bgClass}`}
+      className="p-px cursor-pointer select-none touch-none"
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onTouchStart={onTouchStart}
-    />
+    >
+      <div
+        data-day={day}
+        data-slot={slot}
+        className={`h-6 ${bgClass}`}
+      />
+    </div>
   );
 }
 
@@ -78,16 +86,16 @@ export default function ScheduleSelector({
   startHour = 8,
   endHour = 22,
 }: ScheduleSelectorProps) {
-  const hours = Array.from(
-    { length: endHour - startHour },
-    (_, i) => startHour + i,
+  const slots = Array.from(
+    { length: (endHour - startHour) * 2 },
+    (_, i) => startHour + i * 0.5,
   );
 
-  const { gridRef, selectionState, isSelected, isPreview, handlers } =
+  const { gridRef, selectionState, isSelected, isPreview, isHovered, handlers } =
     useScheduleSelection({
       value,
       onChange,
-      hours,
+      slots,
     });
 
   const totalSelected = Object.values(value).reduce(
@@ -112,12 +120,9 @@ export default function ScheduleSelector({
         style={{
           gridTemplateColumns: "50px repeat(7, minmax(40px, 1fr))",
         }}
-        onMouseLeave={() => {
-          // Don't end selection on mouse leave - let global handler do it
-        }}
       >
         {/* Header row: empty corner + day names */}
-        <div className="sticky left-0 bg-white" />
+        <div className="sticky left-0" />
         {DAY_NAMES.map((day) => (
           <div
             key={day}
@@ -128,36 +133,40 @@ export default function ScheduleSelector({
         ))}
 
         {/* Time rows */}
-        {hours.map((hour) => (
+        {slots.map((slot) => (
           <>
-            {/* Time label */}
+            {/* Time label - only show on full hours, positioned at top edge */}
             <div
-              key={`label-${hour}`}
-              className="sticky left-0 bg-white text-right pr-2 text-xs text-gray-500 flex items-center justify-end"
+              key={`label-${slot}`}
+              className="sticky left-0 text-right pr-2 text-xs text-gray-500 flex items-start justify-end relative"
             >
-              {formatHour(hour)}
+              {slot % 1 === 0 && (
+                <span className="relative -top-2">{formatHour(slot)}</span>
+              )}
             </div>
 
-            {/* Day cells for this hour */}
+            {/* Day cells for this slot */}
             {DAY_NAMES.map((day) => (
               <TimeSlotCell
-                key={`${day}-${hour}`}
+                key={`${day}-${slot}`}
                 day={day}
-                hour={hour}
-                isSelected={isSelected(day, hour)}
-                isPreview={isPreview(day, hour)}
+                slot={slot}
+                isSelected={isSelected(day, slot)}
+                isPreview={isPreview(day, slot)}
+                isHovered={isHovered(day, slot)}
                 selectionMode={selectionState.selectionMode}
-                onMouseDown={() => handlers.onMouseDown(day, hour)}
-                onMouseEnter={() => handlers.onMouseEnter(day, hour)}
-                onTouchStart={() => handlers.onTouchStart(day, hour)}
+                onMouseDown={() => handlers.onMouseDown(day, slot)}
+                onMouseEnter={() => handlers.onMouseEnter(day, slot)}
+                onMouseLeave={handlers.onMouseLeave}
+                onTouchStart={() => handlers.onTouchStart(day, slot)}
               />
             ))}
           </>
         ))}
 
         {/* Final time label row */}
-        <div className="sticky left-0 bg-white text-right pr-2 text-xs text-gray-500 flex items-start justify-end pt-1">
-          {formatHour(endHour)}
+        <div className="sticky left-0 text-right pr-2 text-xs text-gray-500 flex items-start justify-end relative">
+          <span className="relative -top-2">{formatHour(endHour)}</span>
         </div>
         {DAY_NAMES.map((day) => (
           <div key={`empty-${day}`} />

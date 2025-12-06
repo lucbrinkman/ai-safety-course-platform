@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { SignupFormData } from "../../types/signup";
-import { EMPTY_AVAILABILITY } from "../../types/signup";
-import StepIndicator from "./StepIndicator";
+import { EMPTY_AVAILABILITY, getBrowserTimezone } from "../../types/signup";
 import PersonalInfoStep from "./PersonalInfoStep";
 import AvailabilityStep from "./AvailabilityStep";
 import SuccessMessage from "./SuccessMessage";
@@ -10,7 +9,6 @@ import { useAuth } from "../../hooks/useAuth";
 type Step = 1 | 2 | "complete";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const STEPS = ["Personal Info", "Availability"];
 
 export default function SignupWizard() {
   const { isAuthenticated, isLoading, user, discordUsername, login } =
@@ -23,6 +21,7 @@ export default function SignupWizard() {
     discordConnected: false,
     discordUsername: undefined,
     availability: { ...EMPTY_AVAILABILITY },
+    timezone: getBrowserTimezone(),
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,8 +95,6 @@ export default function SignupWizard() {
 
   return (
     <div>
-      <StepIndicator currentStep={currentStep} steps={STEPS} />
-
       {currentStep === 1 && (
         <PersonalInfoStep
           firstName={formData.firstName}
@@ -120,6 +117,10 @@ export default function SignupWizard() {
           availability={formData.availability}
           onAvailabilityChange={(data) =>
             setFormData((prev) => ({ ...prev, availability: data }))
+          }
+          timezone={formData.timezone}
+          onTimezoneChange={(tz) =>
+            setFormData((prev) => ({ ...prev, timezone: tz }))
           }
           onBack={() => setCurrentStep(1)}
           onSubmit={handleSubmit}

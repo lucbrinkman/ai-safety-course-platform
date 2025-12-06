@@ -17,7 +17,7 @@ interface SelectionState {
 interface UseScheduleSelectionOptions {
   value: AvailabilityData;
   onChange: (data: AvailabilityData) => void;
-  hours: number[];
+  slots: number[];
 }
 
 function getSelectedCells(
@@ -34,7 +34,7 @@ function getSelectedCells(
 
   const cells: CellPosition[] = [];
   for (let dayIdx = minDayIndex; dayIdx <= maxDayIndex; dayIdx++) {
-    for (let hour = minHour; hour <= maxHour; hour++) {
+    for (let hour = minHour; hour <= maxHour; hour += 0.5) {
       cells.push({ day: DAY_NAMES[dayIdx], hour });
     }
   }
@@ -44,7 +44,7 @@ function getSelectedCells(
 export function useScheduleSelection({
   value,
   onChange,
-  hours,
+  slots,
 }: UseScheduleSelectionOptions) {
   const [selectionState, setSelectionState] = useState<SelectionState>({
     isSelecting: false,
@@ -52,6 +52,8 @@ export function useScheduleSelection({
     currentCell: null,
     selectionMode: null,
   });
+
+  const [hoveredCell, setHoveredCell] = useState<CellPosition | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +87,13 @@ export function useScheduleSelection({
       );
     },
     [getPreviewCells],
+  );
+
+  const isHovered = useCallback(
+    (day: DayName, hour: number): boolean => {
+      return hoveredCell?.day === day && hoveredCell?.hour === hour;
+    },
+    [hoveredCell],
   );
 
   const applySelection = useCallback(() => {
@@ -139,6 +148,7 @@ export function useScheduleSelection({
 
   const handleMouseEnter = useCallback(
     (day: DayName, hour: number) => {
+      setHoveredCell({ day, hour });
       if (selectionState.isSelecting) {
         setSelectionState((prev) => ({
           ...prev,
@@ -148,6 +158,10 @@ export function useScheduleSelection({
     },
     [selectionState.isSelecting],
   );
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredCell(null);
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     if (selectionState.isSelecting) {
@@ -179,17 +193,17 @@ export function useScheduleSelection({
       const element = document.elementFromPoint(x, y);
       if (
         element?.hasAttribute("data-day") &&
-        element?.hasAttribute("data-hour")
+        element?.hasAttribute("data-slot")
       ) {
         const day = element.getAttribute("data-day") as DayName;
-        const hour = parseInt(element.getAttribute("data-hour")!, 10);
-        if (DAY_NAMES.includes(day) && hours.includes(hour)) {
-          return { day, hour };
+        const slot = parseFloat(element.getAttribute("data-slot")!);
+        if (DAY_NAMES.includes(day) && slots.includes(slot)) {
+          return { day, hour: slot };
         }
       }
       return null;
     },
-    [hours],
+    [slots],
   );
 
   // Global mouse up listener to handle mouse release outside the grid
@@ -250,9 +264,11 @@ export function useScheduleSelection({
     selectionState,
     isSelected,
     isPreview,
+    isHovered,
     handlers: {
       onMouseDown: handleMouseDown,
       onMouseEnter: handleMouseEnter,
+      onMouseLeave: handleMouseLeave,
       onMouseUp: handleMouseUp,
       onTouchStart: handleTouchStart,
     },

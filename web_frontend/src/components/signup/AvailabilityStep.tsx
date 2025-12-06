@@ -1,9 +1,12 @@
 import type { AvailabilityData } from "../../types/signup";
+import { COMMON_TIMEZONES, formatTimezoneDisplay } from "../../types/signup";
 import ScheduleSelector from "../schedule/ScheduleSelector";
 
 interface AvailabilityStepProps {
   availability: AvailabilityData;
   onAvailabilityChange: (data: AvailabilityData) => void;
+  timezone: string;
+  onTimezoneChange: (timezone: string) => void;
   onBack: () => void;
   onSubmit: () => void;
 }
@@ -11,6 +14,8 @@ interface AvailabilityStepProps {
 export default function AvailabilityStep({
   availability,
   onAvailabilityChange,
+  timezone,
+  onTimezoneChange,
   onBack,
   onSubmit,
 }: AvailabilityStepProps) {
@@ -26,8 +31,33 @@ export default function AvailabilityStep({
       </h2>
       <p className="text-gray-600 mb-6">
         Select the times when you're available to participate in course
-        sessions. This helps us match you with a cohort that fits your schedule.
+        sessions. This helps us match you with a group that fits your schedule.
       </p>
+
+      <div className="mb-6">
+        <label
+          htmlFor="timezone"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Your Timezone
+        </label>
+        <select
+          id="timezone"
+          value={timezone}
+          onChange={(e) => onTimezoneChange(e.target.value)}
+          className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          {/* Include current timezone if not in common list */}
+          {!COMMON_TIMEZONES.includes(timezone as typeof COMMON_TIMEZONES[number]) && (
+            <option value={timezone}>{formatTimezoneDisplay(timezone)}</option>
+          )}
+          {COMMON_TIMEZONES.map((tz) => (
+            <option key={tz} value={tz}>
+              {formatTimezoneDisplay(tz)}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <ScheduleSelector
         value={availability}
