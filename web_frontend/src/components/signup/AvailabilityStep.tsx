@@ -26,7 +26,7 @@ export default function AvailabilityStep({
       </h2>
       <p className="text-gray-600 mb-6">
         Select the times when you're available to participate in course
-        sessions. This helps us match you with a cohort that fits your schedule.
+        sessions. This helps us match you with a group that fits your schedule.
       </p>
 
       <ScheduleSelector

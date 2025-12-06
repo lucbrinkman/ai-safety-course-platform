@@ -39,6 +39,8 @@ export const EMPTY_AVAILABILITY: AvailabilityData = {
   Sunday: [],
 };
 
-export function formatTimeSlot(hour: number): TimeSlot {
-  return `${hour.toString().padStart(2, "0")}:00`;
+export function formatTimeSlot(slot: number): TimeSlot {
+  const hour = Math.floor(slot);
+  const minutes = slot % 1 >= 0.5 ? "30" : "00";
+  return `${hour.toString().padStart(2, "0")}:${minutes}`;
 }
