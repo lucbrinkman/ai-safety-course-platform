@@ -7,9 +7,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Unified Backend (FastAPI + Discord Bot):**
 ```bash
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000   # Preferred: starts both services
-# OR
-python main.py                                 # Alternative (may have import issues)
+
+# IMPORTANT: Use this command to start the server (avoids module import issues)
+python -c "
+import sys
+from pathlib import Path
+project_root = Path.cwd()
+sys.path.insert(0, str(project_root))
+sys.path.append(str(project_root / 'discord_bot'))
+import main
+import uvicorn
+uvicorn.run(main.app, host='0.0.0.0', port=8000)
+"
+
+# Why not just `python main.py`?
+# The root main.py uses `uvicorn.run("main:app", ...)` with a STRING import.
+# When uvicorn reimports "main", it can find the wrong module (web_api/main.py).
+# The command above imports main.py explicitly and passes main.app as an OBJECT,
+# avoiding the string-based reimport that causes module confusion.
 
 # Requires .env with:
 #   DISCORD_BOT_TOKEN=your_token

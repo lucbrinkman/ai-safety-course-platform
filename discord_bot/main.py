@@ -35,6 +35,7 @@ COGS = [
     "cogs.cohorts_cog",
     "cogs.breakout_cog",
     "cogs.sync_cog",
+    "cogs.stampy_cog",
     # "cogs.meetings_cog",  # Temporarily disabled
 ]
 

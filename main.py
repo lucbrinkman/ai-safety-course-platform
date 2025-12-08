@@ -25,7 +25,8 @@ from pathlib import Path
 # This allows discord_bot cogs to use their relative imports
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
-sys.path.insert(0, str(project_root / "discord_bot"))  # For cog loading
+# Append (not insert at 0) to allow cog loading without shadowing root main.py
+sys.path.append(str(project_root / "discord_bot"))
 
 from dotenv import load_dotenv
 
