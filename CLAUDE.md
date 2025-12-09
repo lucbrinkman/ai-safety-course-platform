@@ -5,34 +5,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 **Unified Backend (FastAPI + Discord Bot):**
+
 ```bash
 pip install -r requirements.txt
 
-# IMPORTANT: Use this command to start the server (avoids module import issues)
-python -c "
-import sys
-from pathlib import Path
-project_root = Path.cwd()
-sys.path.insert(0, str(project_root))
-sys.path.append(str(project_root / 'discord_bot'))
-import main
-import uvicorn
-uvicorn.run(main.app, host='0.0.0.0', port=8000)
-"
-
-# Why not just `python main.py`?
-# The root main.py uses `uvicorn.run("main:app", ...)` with a STRING import.
-# When uvicorn reimports "main", it can find the wrong module (web_api/main.py).
-# The command above imports main.py explicitly and passes main.app as an OBJECT,
-# avoiding the string-based reimport that causes module confusion.
+python main.py                      # Default: with Discord bot
+python main.py --no-bot             # Without Discord bot
+python main.py --port 8001          # Custom port
+python main.py --no-bot --port 8001 # Both options
 
 # Requires .env with:
 #   DISCORD_BOT_TOKEN=your_token
-#   SUPABASE_URL=your_url
-#   SUPABASE_KEY=your_key
+#   DATABASE_URL=postgresql://...
 ```
 
 **Web Frontend (React/Vite):**
+
+Only needed when you want to run only the frontend without the backend. With python main.py, the frontend is automatically included.
+
 ```bash
 cd web_frontend
 npm install
@@ -40,11 +30,13 @@ npm run dev                       # Serves on localhost:5173
 ```
 
 **Tests:**
+
 ```bash
 pytest discord_bot/tests/         # Scheduler algorithm tests
 ```
 
 **Legacy (standalone, for reference):**
+
 ```bash
 cd discord_bot && python main.py  # Discord bot only
 cd web_api && python main.py      # FastAPI only
@@ -57,13 +49,15 @@ This is a Discord bot + web platform for AI Safety education course logistics.
 ### Unified Backend
 
 **One process, one asyncio event loop** running two peer services:
+
 - **FastAPI** (HTTP server on :8000) - serves web API for React frontend
 - **Discord bot** (WebSocket to Discord) - handles slash commands and events
 
 Both services share:
+
 - The same event loop (can call each other's async functions directly)
 - The same `core/` business logic
-- The same database connections (Supabase)
+- The same database connections (PostgreSQL via SQLAlchemy)
 
 This eliminates need for IPC/message queues between services.
 
@@ -109,23 +103,26 @@ ai-safety-course-platform/
 ### Core (`core/`)
 
 **Platform-agnostic business logic** - no Discord imports, pure Python:
+
 - `scheduling.py` - Stochastic greedy algorithm, `Person`/`Group` dataclasses
 - `courses.py` - `create_course()`, `mark_week_complete()`, `get_user_progress()`
 - `enrollment.py` - `get_user_profile()`, `save_user_profile()`, `get_facilitators()`
 - `cohorts.py` - `find_availability_overlap()`, `format_local_time()`
-- `data.py` - JSON persistence (legacy, being migrated to Supabase)
-- `database.py` - Supabase client singleton (`get_client()`)
+- `data.py` - JSON persistence (legacy, being migrated to PostgreSQL)
+- `database.py` - SQLAlchemy async engine (`get_connection()`, `get_transaction()`)
 - `auth.py` - Discord-to-Web auth flow (`create_auth_code()`, `get_or_create_user()`)
 
 ### Discord Bot (`discord_bot/`)
 
 **Thin adapter cogs** - handle Discord UI/events, delegate logic to core/:
+
 - `scheduler_cog.py` - `/schedule`, `/list-users` commands
 - `courses_cog.py` - `/add-course`, `/sync-course`, reaction handling
 - `enrollment_cog.py` - `/signup` flow with Views/Buttons/Selects
 - `cohorts_cog.py` - `/cohort` command, channel/event creation
 
 **Data persistence** - JSON files in `discord_bot/`:
+
 - `user_data.json` - User profiles, availability, course progress
 - `courses.json` - Course structure and Discord channel mappings
 
@@ -136,6 +133,7 @@ Static HTML/JS Discord Activities served via `npx serve`. Each subfolder is a ro
 ## Key Patterns
 
 **Creating a new cog:**
+
 ```python
 import discord
 from discord import app_commands
@@ -158,11 +156,13 @@ class MyCog(commands.Cog):
 async def setup(bot):
     await bot.add_cog(MyCog(bot))
 ```
+
 Then add `"cogs.my_cog"` to `COGS` list in `main.py`.
 
 **Admin-only commands:** Add `@app_commands.checks.has_permissions(administrator=True)`
 
 **Data access (from cogs):**
+
 ```python
 from core import (
     load_data, save_data, get_user_data, save_user_data,
@@ -176,7 +176,7 @@ from core import (
 ## Hosting
 
 Single Railway service running the unified backend (`uvicorn main:app`).
-Database: Supabase (PostgreSQL).
+Database: PostgreSQL (Supabase-hosted, accessed via SQLAlchemy).
 
 # jj
 
@@ -187,6 +187,7 @@ I use jj in all my repos. Don't be afraid to make destructive changes, as long a
 **Working Copy as Commit**: Unlike Git's "dirty" working directory, jj automatically commits working copy changes on every command. No staging area - files are tracked and committed automatically.
 
 **Change ID vs Commit ID**:
+
 - **Change ID** (12 letters, z-k range): Stable identifier that persists through rewrites (like `ywnkulko`)
 - **Commit ID** (hex): Changes when commit is rewritten (like `46b50ed7`)
 - Use change IDs for most operations; commit IDs for specific snapshots
@@ -200,6 +201,7 @@ I use jj in all my repos. Don't be afraid to make destructive changes, as long a
 **Git Compatibility**: jj stores commits in .git and uses .gitignore
 
 ## Instant Tutorial
+
 ```bash
 jj git init --colocate   # Create repo (git-backed)
 echo "hello" > file.txt  # Edit files
@@ -211,6 +213,7 @@ jj log -p                # View history with patches
 ```
 
 ## File Management
+
 ```bash
 jj status                # Status (like git status) - run often, updates current change and saves anonymous undo history
 jj file list             # List tracked files
@@ -218,9 +221,11 @@ jj file untrack <file>   # Untrack ignored file (keep in working copy - requires
 jj restore <file>        # Restore file from parent
 jj restore               # Clear all working copy changes (jj undo if done by accident)
 ```
+
 Files automatically tracked when added. Use `.gitignore` for exclusions.
 
 ## Basic Workflow
+
 ```bash
 # Start work
 jj new [parent] -m "msg"   # Create new change (somewhat like git checkout [parent] && git add . && git commit -m '' && git checkout [parent])
@@ -241,6 +246,7 @@ jj log                  # View history (like git log --graph)
 **Anonymous Branches**: Don't need names - just create changes with `jj new`. View with `jj log -r 'heads(all())'`.
 
 **Revsets** (like Git's rev syntax but more powerful):
+
 ```bash
 @                       # Current working copy
 @-                      # Parent of working copy
@@ -250,6 +256,7 @@ heads(all())           # All branch heads
 ```
 
 **Branch Operations**:
+
 ```bash
 jj new parent1 parent2  # Create merge (no special merge command)
 jj rebase -r X -d Y     # Move single revision X to destination D
@@ -258,6 +265,7 @@ jj duplicate X -d Y     # Copy commit (like git cherry-pick)
 ```
 
 ## Change Manipulation
+
 ```bash
 # Split/combine
 jj split [-r X]         # Split commit interactively (unavailable to claude)
@@ -293,6 +301,7 @@ Resolution: Apply the diff to the snapshot. Use `jj resolve` for 3-way merge too
 ## Remote Operations
 
 **Bookmarks = Git Branches**:
+
 ```bash
 jj bookmark create name  # Create bookmark at @
 jj bookmark set name     # Move bookmark to @
@@ -301,6 +310,7 @@ jj bookmark track name@remote  # Track remote bookmark
 ```
 
 **Git Interop**:
+
 ```bash
 jj git fetch            # Fetch from remotes
 jj git push             # Push tracked bookmarks
@@ -311,6 +321,7 @@ jj git push --bookmark name  # Push specific bookmark
 ## Advanced Operations
 
 **Operation Log** (like unlimited undo):
+
 ```bash
 jj op log               # View operation history
 jj undo                 # Undo last operation
@@ -318,6 +329,7 @@ jj op restore X         # Restore repo to operation X
 ```
 
 **Working with Git repos**:
+
 ```bash
 jj git clone URL        # Clone git repo
 jj git init --colocate  # Initialize in existing git repo
@@ -326,11 +338,13 @@ jj git init --colocate  # Initialize in existing git repo
 ## Two Workflow Patterns
 
 **Squash Workflow** (like git add -p):
+
 1. `jj describe -m "feature"` - describe planned work, DOES NOT MAKE A NEW CHANGE
 2. `jj new` - create scratch space, DOES make a new change
 3. Make changes, then `jj squash [-i]` to move into described commit
 
 **Edit Workflow**:
+
 1. `jj new -m "feature"` - create and start working
 2. If need prep work: `jj new -B @ -m "prep"` (insert before current)
 3. `jj next --edit` to return to feature work

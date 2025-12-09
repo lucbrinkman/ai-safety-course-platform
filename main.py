@@ -12,7 +12,7 @@ We use FastAPI's lifespan to manage startup/shutdown, but at runtime
 all services are equal peers in the event loop. The lifespan pattern
 gives us uvicorn's signal handling and --reload for free.
 
-Run with: python main.py
+Run with: python main.py [--no-bot] [--port PORT]
 """
 
 import asyncio
@@ -55,6 +55,11 @@ async def start_bot():
     Uses bot.start() instead of bot.run() so it can run
     alongside FastAPI in the same event loop.
     """
+    # Check if bot is disabled via CLI flag (--no-bot)
+    if os.getenv("DISABLE_DISCORD_BOT", "").lower() in ("true", "1", "yes"):
+        print("Discord bot disabled (--no-bot flag or DISABLE_DISCORD_BOT=true)")
+        return
+
     token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
         print("Warning: DISCORD_BOT_TOKEN not set, Discord bot will not start")
@@ -175,13 +180,32 @@ if spa_path.exists():
 
 
 if __name__ == "__main__":
+    import argparse
     import uvicorn
 
+    parser = argparse.ArgumentParser(description="AI Safety Course Platform Server")
+    parser.add_argument(
+        "--no-bot",
+        action="store_true",
+        help="Disable Discord bot (useful for running multiple dev servers)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to run the server on (default: 8000)",
+    )
+    args = parser.parse_args()
+
+    # Set env var so it persists across uvicorn reloads
+    if args.no_bot:
+        os.environ["DISABLE_DISCORD_BOT"] = "true"
+
     # Run with uvicorn
-    # Note: --reload may cause issues with Discord bot reconnecting frequently
+    # Pass app object directly (not string) to avoid module reimport issues
+    # Note: --reload requires string import; use `uvicorn main:app --reload` if needed
     uvicorn.run(
-        "main:app",
+        app,
         host="0.0.0.0",
-        port=8000,
-        reload=os.environ.get("ENV") == "development",
+        port=args.port,
     )
