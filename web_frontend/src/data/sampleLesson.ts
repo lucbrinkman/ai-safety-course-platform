@@ -26,10 +26,10 @@ export const sampleLesson: LessonItem[] = [
   },
   {
     type: "video",
-    // Robert Miles - "Why AI Safety?" (5 second fragment starting at 5:30)
+    // Robert Miles - "Why AI Safety?" (1:12 fragment starting at 5:30)
     videoId: "pYXy-A4siMw",
     start: 330,
-    end: 335,
+    end: 402,
   },
   {
     type: "conversation",

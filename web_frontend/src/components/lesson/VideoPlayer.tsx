@@ -35,13 +35,24 @@ export default function VideoPlayer({
 }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const hasEndedRef = useRef(false);
+  const originalVolumeRef = useRef(1);
+  const isDraggingRef = useRef(false);
+  const isFadingRef = useRef(false); // Mirror of isFading for event callbacks
+  const fadeIntervalRef = useRef<number | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+
   const [progress, setProgress] = useState(0);
   const [fragmentEnded, setFragmentEnded] = useState(false);
+  const [isFading, setIsFading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const [isFullVideo, setIsFullVideo] = useState(false);
+
+  // Keep ref in sync with state for event callbacks
+  useEffect(() => {
+    isFadingRef.current = isFading;
+  }, [isFading]);
 
   const duration = end - start;
   const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}&t=${start}`;
@@ -60,9 +71,38 @@ export default function VideoPlayer({
       video.play();
     };
 
-    const handleTimeUpdate = () => {
-      if (hasEndedRef.current) return;
+    const handlePlay = () => setIsPaused(false);
+    const handlePause = () => setIsPaused(true);
 
+    // Track volume changes from user
+    const handleVolumeChange = () => {
+      if (!isFadingRef.current) {
+        originalVolumeRef.current = video.volume;
+      }
+    };
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("volumechange", handleVolumeChange);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("volumechange", handleVolumeChange);
+    };
+  }, [start]);
+
+  // High-frequency polling for smooth progress and fade timing
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Skip polling entirely if in full video mode or already ended
+    if (isFullVideo || fragmentEnded) return;
+
+    const pollInterval = setInterval(() => {
       const currentTime = video.currentTime;
 
       // If user seeks before fragment start, snap back
@@ -71,39 +111,92 @@ export default function VideoPlayer({
         return;
       }
 
-      const elapsed = Math.max(0, currentTime - start);
-      setProgress(Math.min(elapsed / duration, 1));
+      // Update progress (skip while dragging to avoid fighting)
+      if (!isDraggingRef.current) {
+        const elapsed = Math.max(0, currentTime - start);
+        setProgress(Math.min(elapsed / duration, 1));
+      }
 
-      if (currentTime >= end) {
-        hasEndedRef.current = true;
+      // Start fading audio 500ms before end
+      const fadeStart = end - 0.5;
+
+      if (currentTime >= fadeStart && !isFading) {
+        setIsFading(true);
+      }
+    }, 50);
+
+    return () => clearInterval(pollInterval);
+  }, [start, end, duration, isFullVideo, fragmentEnded, isFading]);
+
+  // Handle fade effect separately - triggered by isFading state
+  useEffect(() => {
+    if (!isFading || isFullVideo || fragmentEnded) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const fadeDuration = 1000; // 1 second
+    const fadeSteps = 20;
+    const fadeInterval = fadeDuration / fadeSteps;
+    let step = 0;
+
+    fadeIntervalRef.current = window.setInterval(() => {
+      step++;
+      video.volume = originalVolumeRef.current * (1 - step / fadeSteps);
+
+      if (step >= fadeSteps) {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
         video.pause();
+        video.volume = originalVolumeRef.current;
         setProgress(1);
         setFragmentEnded(true);
+        setIsFading(false);
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
       }
-    };
-
-    const handlePlay = () => setIsPaused(false);
-    const handlePause = () => setIsPaused(true);
-
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
+    }, fadeInterval);
 
     return () => {
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
     };
-  }, [start, end, duration]);
+  }, [isFading, isFullVideo, fragmentEnded]);
 
   const handleReplay = () => {
     const video = videoRef.current;
     if (video) {
-      hasEndedRef.current = false;
       setFragmentEnded(false);
+      setIsFading(false);
       setProgress(0);
+      video.volume = originalVolumeRef.current;
+      video.currentTime = start;
+      video.play();
+    }
+  };
+
+  const handleWatchFullVideo = () => {
+    setIsFullVideo(true);
+    setIsFading(false);
+    // Resume playback if paused
+    const video = videoRef.current;
+    if (video && video.paused) {
+      video.volume = originalVolumeRef.current;
+      video.play();
+    }
+  };
+
+  const handleWatchClipOnly = () => {
+    setIsFullVideo(false);
+    setFragmentEnded(false);
+    setIsFading(false);
+    setProgress(0);
+    const video = videoRef.current;
+    if (video) {
+      video.volume = originalVolumeRef.current;
       video.currentTime = start;
       video.play();
     }
@@ -123,13 +216,14 @@ export default function VideoPlayer({
     const newTime = start + percentage * duration;
     videoRef.current.currentTime = newTime;
     setProgress(percentage);
-    if (hasEndedRef.current && percentage < 1) {
-      hasEndedRef.current = false;
+    if (fragmentEnded && percentage < 1) {
       setFragmentEnded(false);
+      setIsFading(false);
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = true;
     setIsDragging(true);
     seekToPosition(e.clientX);
   };
@@ -143,6 +237,7 @@ export default function VideoPlayer({
     };
 
     const handleMouseUp = () => {
+      isDraggingRef.current = false;
       setIsDragging(false);
     };
 
@@ -159,6 +254,12 @@ export default function VideoPlayer({
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
       {/* Video + progress bar container with hover detection */}
       <div
         className="w-full max-w-3xl"
@@ -168,7 +269,7 @@ export default function VideoPlayer({
         {/* Video with native YouTube controls */}
         <div
           ref={containerRef}
-          className="w-full aspect-video"
+          className="w-full aspect-video relative"
         >
           <youtube-video
             src={youtubeUrl}
@@ -176,13 +277,40 @@ export default function VideoPlayer({
             autoplay
             className="w-full h-full"
           />
+
+          {/* End-of-clip overlay (only in clip mode) */}
+          {fragmentEnded && !isFullVideo && (
+            <div
+              className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-4 z-10 animate-fade-in"
+              style={{
+                animation: "fadeIn 0.5s ease-out",
+              }}
+            >
+              <p className="text-white text-lg font-medium">Clip finished</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleReplay}
+                  className="bg-white/20 text-white px-6 py-2 rounded-lg hover:bg-white/30 border border-white/40"
+                >
+                  Replay
+                </button>
+                <button
+                  onClick={onEnded}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Custom fragment progress bar below video */}
-        <div
-          className="flex items-center gap-3 pt-3 transition-opacity duration-200"
-          style={{ opacity: showControls ? 1 : 0 }}
-        >
+        {/* Custom fragment progress bar below video (hidden in full video mode) */}
+        {!isFullVideo && (
+          <div
+            className="flex items-center gap-3 pt-3 transition-opacity duration-200"
+            style={{ opacity: showControls ? 1 : 0 }}
+          >
           <div
             ref={progressBarRef}
             className="flex-1 rounded cursor-pointer relative select-none"
@@ -202,35 +330,48 @@ export default function VideoPlayer({
             {formatTime(progress * duration)} / {formatTime(duration)}
           </span>
         </div>
+        )}
       </div>
 
-      {/* Clip info */}
-      <div className="text-center text-xs text-gray-400">
-        {duration}s clip from {formatTime(start)} – {formatTime(end)}
-      </div>
-
-      {fragmentEnded ? (
-        <div className="flex gap-4">
+      {/* Clip info and controls */}
+      {!isFullVideo ? (
+        <>
+          <div className="text-center text-xs text-gray-400">
+            Clip from {formatTime(start)} to {formatTime(end)}
+            <span className="mx-1">·</span>
+            <button
+              onClick={handleWatchFullVideo}
+              className="text-gray-400 hover:text-gray-600 underline"
+            >
+              Watch full video
+            </button>
+            <span className="mx-1">·</span>
+            <button
+              onClick={onSkip}
+              className="text-gray-400 hover:text-gray-600 underline"
+            >
+              Skip to next question
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="w-full max-w-3xl flex justify-between items-center">
+          <span className="text-xs text-gray-400">
+            Watching full video
+            <button
+              onClick={handleWatchClipOnly}
+              className="ml-2 text-gray-400 hover:text-gray-600 underline"
+            >
+              Watch clip only
+            </button>
+          </span>
           <button
-            onClick={handleReplay}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50"
-          >
-            Replay
-          </button>
-          <button
-            onClick={onEnded}
+            onClick={onSkip}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Continue to next question
+            Continue with lesson
           </button>
         </div>
-      ) : (
-        <button
-          onClick={onSkip}
-          className="text-gray-500 hover:text-gray-700 text-sm underline"
-        >
-          Skip to next question
-        </button>
       )}
     </div>
   );
