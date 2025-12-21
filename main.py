@@ -48,6 +48,7 @@ from discord_bot.main import bot
 # Import routes using full paths (don't add web_api to sys.path to avoid main.py conflict)
 from web_api.routes.auth import router as auth_router
 from web_api.routes.users import router as users_router
+from web_api.routes.lesson import router as lesson_router
 
 # Track bot task for cleanup
 _bot_task: asyncio.Task | None = None
@@ -209,6 +210,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(lesson_router)
 
 
 # New paths for static files
@@ -260,6 +262,7 @@ if spa_path.exists() and not dev_mode:
 
     @app.get("/signup")
     @app.get("/auth/code")
+    @app.get("/prototype/interactive-lesson")
     async def spa():
         """Serve React SPA for frontend routes."""
         return FileResponse(spa_path / "index.html")

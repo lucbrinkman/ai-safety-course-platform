@@ -56,6 +56,7 @@ from .auth import create_auth_code, get_or_create_user
 
 # Stampy chatbot
 from core import stampy
+from core import lesson_chat
 
 __all__ = [
     # Data
@@ -90,4 +91,5 @@ __all__ = [
     'create_auth_code', 'get_or_create_user',
     # Stampy
     'stampy',
+    'lesson_chat',
 ]

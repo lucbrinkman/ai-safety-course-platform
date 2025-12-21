@@ -9,6 +9,7 @@ pytz>=2023.3
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 httpx>=0.27.0
+anthropic>=0.40.0
 pyjwt>=2.8.0
 
 # Shared
