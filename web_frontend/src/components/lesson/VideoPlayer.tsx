@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import "youtube-video-element";
-import {
-  MediaController,
-  MediaControlBar,
-  MediaPlayButton,
-  MediaMuteButton,
-  MediaVolumeRange,
-  MediaFullscreenButton,
-} from "media-chrome/react";
 
 type VideoPlayerProps = {
   videoId: string;
@@ -26,6 +18,7 @@ declare global {
           src?: string;
           autoplay?: boolean;
           muted?: boolean;
+          controls?: boolean;
         },
         HTMLElement
       >;
@@ -46,6 +39,8 @@ export default function VideoPlayer({
   const [progress, setProgress] = useState(0);
   const [fragmentEnded, setFragmentEnded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
 
   const duration = end - start;
@@ -87,12 +82,19 @@ export default function VideoPlayer({
       }
     };
 
+    const handlePlay = () => setIsPaused(false);
+    const handlePause = () => setIsPaused(true);
+
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
 
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
     };
   }, [start, end, duration]);
 
@@ -153,60 +155,59 @@ export default function VideoPlayer({
     };
   }, [isDragging, start, duration]);
 
+  const showControls = isHovering || isPaused || fragmentEnded;
+
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* Video + progress bar container with hover detection */}
       <div
-        ref={containerRef}
-        className="w-full max-w-3xl aspect-video relative"
+        className="w-full max-w-3xl"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
-        <MediaController className="w-full h-full">
-          <youtube-video
-            slot="media"
-            src={youtubeUrl}
-            autoplay
-          />
-          <MediaControlBar>
-            <MediaPlayButton />
-            <MediaMuteButton />
-            <MediaVolumeRange />
-            {/* Custom fragment progress bar */}
-            <div
-              ref={progressBarRef}
-              className="flex-1 rounded cursor-pointer relative select-none mx-2 self-center"
-              style={{ height: "4px", backgroundColor: "#444" }}
-              onMouseDown={handleMouseDown}
-            >
-              <div
-                className="h-full rounded pointer-events-none"
-                style={{ width: `${progress * 100}%`, backgroundColor: "#888" }}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow pointer-events-none"
-                style={{ left: `calc(${progress * 100}% - 6px)`, backgroundColor: "#888" }}
-              />
-            </div>
-            <span style={{ color: "#888", fontSize: "12px", marginLeft: "8px", marginRight: "8px", whiteSpace: "nowrap", alignSelf: "center" }}>
-              {formatTime(progress * duration)} / {formatTime(duration)}
-            </span>
-            <MediaFullscreenButton />
-          </MediaControlBar>
-        </MediaController>
-        {/* Overlay to dim YouTube branding */}
+        {/* Video with native YouTube controls */}
         <div
-          className="absolute bottom-0 right-0 pointer-events-none"
-          style={{
-            width: "120px",
-            height: "40px",
-            background: "linear-gradient(to right, transparent, rgba(0,0,0,0.7))",
-          }}
-        />
+          ref={containerRef}
+          className="w-full aspect-video"
+        >
+          <youtube-video
+            src={youtubeUrl}
+            controls
+            autoplay
+            className="w-full h-full"
+          />
+        </div>
+
+        {/* Custom fragment progress bar below video */}
+        <div
+          className="flex items-center gap-3 pt-3 transition-opacity duration-200"
+          style={{ opacity: showControls ? 1 : 0 }}
+        >
+          <div
+            ref={progressBarRef}
+            className="flex-1 rounded cursor-pointer relative select-none"
+            style={{ height: "6px", backgroundColor: "#ddd" }}
+            onMouseDown={handleMouseDown}
+          >
+            <div
+              className="h-full rounded pointer-events-none"
+              style={{ width: `${progress * 100}%`, backgroundColor: "#3b82f6" }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full shadow pointer-events-none bg-blue-600 border-2 border-white"
+              style={{ left: `calc(${progress * 100}% - 8px)` }}
+            />
+          </div>
+          <span className="text-sm text-gray-600 whitespace-nowrap">
+            {formatTime(progress * duration)} / {formatTime(duration)}
+          </span>
+        </div>
       </div>
 
-      {/* Clip info - always visible */}
+      {/* Clip info */}
       <div className="text-center text-xs text-gray-400">
         {duration}s clip from {formatTime(start)} – {formatTime(end)}
       </div>
-
 
       {fragmentEnded ? (
         <div className="flex gap-4">
