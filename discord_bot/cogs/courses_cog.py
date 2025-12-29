@@ -20,6 +20,11 @@ from core import (
 from core.data import get_user_data
 
 
+# Not sure what to do with this. Probably will become clearer once we have a course,
+# then we know the course structure
+# oh and once we have more frontend we know if and how we want to do things like making channels
+# This also presumes that reading materials are just URLs. In reality, we probably want to 
+# copy materials into our DB.
 class CoursesCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

@@ -28,14 +28,33 @@ export default function SignupWizard() {
   // Sync auth state with form data
   useEffect(() => {
     if (isAuthenticated && discordUsername) {
-      setFormData((prev) => ({
-        ...prev,
-        discordConnected: true,
-        discordUsername: discordUsername,
-        // Pre-fill: database nickname > Discord username > existing value
-        displayName: user?.nickname || discordUsername || prev.displayName,
-        email: user?.email || prev.email,
-      }));
+      setFormData((prev) => {
+        // Load existing availability from database
+        let availability = prev.availability;
+        let timezone = prev.timezone;
+
+        if (user?.availability_utc) {
+          try {
+            availability = JSON.parse(user.availability_utc);
+          } catch {
+            // Keep existing
+          }
+        }
+        if (user?.timezone) {
+          timezone = user.timezone;
+        }
+
+        return {
+          ...prev,
+          discordConnected: true,
+          discordUsername: discordUsername,
+          // Pre-fill: database nickname > Discord username > existing value
+          displayName: user?.nickname || discordUsername || prev.displayName,
+          email: user?.email || prev.email,
+          availability,
+          timezone,
+        };
+      });
     }
   }, [isAuthenticated, discordUsername, user]);
 

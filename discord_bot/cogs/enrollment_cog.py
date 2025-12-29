@@ -5,7 +5,6 @@ The /signup command now generates a web link with an auth code,
 redirecting users to the web frontend for profile setup.
 """
 
-import json
 import os
 import discord
 from discord import app_commands
@@ -16,8 +15,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core import (
-    DAY_CODES,
-    utc_to_local_time,
     get_user_profile,
     toggle_facilitator,
     create_auth_code,
@@ -30,6 +27,7 @@ class EnrollmentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # TODO: Probably move this function or rename the class.
     @app_commands.command(name="signup", description="Sign up for the AI Safety course")
     async def signup(self, interaction: discord.Interaction):
         """Generate a web signup link with an auth code."""
@@ -44,88 +42,21 @@ class EnrollmentCog(commands.Cog):
             ephemeral=True
         )
 
-    # TODO: Remove this command. Instead we should have an 
-    @app_commands.command(name="view-availability", description="View your current availability in UTC and local time")
-    async def view_availability(self, interaction: discord.Interaction):
-        """Display user's availability in both UTC and local timezone"""
-        await interaction.response.defer(ephemeral=True)
+    @app_commands.command(name="availability", description="View and edit your availability")
+    async def availability(self, interaction: discord.Interaction):
+        """Generate a web link with an auth code to edit availability."""
+        discord_id = str(interaction.user.id)
+        code = await create_auth_code(discord_id)
 
-        user_id = str(interaction.user.id)
-        user_data = await get_user_profile(user_id)
+        web_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        link = f"{web_url}/auth/code?code={code}&next=/availability"
 
-        if not user_data:
-            await interaction.followup.send(
-                "You haven't set up your profile yet! Use `/signup` to get started."
-            )
-            return
-
-        # Parse availability from JSON strings
-        availability_str = user_data.get("availability_utc")
-        if_needed_str = user_data.get("if_needed_availability_utc")
-
-        availability = json.loads(availability_str) if availability_str else {}
-        if_needed = json.loads(if_needed_str) if if_needed_str else {}
-
-        if not availability and not if_needed:
-            await interaction.followup.send(
-                "You haven't set up your availability yet! Use `/signup` to update your profile."
-            )
-            return
-
-        name = user_data.get("nickname") or user_data.get("discord_username") or interaction.user.display_name
-        user_tz = user_data.get("timezone") or "UTC"
-
-        local_slots = []
-        utc_slots = []
-
-        for is_if_needed, time_dict in [(False, availability), (True, if_needed)]:
-            for day, slots in time_dict.items():
-                day_code = DAY_CODES.get(day, day[0])
-                for slot in sorted(slots):
-                    hour = int(slot.split(":")[0])
-                    utc_slots.append((day_code, slot, is_if_needed))
-
-                    local_day, local_hour = utc_to_local_time(day, hour, user_tz)
-                    local_day_code = DAY_CODES.get(local_day, local_day[0])
-                    local_slots.append((local_day_code, f"{local_hour:02d}:00", is_if_needed))
-
-        def format_slots(slots):
-            if not slots:
-                return "None"
-            day_order = {'M': 0, 'T': 1, 'W': 2, 'R': 3, 'F': 4, 'S': 5, 'U': 6}
-            sorted_slots = sorted(slots, key=lambda x: (day_order.get(x[0], 0), x[1]))
-            return ", ".join(f"{d}{t}{'*' if is_if else ''}" for d, t, is_if in sorted_slots)
-
-        local_str = format_slots(local_slots)
-        utc_str = format_slots(utc_slots)
-
-        embed = discord.Embed(
-            title=f"Availability for {name}",
-            color=discord.Color.blue()
+        await interaction.response.send_message(
+            f"Click here to view and edit your availability: {link}\n\nThis link expires in 5 minutes.",
+            ephemeral=True
         )
 
-        embed.add_field(
-            name="Profile",
-            value=f"**Timezone:** {user_tz}",
-            inline=False
-        )
-
-        embed.add_field(
-            name=f"Local Time ({user_tz})",
-            value=f"```\n{local_str}\n```",
-            inline=False
-        )
-
-        embed.add_field(
-            name="UTC Time",
-            value=f"```\n{utc_str}\n```",
-            inline=False
-        )
-
-        embed.set_footer(text="* = if needed | Day codes: M=Mon, T=Tue, W=Wed, R=Thu, F=Fri, S=Sat, U=Sun")
-
-        await interaction.followup.send(embed=embed)
-
+    # TODO: Probably remove this command. I think it is an old trial that presumes facilitator privileges are set within the Discord guild, instead of in our DB.
     @app_commands.command(name="toggle-facilitator", description="Toggle your facilitator status")
     async def toggle_facilitator_cmd(self, interaction: discord.Interaction):
         """Toggle whether you are marked as a facilitator."""

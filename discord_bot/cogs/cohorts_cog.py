@@ -21,6 +21,10 @@ from core import (
 )
 
 
+# TODO: Refactor this cog. 
+# We have switched to using the DB and the scheduler to initate cohort creation.
+# But I can imagine a cog like this could then make the actual channels in Discord, for example.
+# Ask user for input on how to do this.
 class CohortsCog(commands.Cog):
     """Cog for creating and managing cohorts."""
 
