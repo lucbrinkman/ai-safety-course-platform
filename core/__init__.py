@@ -57,7 +57,7 @@ from .cohorts import (
 )
 
 # Auth (Discord-to-Web flow)
-from .auth import create_auth_code, get_or_create_user
+from .auth import create_auth_code, get_or_create_user, validate_and_use_auth_code
 
 # Stampy chatbot
 from core import stampy
@@ -96,7 +96,7 @@ __all__ = [
     # Cohorts / Availability
     'find_availability_overlap', 'format_local_time', 'get_timezone_abbrev',
     # Auth
-    'create_auth_code', 'get_or_create_user',
+    'create_auth_code', 'get_or_create_user', 'validate_and_use_auth_code',
     # Stampy
     'stampy',
     'lesson_chat',

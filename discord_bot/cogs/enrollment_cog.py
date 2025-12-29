@@ -44,6 +44,7 @@ class EnrollmentCog(commands.Cog):
             ephemeral=True
         )
 
+    # TODO: Remove this command. Instead we should have an 
     @app_commands.command(name="view-availability", description="View your current availability in UTC and local time")
     async def view_availability(self, interaction: discord.Interaction):
         """Display user's availability in both UTC and local timezone"""

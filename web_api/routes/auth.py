@@ -20,10 +20,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.auth import get_or_create_user
-from core.database import get_transaction
-from core.queries.auth import validate_auth_code
-from core import get_user_profile
+from core import get_or_create_user, get_user_profile, validate_and_use_auth_code
 from web_api.auth import create_jwt, get_current_user, set_session_cookie
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -64,22 +61,6 @@ def _validate_origin(origin: str | None) -> str:
 # In-memory state storage for OAuth CSRF protection
 # In production, use Redis or database
 _oauth_states: dict[str, dict] = {}
-
-
-async def _validate_auth_code(code: str) -> tuple[dict | None, str | None]:
-    """
-    Validate an auth code and mark it as used.
-
-    Args:
-        code: The auth code to validate
-
-    Returns:
-        Tuple of (auth_code_record, error_string).
-        If valid, returns (record, None).
-        If invalid, returns (None, error_string).
-    """
-    async with get_transaction() as conn:
-        return await validate_auth_code(conn, code)
 
 
 @router.get("/discord")
@@ -221,7 +202,7 @@ async def validate_auth_code_endpoint(
     if not code:
         return RedirectResponse(url=f"{redirect_base}/signup?error=missing_code")
 
-    auth_code, error = await _validate_auth_code(code)
+    auth_code, error = await validate_and_use_auth_code(code)
     if error:
         return RedirectResponse(url=f"{redirect_base}/signup?error={error}")
 
@@ -250,7 +231,7 @@ async def validate_auth_code_api(code: str, next: str = "/", response: Response 
     if not code:
         return {"status": "error", "error": "missing_code"}
 
-    auth_code, error = await _validate_auth_code(code)
+    auth_code, error = await validate_and_use_auth_code(code)
     if error:
         return {"status": "error", "error": error}
 

@@ -3,7 +3,7 @@
 import secrets
 
 from .database import get_transaction
-from .queries.auth import create_auth_code as _create_auth_code
+from .queries.auth import create_auth_code as _create_auth_code, validate_auth_code as _validate_auth_code
 from .queries.users import get_or_create_user as _get_or_create_user
 
 
@@ -60,3 +60,19 @@ async def create_auth_code(discord_id: str, expires_minutes: int = 5) -> str:
         )
 
     return code
+
+
+async def validate_and_use_auth_code(code: str) -> tuple[dict | None, str | None]:
+    """
+    Validate an auth code and mark it as used.
+
+    Args:
+        code: The auth code to validate
+
+    Returns:
+        Tuple of (auth_code_record, error_string).
+        If valid, returns (record, None).
+        If invalid, returns (None, error_string).
+    """
+    async with get_transaction() as conn:
+        return await _validate_auth_code(conn, code)
