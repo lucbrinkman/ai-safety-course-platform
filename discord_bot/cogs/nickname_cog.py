@@ -11,9 +11,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.database import get_connection
-from core.tables import users
-from sqlalchemy import select, update as sql_update
+from core import get_user_nickname, update_user_nickname
 
 
 # Module-level reference to bot, set during cog setup
@@ -66,19 +64,15 @@ class NicknameCog(commands.Cog):
 
         discord_id = str(member.id)
 
-        # Look up user in database
-        async with get_connection() as conn:
-            result = await conn.execute(
-                select(users.c.nickname).where(users.c.discord_id == discord_id)
-            )
-            row = result.mappings().first()
+        # Look up user nickname via core function
+        nickname = await get_user_nickname(discord_id)
 
-        if not row or not row["nickname"]:
+        if not nickname:
             return  # No stored name
 
         # Apply stored name as nickname
         try:
-            await member.edit(nick=row["nickname"])
+            await member.edit(nick=nickname)
         except discord.Forbidden:
             pass  # Silently fail if we can't set nickname
 
@@ -93,14 +87,8 @@ class NicknameCog(commands.Cog):
         # If nickname deleted, fall back to Discord username
         new_name = after.nick if after.nick else after.name
 
-        # Update database to match Discord
-        async with get_connection() as conn:
-            await conn.execute(
-                sql_update(users)
-                .where(users.c.discord_id == discord_id)
-                .values(nickname=new_name)
-            )
-            await conn.commit()
+        # Update database to match Discord via core function
+        await update_user_nickname(discord_id, new_name)
 
 
 async def setup(bot):

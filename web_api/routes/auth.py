@@ -18,14 +18,12 @@ from urllib.parse import urlencode
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
-from sqlalchemy import select
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.auth import get_or_create_user
-from core.database import get_connection, get_transaction
+from core.database import get_transaction
 from core.queries.auth import validate_auth_code
-from core.tables import users
+from core import get_user_profile
 from web_api.auth import create_jwt, get_current_user, set_session_cookie
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -284,16 +282,10 @@ async def get_me(request: Request):
     """
     user = await get_current_user(request)
 
-    async with get_connection() as conn:
-        result = await conn.execute(
-            select(users).where(users.c.discord_id == user["sub"])
-        )
-        row = result.mappings().first()
+    db_user = await get_user_profile(user["sub"])
 
-    if not row:
+    if not db_user:
         raise HTTPException(404, "User not found in database")
-
-    db_user = dict(row)
 
     return {
         "discord_id": user["sub"],

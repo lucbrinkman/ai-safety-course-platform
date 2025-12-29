@@ -1,114 +1,16 @@
 """
-User enrollment and profile management.
+Enrollment and scheduling helpers.
 
-All functions are async and use the database.
+Converts user data to Person objects for scheduling algorithm.
+User profile functions are in core/users.py.
 """
 
 import json
-from typing import Any
 
-from .database import get_connection, get_transaction
+from .database import get_connection
 from .queries import users as user_queries
 from .scheduling import Person, parse_interval_string
 from .constants import DAY_CODES
-
-
-async def get_user_profile(discord_id: str) -> dict[str, Any] | None:
-    """
-    Get a user's full profile.
-
-    Args:
-        discord_id: Discord user ID
-
-    Returns:
-        User profile dict or None if not found
-    """
-    async with get_connection() as conn:
-        return await user_queries.get_user_profile(conn, discord_id)
-
-
-async def save_user_profile(
-    discord_id: str,
-    nickname: str = None,
-    timezone: str = None,
-    availability_utc: str = None,
-    if_needed_availability_utc: str = None,
-) -> dict[str, Any]:
-    """
-    Save or update a user's profile.
-
-    Args:
-        discord_id: Discord user ID
-        nickname: Display name
-        timezone: Timezone string (e.g., "America/New_York")
-        availability_utc: JSON string of day -> list of time slots (in UTC)
-        if_needed_availability_utc: JSON string of if-needed slots (in UTC)
-
-    Returns:
-        Updated user profile
-    """
-    fields = {}
-    if nickname is not None:
-        fields["nickname"] = nickname
-    if timezone is not None:
-        fields["timezone"] = timezone
-    if availability_utc is not None:
-        fields["availability_utc"] = availability_utc
-    if if_needed_availability_utc is not None:
-        fields["if_needed_availability_utc"] = if_needed_availability_utc
-
-    async with get_transaction() as conn:
-        return await user_queries.save_user_profile(conn, discord_id, **fields)
-
-
-async def get_users_with_availability() -> list[dict[str, Any]]:
-    """
-    Get all users who have set availability.
-
-    Returns:
-        List of user dicts for users with availability
-    """
-    async with get_connection() as conn:
-        return await user_queries.get_all_users_with_availability(conn)
-
-
-async def get_facilitators() -> list[dict[str, Any]]:
-    """
-    Get all users marked as facilitators.
-
-    Returns:
-        List of user dicts for facilitators
-    """
-    async with get_connection() as conn:
-        return await user_queries.get_facilitators(conn)
-
-
-async def toggle_facilitator(discord_id: str) -> bool:
-    """
-    Toggle a user's facilitator status.
-
-    Args:
-        discord_id: Discord user ID
-
-    Returns:
-        New facilitator status (True/False), or False if user doesn't exist
-    """
-    async with get_transaction() as conn:
-        return await user_queries.toggle_facilitator(conn, discord_id)
-
-
-async def is_facilitator(discord_id: str) -> bool:
-    """
-    Check if a user is a facilitator.
-
-    Args:
-        discord_id: Discord user ID
-
-    Returns:
-        True if user is a facilitator, False otherwise
-    """
-    async with get_connection() as conn:
-        return await user_queries.is_facilitator(conn, discord_id)
 
 
 async def get_people_for_scheduling() -> tuple[list[Person], dict[str, dict]]:
