@@ -153,6 +153,12 @@ export default function UnifiedLesson() {
     setViewingStageIndex(null);
   }, []);
 
+  // Compute navigation states
+  const reviewableStages = getReviewableStages();
+  const currentViewing = viewingStageIndex ?? (session?.current_stage_index ?? 0);
+  const canGoBack = reviewableStages.some(s => s.index < currentViewing);
+  const canGoForward = isReviewing && reviewableStages.some(s => s.index > currentViewing && s.index < (session?.current_stage_index ?? 0));
+
   // Auto-initiate AI when entering any chat stage (initial load or after advancing)
   useEffect(() => {
     if (!sessionId || !session) return;
@@ -211,20 +217,67 @@ export default function UnifiedLesson() {
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
-          <p className="text-sm text-gray-500">
-            Stage {session.current_stage_index + 1} of {session.total_stages}
-          </p>
+        <div className="flex items-center gap-3">
+          {/* Navigation arrows */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleGoBack}
+              disabled={!canGoBack}
+              className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Review previous content"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            {isReviewing && (
+              <button
+                onClick={handleGoForward}
+                disabled={!canGoForward}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Next reviewed content"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Stage indicator */}
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
+            <p className="text-sm text-gray-500">
+              Stage {session.current_stage_index + 1} of {session.total_stages}
+            </p>
+          </div>
         </div>
-        {!isChatStage && (
-          <button
-            onClick={handleAdvanceStage}
-            className="text-gray-500 hover:text-gray-700 text-sm"
-          >
-            Skip →
-          </button>
-        )}
+
+        {/* Right side: reviewing indicator or skip button */}
+        <div className="flex items-center gap-2">
+          {isReviewing ? (
+            <>
+              <span className="text-sm text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                Reviewing previous material
+              </span>
+              <button
+                onClick={handleReturnToCurrent}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                Return to current →
+              </button>
+            </>
+          ) : (
+            !isChatStage && (
+              <button
+                onClick={handleAdvanceStage}
+                className="text-gray-500 hover:text-gray-700 text-sm"
+              >
+                Skip →
+              </button>
+            )
+          )}
+        </div>
       </header>
 
       {/* Main content - split panel */}
