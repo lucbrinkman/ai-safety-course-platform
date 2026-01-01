@@ -16,6 +16,7 @@ export default function UnifiedLesson() {
   const [pendingTransition, setPendingTransition] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastInitiatedStage, setLastInitiatedStage] = useState<number | null>(null);
+  const [viewingStageIndex, setViewingStageIndex] = useState<number | null>(null);
 
   // Messages derived from session (server is source of truth)
   const messages = session?.messages ?? [];
@@ -116,6 +117,42 @@ export default function UnifiedLesson() {
   const isChatStage = session?.current_stage?.type === "chat";
   const currentStageIndex = session?.current_stage_index ?? null;
 
+  // Derived values for reviewing previous stages
+  const isReviewing = viewingStageIndex !== null;
+  const displayStageIndex = viewingStageIndex ?? (session?.current_stage_index ?? 0);
+
+  // Get indices of reviewable stages (article/video only, before current)
+  const getReviewableStages = useCallback(() => {
+    if (!session?.stages) return [];
+    return session.stages
+      .map((stage, index) => ({ stage, index }))
+      .filter(({ stage, index }) =>
+        stage.type !== 'chat' && index < session.current_stage_index
+      );
+  }, [session?.stages, session?.current_stage_index]);
+
+  const handleGoBack = useCallback(() => {
+    const reviewable = getReviewableStages();
+    const currentViewing = viewingStageIndex ?? session?.current_stage_index ?? 0;
+    const earlier = reviewable.filter(s => s.index < currentViewing);
+    if (earlier.length) {
+      setViewingStageIndex(earlier[earlier.length - 1].index);
+    }
+  }, [getReviewableStages, viewingStageIndex, session?.current_stage_index]);
+
+  const handleGoForward = useCallback(() => {
+    const reviewable = getReviewableStages();
+    const currentViewing = viewingStageIndex ?? session?.current_stage_index ?? 0;
+    const later = reviewable.filter(s => s.index > currentViewing);
+    if (later.length) {
+      setViewingStageIndex(later[0].index);
+    }
+  }, [getReviewableStages, viewingStageIndex, session?.current_stage_index]);
+
+  const handleReturnToCurrent = useCallback(() => {
+    setViewingStageIndex(null);
+  }, []);
+
   // Auto-initiate AI when entering any chat stage (initial load or after advancing)
   useEffect(() => {
     if (!sessionId || !session) return;
@@ -128,6 +165,28 @@ export default function UnifiedLesson() {
     setLastInitiatedStage(currentStageIndex);
     handleSendMessage("");
   }, [sessionId, session, currentStageIndex, isChatStage, isLoading, lastInitiatedStage, handleSendMessage]);
+
+  // Fetch content for viewed stage when reviewing
+  useEffect(() => {
+    if (!sessionId || viewingStageIndex === null) return;
+
+    async function fetchViewedContent() {
+      try {
+        const state = await getSession(sessionId!, viewingStageIndex!);
+        // Only update the content, not the full session
+        setSession(prev => prev ? { ...prev, content: state.content } : null);
+      } catch (e) {
+        console.error("Failed to fetch stage content:", e);
+      }
+    }
+
+    fetchViewedContent();
+  }, [sessionId, viewingStageIndex]);
+
+  // Reset viewingStageIndex when advancing to new stage
+  useEffect(() => {
+    setViewingStageIndex(null);
+  }, [session?.current_stage_index]);
 
   if (error) {
     return (
