@@ -13,7 +13,7 @@ type ChatPanelProps = {
   pendingTransition: boolean;
   onConfirmTransition: () => void;
   onContinueChatting: () => void;
-  disabled?: boolean;
+  showDisclaimer?: boolean;
 };
 
 export default function ChatPanel({
@@ -23,11 +23,11 @@ export default function ChatPanel({
   onRetryMessage,
   isLoading,
   streamingContent,
-  currentStage,
+  currentStage: _currentStage,
   pendingTransition,
   onConfirmTransition,
   onContinueChatting,
-  disabled = false,
+  showDisclaimer = false,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -38,23 +38,14 @@ export default function ChatPanel({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() && !isLoading && !disabled) {
+    if (input.trim() && !isLoading) {
       onSendMessage(input.trim());
       setInput("");
     }
   };
 
-  const isContentStage = currentStage?.type === "article" || currentStage?.type === "video";
-
   return (
-    <div className={`flex flex-col h-full ${isContentStage ? "opacity-60" : ""}`}>
-      {/* Header indicator for content stages */}
-      {isContentStage && (
-        <div className="bg-gray-100 px-4 py-2 text-sm text-gray-600 border-b">
-          {currentStage.type === "article" ? "Reading article..." : "Watching video..."}
-        </div>
-      )}
-
+    <div className="flex flex-col h-full">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-3 p-4">
         {messages.map((msg, i) =>
@@ -146,19 +137,28 @@ export default function ChatPanel({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Disclaimer when not in chat stage */}
+      {showDisclaimer && (
+        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+          <p className="text-sm text-gray-500">
+            Feel free to ask questions. The focus is on the content above.
+          </p>
+        </div>
+      )}
+
       {/* Input form */}
       <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t border-gray-200">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={disabled ? "Move to a chat section to discuss..." : "Type your response..."}
-          disabled={isLoading || disabled}
+          placeholder="Type a message..."
+          disabled={isLoading}
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
         />
         <button
           type="submit"
-          disabled={isLoading || !input.trim() || disabled}
+          disabled={isLoading || !input.trim()}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send

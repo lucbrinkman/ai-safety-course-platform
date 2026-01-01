@@ -1,5 +1,5 @@
 // web_frontend/src/pages/UnifiedLesson.tsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import type { SessionState, PendingMessage } from "../types/unified-lesson";
 import { createSession, getSession, advanceStage, sendMessage } from "../api/lessons";
@@ -27,7 +27,7 @@ export default function UnifiedLesson() {
 
     async function init() {
       try {
-        const sid = await createSession(lessonId);
+        const sid = await createSession(lessonId!);
         setSessionId(sid);
         const state = await getSession(sid);
         setSession(state);
@@ -119,7 +119,6 @@ export default function UnifiedLesson() {
 
   // Derived values for reviewing previous stages
   const isReviewing = viewingStageIndex !== null;
-  const displayStageIndex = viewingStageIndex ?? (session?.current_stage_index ?? 0);
 
   // Get indices of reviewable stages (article/video only, before current)
   const getReviewableStages = useCallback(() => {
@@ -143,9 +142,15 @@ export default function UnifiedLesson() {
   const handleGoForward = useCallback(() => {
     const reviewable = getReviewableStages();
     const currentViewing = viewingStageIndex ?? session?.current_stage_index ?? 0;
-    const later = reviewable.filter(s => s.index > currentViewing);
+    const currentStageIndex = session?.current_stage_index ?? 0;
+
+    // Find next reviewable stage between here and current
+    const later = reviewable.filter(s => s.index > currentViewing && s.index < currentStageIndex);
     if (later.length) {
       setViewingStageIndex(later[0].index);
+    } else {
+      // No more reviewable stages ahead - go to current (even if it's a chat)
+      setViewingStageIndex(null);
     }
   }, [getReviewableStages, viewingStageIndex, session?.current_stage_index]);
 
@@ -157,7 +162,17 @@ export default function UnifiedLesson() {
   const reviewableStages = getReviewableStages();
   const currentViewing = viewingStageIndex ?? (session?.current_stage_index ?? 0);
   const canGoBack = reviewableStages.some(s => s.index < currentViewing);
-  const canGoForward = isReviewing && reviewableStages.some(s => s.index > currentViewing && s.index < (session?.current_stage_index ?? 0));
+  // Forward enabled if reviewing and not already at current stage
+  const canGoForward = isReviewing && currentViewing < (session?.current_stage_index ?? 0);
+
+  // Get the stage to display (reviewed or current)
+  const displayedStage = useMemo(() => {
+    if (!session?.stages) return session?.current_stage ?? null;
+    if (viewingStageIndex !== null) {
+      return session.stages[viewingStageIndex] ?? null;
+    }
+    return session.current_stage;
+  }, [session?.stages, session?.current_stage, viewingStageIndex]);
 
   // Auto-initiate AI when entering any chat stage (initial load or after advancing)
   useEffect(() => {
@@ -218,15 +233,23 @@ export default function UnifiedLesson() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {/* Stage indicator */}
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
+            <p className="text-sm text-gray-500">
+              Stage {session.current_stage_index + 1} of {session.total_stages}
+            </p>
+          </div>
+
           {/* Navigation arrows */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               onClick={handleGoBack}
               disabled={!canGoBack}
-              className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
               title="Review previous content"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -234,22 +257,14 @@ export default function UnifiedLesson() {
               <button
                 onClick={handleGoForward}
                 disabled={!canGoForward}
-                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 title="Next reviewed content"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             )}
-          </div>
-
-          {/* Stage indicator */}
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
-            <p className="text-sm text-gray-500">
-              Stage {session.current_stage_index + 1} of {session.total_stages}
-            </p>
           </div>
         </div>
 
@@ -295,17 +310,18 @@ export default function UnifiedLesson() {
             pendingTransition={pendingTransition}
             onConfirmTransition={handleAdvanceStage}
             onContinueChatting={handleContinueChatting}
-            disabled={!isChatStage}
+            showDisclaimer={!isChatStage || isReviewing}
           />
         </div>
 
         {/* Content panel - right */}
         <div className="w-1/2 bg-white">
           <ContentPanel
-            stage={session.current_stage}
+            stage={displayedStage}
             articleContent={session.content || undefined}
             onVideoEnded={handleAdvanceStage}
             onNextClick={handleAdvanceStage}
+            isReviewing={isReviewing}
           />
         </div>
       </div>

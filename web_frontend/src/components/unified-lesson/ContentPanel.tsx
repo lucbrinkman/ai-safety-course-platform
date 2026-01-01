@@ -8,6 +8,7 @@ type ContentPanelProps = {
   articleContent?: string;
   onVideoEnded: () => void;
   onNextClick: () => void;
+  isReviewing?: boolean;
 };
 
 export default function ContentPanel({
@@ -15,6 +16,7 @@ export default function ContentPanel({
   articleContent,
   onVideoEnded,
   onNextClick,
+  isReviewing = false,
 }: ContentPanelProps) {
   if (!stage) {
     return (
@@ -53,14 +55,16 @@ export default function ContentPanel({
             blurred={false}
           />
         </div>
-        <div className="p-4 border-t bg-white">
-          <button
-            onClick={onNextClick}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-          >
-            Continue
-          </button>
-        </div>
+        {!isReviewing && (
+          <div className="p-4 border-t bg-white">
+            <button
+              onClick={onNextClick}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+            >
+              Continue
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -72,8 +76,8 @@ export default function ContentPanel({
           videoId={stage.videoId}
           start={stage.from}
           end={stage.to || 9999}
-          onEnded={onVideoEnded}
-          onSkip={onNextClick}
+          onEnded={isReviewing ? () => {} : onVideoEnded}
+          onSkip={isReviewing ? () => {} : onNextClick}
         />
       </div>
     );
