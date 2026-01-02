@@ -45,6 +45,21 @@ export type PreviousStageInfo = {
   videoId?: string;
 };
 
+export type ArticleMetadata = {
+  title: string | null;
+  author: string | null;
+  source_url: string | null;  // Original article URL
+};
+
+// Bundled article data - content + metadata together
+export type ArticleData = {
+  content: string;
+  title?: string | null;
+  author?: string | null;
+  sourceUrl?: string | null;
+  isExcerpt?: boolean;
+};
+
 export type SessionState = {
   session_id: number;
   lesson_id: string;
@@ -54,10 +69,11 @@ export type SessionState = {
   current_stage: Stage | null;
   messages: ChatMessage[];
   completed: boolean;
-  content: string | null;
+  // Article content with metadata bundled
+  article: ArticleData | null;
   stages: Stage[];
   // For chat stages: previous content to display (blurred or visible)
-  previous_content: string | null;
+  previous_article: ArticleData | null;
   previous_stage: PreviousStageInfo | null;
   include_previous_content: boolean;
 };

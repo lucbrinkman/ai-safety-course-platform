@@ -16,6 +16,9 @@ from .content import (
     load_article,
     extract_article_section,
     load_video_transcript,
+    load_article_with_metadata,
+    ArticleContent,
+    ArticleMetadata,
 )
 from .sessions import (
     create_session,
@@ -40,6 +43,9 @@ __all__ = [
     "load_article",
     "extract_article_section",
     "load_video_transcript",
+    "load_article_with_metadata",
+    "ArticleContent",
+    "ArticleMetadata",
     "create_session",
     "get_session",
     "get_user_sessions",

@@ -9,7 +9,12 @@ from typing import AsyncIterator
 from anthropic import AsyncAnthropic
 
 from .types import Stage, ArticleStage, VideoStage, ChatStage
-from .content import load_article, extract_article_section
+from .content import (
+    load_article,
+    extract_article_section,
+    load_article_with_metadata,
+    ArticleContent,
+)
 
 
 # Tool for transitioning to next stage
@@ -72,13 +77,26 @@ Answer questions if asked, but don't initiate lengthy discussion.
     return prompt
 
 
-def get_stage_content(stage: Stage) -> str | None:
-    """Get the text content for a stage (article text or video transcript)."""
+def get_stage_content(stage: Stage) -> ArticleContent | None:
+    """
+    Get the content for a stage (article or video transcript).
 
+    For articles, returns ArticleContent with:
+    - content: The markdown text (possibly an excerpt)
+    - metadata: Title, author, source_url from frontmatter
+    - is_excerpt: True if from/to were used
+
+    For videos, returns ArticleContent with just content (no metadata).
+
+    Returns None if content not found.
+    """
     if isinstance(stage, ArticleStage):
         try:
-            full_content = load_article(stage.source_url)
-            return extract_article_section(full_content, stage.from_text, stage.to_text)
+            return load_article_with_metadata(
+                stage.source_url,
+                stage.from_text,
+                stage.to_text,
+            )
         except FileNotFoundError:
             return None
 

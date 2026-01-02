@@ -1,6 +1,8 @@
 # core/lessons/content.py
 """Content loading and extraction utilities."""
 
+import re
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -8,22 +10,117 @@ from pathlib import Path
 CONTENT_DIR = Path(__file__).parent.parent.parent / "educational_content"
 
 
+@dataclass
+class ArticleMetadata:
+    """Metadata extracted from article frontmatter."""
+    title: str | None = None
+    author: str | None = None
+    source_url: str | None = None  # Original article URL
+
+
+@dataclass
+class ArticleContent:
+    """Article content with metadata."""
+    content: str
+    metadata: ArticleMetadata
+    is_excerpt: bool = False  # True if from/to were used to extract a section
+
+
+def parse_frontmatter(text: str) -> tuple[ArticleMetadata, str]:
+    """
+    Parse YAML frontmatter from markdown text.
+
+    Args:
+        text: Full markdown text, possibly with frontmatter
+
+    Returns:
+        Tuple of (metadata, content_without_frontmatter)
+    """
+    # Match frontmatter: starts with ---, ends with ---
+    pattern = r'^---\s*\n(.*?)\n---\s*\n'
+    match = re.match(pattern, text, re.DOTALL)
+
+    if not match:
+        return ArticleMetadata(), text
+
+    frontmatter_text = match.group(1)
+    content = text[match.end():]
+
+    # Simple YAML parsing (just key: value pairs)
+    metadata = ArticleMetadata()
+    for line in frontmatter_text.split('\n'):
+        line = line.strip()
+        if ':' in line:
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key == 'title':
+                metadata.title = value
+            elif key == 'author':
+                metadata.author = value
+            elif key == 'source_url':
+                metadata.source_url = value
+
+    return metadata, content
+
+
 def load_article(source_url: str) -> str:
     """
-    Load article content from file.
+    Load article content from file (without metadata).
 
     Args:
         source_url: Relative path from content directory (e.g., "articles/foo.md")
 
     Returns:
-        Full markdown content as string
+        Full markdown content as string (frontmatter stripped)
     """
     article_path = CONTENT_DIR / source_url
 
     if not article_path.exists():
         raise FileNotFoundError(f"Article not found: {source_url}")
 
-    return article_path.read_text()
+    raw_text = article_path.read_text()
+    _, content = parse_frontmatter(raw_text)
+    return content
+
+
+def load_article_with_metadata(
+    source_url: str,
+    from_text: str | None = None,
+    to_text: str | None = None,
+) -> ArticleContent:
+    """
+    Load article content with metadata.
+
+    Args:
+        source_url: Relative path from content directory
+        from_text: Starting anchor phrase (inclusive), or None for start
+        to_text: Ending anchor phrase (inclusive), or None for end
+
+    Returns:
+        ArticleContent with metadata and content
+    """
+    article_path = CONTENT_DIR / source_url
+
+    if not article_path.exists():
+        raise FileNotFoundError(f"Article not found: {source_url}")
+
+    raw_text = article_path.read_text()
+    metadata, full_content = parse_frontmatter(raw_text)
+
+    # Check if we're extracting an excerpt
+    is_excerpt = from_text is not None or to_text is not None
+
+    if is_excerpt:
+        content = extract_article_section(full_content, from_text, to_text)
+    else:
+        content = full_content
+
+    return ArticleContent(
+        content=content,
+        metadata=metadata,
+        is_excerpt=is_excerpt,
+    )
 
 
 def extract_article_section(

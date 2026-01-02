@@ -26,18 +26,34 @@ export default function UnifiedLesson() {
   useEffect(() => {
     if (!lessonId) return;
 
+    let completed = false;
+    const timeoutId = setTimeout(() => {
+      if (!completed) {
+        console.warn(`[UnifiedLesson] Session init taking >3s for lesson ${lessonId}`);
+      }
+    }, 3000);
+
     async function init() {
+      const startTime = Date.now();
       try {
         const sid = await createSession(lessonId!);
         setSessionId(sid);
         const state = await getSession(sid);
+        completed = true;
+        clearTimeout(timeoutId);
+        console.log(`[UnifiedLesson] Session initialized in ${Date.now() - startTime}ms`);
         setSession(state);
       } catch (e) {
+        completed = true;
+        clearTimeout(timeoutId);
+        console.error(`[UnifiedLesson] Session init failed after ${Date.now() - startTime}ms:`, e);
         setError(e instanceof Error ? e.message : "Failed to start lesson");
       }
     }
 
     init();
+
+    return () => clearTimeout(timeoutId);
   }, [lessonId]);
 
   const handleSendMessage = useCallback(async (content: string) => {
@@ -201,17 +217,35 @@ export default function UnifiedLesson() {
   useEffect(() => {
     if (!sessionId || viewingStageIndex === null) return;
 
+    let completed = false;
+    const timeoutId = setTimeout(() => {
+      if (!completed) {
+        console.warn(`[UnifiedLesson] Content fetch taking >3s for stage ${viewingStageIndex}`, {
+          sessionId,
+          viewingStageIndex,
+        });
+      }
+    }, 3000);
+
     async function fetchViewedContent() {
+      const startTime = Date.now();
       try {
         const state = await getSession(sessionId!, viewingStageIndex!);
-        // Only update the content, not the full session
-        setSession(prev => prev ? { ...prev, content: state.content } : null);
+        completed = true;
+        clearTimeout(timeoutId);
+        console.log(`[UnifiedLesson] Fetched stage ${viewingStageIndex} in ${Date.now() - startTime}ms`);
+        // Update article data
+        setSession(prev => prev ? { ...prev, article: state.article } : null);
       } catch (e) {
-        console.error("Failed to fetch stage content:", e);
+        completed = true;
+        clearTimeout(timeoutId);
+        console.error(`[UnifiedLesson] Failed to fetch stage ${viewingStageIndex} after ${Date.now() - startTime}ms:`, e);
       }
     }
 
     fetchViewedContent();
+
+    return () => clearTimeout(timeoutId);
   }, [sessionId, viewingStageIndex]);
 
   // Reset viewingStageIndex when advancing to new stage
@@ -316,11 +350,11 @@ export default function UnifiedLesson() {
           )}
           <ContentPanel
             stage={displayedStage}
-            articleContent={session.content || undefined}
+            article={session.article}
             onVideoEnded={handleAdvanceStage}
             onNextClick={handleAdvanceStage}
             isReviewing={isReviewing}
-            previousContent={session.previous_content}
+            previousArticle={session.previous_article}
             previousStage={session.previous_stage}
             includePreviousContent={session.include_previous_content}
           />

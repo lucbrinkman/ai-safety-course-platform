@@ -1,9 +1,7 @@
-# Four Background Claims
-
-*By Nate Soares, July 24, 2015*
-
-*Source: [MIRI](https://intelligence.org/2015/07/24/four-background-claims/)*
-
+---
+title: Four Background Claims
+author: Nate Soares
+source_url: https://intelligence.org/2015/07/24/four-background-claims/
 ---
 
 MIRI's mission is to ensure that the creation of smarter-than-human artificial intelligence has a positive impact. Why is this mission important, and why do we think that there's work we can do today to help ensure any such thing?

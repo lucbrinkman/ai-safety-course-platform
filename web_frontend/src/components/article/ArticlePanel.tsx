@@ -1,23 +1,19 @@
 import { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import type { ArticleData } from "../../types/unified-lesson";
 
 type ArticlePanelProps = {
-  content: string;
-  title?: string;
-  author?: string;
-  date?: string;
-  blurred?: boolean; // For active recall - blur the content
+  article: ArticleData;
+  blurred?: boolean;   // For active recall - blur the content
   onScrolledToBottom?: () => void;
 };
 
 export default function ArticlePanel({
-  content,
-  title,
-  author,
-  date,
+  article,
   blurred = false,
   onScrolledToBottom,
 }: ArticlePanelProps) {
+  const { content, title, author, sourceUrl, isExcerpt } = article;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,11 +39,25 @@ export default function ArticlePanel({
     <div ref={containerRef} className="h-full overflow-y-auto relative">
       <article className={`prose prose-gray max-w-none p-6 ${blurred ? "blur-sm select-none" : ""}`}>
         {title && <h1 className="text-2xl font-bold mb-2">{title}</h1>}
-        {(author || date) && (
+        {isExcerpt && (
+          <div className="text-sm text-gray-500 mb-1">
+            You're reading an excerpt from this article
+          </div>
+        )}
+        {(author || sourceUrl) && (
           <div className="text-sm text-gray-500 mb-6">
-            {author && <span>{author}</span>}
-            {author && date && <span> · </span>}
-            {date && <span>{date}</span>}
+            {author && <span>By {author}</span>}
+            {author && sourceUrl && <span> · </span>}
+            {sourceUrl && (
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Read original ↗
+              </a>
+            )}
           </div>
         )}
         <ReactMarkdown

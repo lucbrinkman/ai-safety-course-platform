@@ -1,28 +1,28 @@
 // web_frontend/src/components/unified-lesson/ContentPanel.tsx
 import { useState, useCallback } from "react";
-import type { Stage, PreviousStageInfo } from "../../types/unified-lesson";
+import type { Stage, PreviousStageInfo, ArticleData } from "../../types/unified-lesson";
 import ArticlePanel from "../article/ArticlePanel";
 import VideoPlayer from "../lesson/VideoPlayer";
 
 type ContentPanelProps = {
   stage: Stage | null;
-  articleContent?: string;
+  article?: ArticleData | null;
   onVideoEnded: () => void;
   onNextClick: () => void;
   isReviewing?: boolean;
   // For chat stages: show previous content (blurred or visible)
-  previousContent?: string | null;
+  previousArticle?: ArticleData | null;
   previousStage?: PreviousStageInfo | null;
   includePreviousContent?: boolean;
 };
 
 export default function ContentPanel({
   stage,
-  articleContent,
+  article,
   onVideoEnded,
   onNextClick,
   isReviewing = false,
-  previousContent,
+  previousArticle,
   previousStage,
   includePreviousContent = true,
 }: ContentPanelProps) {
@@ -44,10 +44,10 @@ export default function ContentPanel({
     // Show previous content (blurred or visible) during chat stages
     const blurred = !includePreviousContent;
 
-    if (previousStage?.type === "article" && previousContent) {
+    if (previousStage?.type === "article" && previousArticle) {
       return (
         <div className="h-full overflow-hidden">
-          <ArticlePanel content={previousContent} blurred={blurred} />
+          <ArticlePanel article={previousArticle} blurred={blurred} />
         </div>
       );
     }
@@ -91,12 +91,12 @@ export default function ContentPanel({
   }
 
   if (stage.type === "article") {
+    const articleData = article ?? { content: "Loading..." };
     return (
       <div className="h-full flex flex-col">
         <div className="flex-1 overflow-hidden">
           <ArticlePanel
-            content={articleContent || "Loading..."}
-            blurred={false}
+            article={articleData}
             onScrolledToBottom={handleScrolledToBottom}
           />
         </div>

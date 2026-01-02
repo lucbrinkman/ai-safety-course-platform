@@ -225,13 +225,26 @@ async def get_session_state(
         else None
     )
 
+    # Helper to bundle article content with metadata
+    def bundle_article(result) -> dict | None:
+        if not result:
+            return None
+        return {
+            "content": result.content,
+            "title": result.metadata.title,
+            "author": result.metadata.author,
+            "sourceUrl": result.metadata.source_url,
+            "isExcerpt": result.is_excerpt,
+        }
+
     # Get content for the viewed stage
-    stage_content = None
+    article = None
     if content_stage:
-        stage_content = get_stage_content(content_stage)
+        result = get_stage_content(content_stage)
+        article = bundle_article(result)
 
     # For chat stages, get previous stage content (for blur/visible display)
-    previous_content = None
+    previous_article = None
     previous_stage = None
     include_previous_content = True
     if current_stage and current_stage.type == "chat" and view_stage is None:
@@ -239,7 +252,8 @@ async def get_session_state(
         stage_idx = session["current_stage_index"]
         if stage_idx > 0:
             previous_stage = lesson.stages[stage_idx - 1]
-            previous_content = get_stage_content(previous_stage)
+            prev_result = get_stage_content(previous_stage)
+            previous_article = bundle_article(prev_result)
             include_previous_content = current_stage.include_previous_content
 
     return {
@@ -275,9 +289,10 @@ async def get_session_state(
         ),
         "messages": session["messages"],
         "completed": session["completed_at"] is not None,
-        "content": stage_content,
-        # Previous content for chat stages (blurred or visible based on includePreviousContent)
-        "previous_content": previous_content,
+        # Bundled article data (content + metadata)
+        "article": article,
+        # Previous article for chat stages (blurred or visible)
+        "previous_article": previous_article,
         "previous_stage": (
             {
                 "type": previous_stage.type,
@@ -329,7 +344,8 @@ async def send_message_endpoint(
     # Get previous content if needed
     previous_content = None
     if previous_stage:
-        previous_content = get_stage_content(previous_stage)
+        prev_result = get_stage_content(previous_stage)
+        previous_content = prev_result.content if prev_result else None
 
     # Add user message to session (skip empty messages - used for AI auto-initiation)
     if request_body.content:
