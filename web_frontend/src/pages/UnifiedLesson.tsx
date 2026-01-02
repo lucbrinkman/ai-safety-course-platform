@@ -5,6 +5,7 @@ import type { SessionState, PendingMessage } from "../types/unified-lesson";
 import { createSession, getSession, advanceStage, sendMessage } from "../api/lessons";
 import ChatPanel from "../components/unified-lesson/ChatPanel";
 import ContentPanel from "../components/unified-lesson/ContentPanel";
+import StageProgressBar from "../components/unified-lesson/StageProgressBar";
 
 export default function UnifiedLesson() {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -158,6 +159,15 @@ export default function UnifiedLesson() {
     setViewingStageIndex(null);
   }, []);
 
+  const handleStageClick = useCallback((index: number) => {
+    // If clicking current stage, exit review mode
+    if (index === session?.current_stage_index) {
+      setViewingStageIndex(null);
+    } else {
+      setViewingStageIndex(index);
+    }
+  }, [session?.current_stage_index]);
+
   // Compute navigation states
   const reviewableStages = getReviewableStages();
   const currentViewing = viewingStageIndex ?? (session?.current_stage_index ?? 0);
@@ -231,68 +241,41 @@ export default function UnifiedLesson() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Stage indicator */}
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
-            <p className="text-sm text-gray-500">
-              Stage {session.current_stage_index + 1} of {session.total_stages}
-            </p>
-          </div>
-
-          {/* Navigation arrows */}
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={handleGoBack}
-              disabled={!canGoBack}
-              className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Review previous content"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            {isReviewing && (
-              <button
-                onClick={handleGoForward}
-                disabled={!canGoForward}
-                className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Next reviewed content"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Right side: reviewing indicator or skip button */}
-        <div className="flex items-center gap-2">
-          {isReviewing ? (
-            <>
-              <span className="text-sm text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                Reviewing previous material
-              </span>
+      <header className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-lg font-semibold text-gray-900">{session.lesson_title}</h1>
+          {/* Right side: reviewing indicator or skip button */}
+          <div className="flex items-center gap-2">
+            {isReviewing ? (
               <button
                 onClick={handleReturnToCurrent}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium"
               >
                 Return to current →
               </button>
-            </>
-          ) : (
-            !isChatStage && (
-              <button
-                onClick={handleAdvanceStage}
-                className="text-gray-500 hover:text-gray-700 text-sm"
-              >
-                Skip →
-              </button>
-            )
-          )}
+            ) : (
+              !isChatStage && (
+                <button
+                  onClick={handleAdvanceStage}
+                  className="text-gray-500 hover:text-gray-700 text-sm"
+                >
+                  Skip →
+                </button>
+              )
+            )}
+          </div>
         </div>
+        {/* Progress bar */}
+        <StageProgressBar
+          stages={session.stages}
+          currentStageIndex={session.current_stage_index}
+          viewingStageIndex={viewingStageIndex}
+          onStageClick={handleStageClick}
+          onPrevious={handleGoBack}
+          onNext={handleGoForward}
+          canGoPrevious={canGoBack}
+          canGoNext={canGoForward}
+        />
       </header>
 
       {/* Main content - split panel */}
