@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { ChatMessage, Stage, PendingMessage } from "../../types/unified-lesson";
 import { transcribeAudio } from "../../api/lessons";
+import { Tooltip } from "../Tooltip";
 
 type ChatPanelProps = {
   messages: ChatMessage[];
@@ -41,8 +42,9 @@ export default function ChatPanel({
   // Recording state
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
-  const [volumeLevel, setVolumeLevel] = useState(0); // Single volume bar (0-1)
+  const [volumeBars, setVolumeBars] = useState<number[]>([0, 0, 0, 0, 0]); // 5 bars with jittered volume
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showRecordingWarning, setShowRecordingWarning] = useState(false);
 
   // Recording refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -54,10 +56,12 @@ export default function ChatPanel({
   const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isRecordingRef = useRef(false); // For animation loop (avoids stale closure)
+  const recordingTimeRef = useRef(0); // For stopRecording check (avoids stale closure)
   const smoothedVolumeRef = useRef(0); // For decay calculation
   const pcmDataRef = useRef<Float32Array | null>(null); // Reuse buffer
 
-  const MAX_RECORDING_TIME = 60; // seconds
+  const MAX_RECORDING_TIME = 6; // seconds (testing, production: 120)
+  const WARNING_TIME = 3; // seconds (testing, production: 90)
   const MIN_RECORDING_TIME = 0.5; // seconds
 
   useEffect(() => {
@@ -102,7 +106,8 @@ export default function ChatPanel({
     }
   }, [errorMessage]);
 
-  // Volume meter with fast attack, slow decay (like system mic settings)
+  // Volume meter - updates 5 bars with current volume + random jitter
+  const lastUpdateRef = useRef(0);
   const updateAudioLevel = useCallback(() => {
     if (!analyserRef.current || !isRecordingRef.current) return;
 
@@ -125,11 +130,23 @@ export default function ChatPanel({
     const rms = Math.sqrt(sumSquares / pcmDataRef.current.length);
     const instantVolume = Math.min(1, rms * 4); // Scale for visibility
 
-    // Fast attack, slow decay (0.92 = ~50ms decay at 60fps)
-    const decay = 0.92;
+    // Fast attack, slow decay (0.97 = holds volume longer for slower sample rate)
+    const decay = 0.97;
     smoothedVolumeRef.current = Math.max(instantVolume, smoothedVolumeRef.current * decay);
 
-    setVolumeLevel(smoothedVolumeRef.current);
+    // Update bars every ~150ms (~7fps) with current volume + random jitter (±30%)
+    const now = performance.now();
+    if (now - lastUpdateRef.current > 150) {
+      lastUpdateRef.current = now;
+      const baseVol = smoothedVolumeRef.current;
+      setVolumeBars([
+        baseVol * (0.7 + Math.random() * 0.6),
+        baseVol * (0.7 + Math.random() * 0.6),
+        baseVol * (0.7 + Math.random() * 0.6),
+        baseVol * (0.7 + Math.random() * 0.6),
+        baseVol * (0.7 + Math.random() * 0.6),
+      ]);
+    }
 
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   }, []);
@@ -172,14 +189,19 @@ export default function ChatPanel({
       setRecordingTime(0);
 
       // Start timer
+      recordingTimeRef.current = 0;
+      setShowRecordingWarning(false);
       timerIntervalRef.current = window.setInterval(() => {
-        setRecordingTime((prev) => {
-          if (prev >= MAX_RECORDING_TIME - 1) {
-            stopRecording();
-            return prev;
-          }
-          return prev + 1;
-        });
+        recordingTimeRef.current += 1;
+        const currentTime = recordingTimeRef.current;
+        setRecordingTime(currentTime);
+        if (currentTime >= WARNING_TIME && currentTime < MAX_RECORDING_TIME) {
+          setShowRecordingWarning(true);
+        }
+        if (currentTime >= MAX_RECORDING_TIME) {
+          // Stop recording after max time
+          setTimeout(() => stopRecording(), 0);
+        }
       }, 1000);
 
       // Start audio level updates
@@ -194,13 +216,13 @@ export default function ChatPanel({
   };
 
   const stopRecording = async () => {
-    if (!mediaRecorderRef.current || recordingState !== "recording") return;
+    if (!mediaRecorderRef.current || !isRecordingRef.current) return;
 
     // Stop animation loop immediately
     isRecordingRef.current = false;
 
     // Check minimum recording time
-    if (recordingTime < MIN_RECORDING_TIME) {
+    if (recordingTimeRef.current < MIN_RECORDING_TIME) {
       // Cancel recording - too short
       mediaRecorderRef.current.stop();
       cleanupRecording();
@@ -218,7 +240,7 @@ export default function ChatPanel({
     }
 
     setRecordingState("transcribing");
-    setVolumeLevel(0);
+    setVolumeBars([0, 0, 0, 0, 0]);
     smoothedVolumeRef.current = 0;
 
     // Stop recording and get audio
@@ -260,8 +282,10 @@ export default function ChatPanel({
   const cleanupRecording = () => {
     setRecordingState("idle");
     isRecordingRef.current = false;
+    recordingTimeRef.current = 0;
     setRecordingTime(0);
-    setVolumeLevel(0);
+    setVolumeBars([0, 0, 0, 0, 0]);
+    setShowRecordingWarning(false);
     smoothedVolumeRef.current = 0;
     pcmDataRef.current = null;
     mediaRecorderRef.current = null;
@@ -438,71 +462,101 @@ export default function ChatPanel({
         </div>
       )}
 
+      {/* Recording time warning */}
+      {showRecordingWarning && (
+        <div className="px-4 py-2 text-sm text-amber-700 bg-amber-50 border-t border-amber-100">
+          Recording will automatically stop and transcribe after {MAX_RECORDING_TIME >= 60 ? `${Math.floor(MAX_RECORDING_TIME / 60)} minute${MAX_RECORDING_TIME >= 120 ? 's' : ''}` : `${MAX_RECORDING_TIME} seconds`}. You can start another recording afterwards.
+        </div>
+      )}
+
       {/* Input form */}
       <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t border-gray-200 items-end">
-        {recordingState === "recording" ? (
-          // Recording indicator with volume bar
-          <div className="flex-1 flex items-center gap-3 border border-red-300 bg-red-50 rounded-lg px-4 py-2">
-            {/* Volume bar (like system mic settings) */}
-            <div className="w-24 h-3 bg-red-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-red-500 rounded-full transition-[width] duration-[50ms]"
-                style={{ width: `${volumeLevel * 100}%` }}
-              />
-            </div>
-            <span className="text-red-700">Recording... {formatTime(recordingTime)}</span>
-          </div>
-        ) : (
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={recordingState === "transcribing" ? "Transcribing..." : "Type a message..."}
-            disabled={isLoading || recordingState === "transcribing"}
-            rows={1}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none resize-none leading-normal disabled:bg-gray-100"
-          />
-        )}
-
-        {/* Mic button */}
-        <button
-          type="button"
-          onClick={handleMicClick}
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={recordingState === "transcribing" ? "Transcribing..." : "Type a message..."}
           disabled={isLoading || recordingState === "transcribing"}
-          className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            recordingState === "recording"
-              ? "bg-red-100 text-red-600 hover:bg-red-200"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-          title={recordingState === "recording" ? "Stop recording" : "Start recording"}
-        >
-          {recordingState === "transcribing" ? (
-            // Spinner
-            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          ) : recordingState === "recording" ? (
-            // Stop icon
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <rect x="6" y="6" width="12" height="12" rx="1" />
-            </svg>
-          ) : (
-            // Microphone icon
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-          )}
-        </button>
+          rows={1}
+          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none resize-none leading-normal disabled:bg-gray-100"
+        />
 
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim() || recordingState !== "idle"}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Send
-        </button>
+        {/* Buttons with volume indicator above when recording */}
+        <div className="flex flex-col items-center gap-1">
+          {recordingState === "recording" && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-end gap-1 h-6">
+                {volumeBars.map((vol, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 bg-gray-500 rounded-sm transition-[height] duration-100"
+                    style={{ height: `${Math.max(6, Math.min(1, vol * 2) * 24)}px` }}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-500 tabular-nums">{formatTime(recordingTime)}</span>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Tooltip content={recordingState === "recording" ? "Stop recording" : "Start recording"}>
+              <button
+                type="button"
+                onClick={handleMicClick}
+                disabled={isLoading || recordingState === "transcribing"}
+                className="p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-600 hover:bg-gray-200"
+              >
+                {recordingState === "transcribing" ? (
+                  // Spinner
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  // Microphone icon (pulses when recording)
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    style={recordingState === "recording" ? {
+                      animation: "mic-pulse 1s ease-in-out infinite",
+                    } : undefined}
+                  >
+                    <style>{`
+                      @keyframes mic-pulse {
+                        0%, 100% { stroke: #4b5563; }
+                        50% { stroke: #000000; }
+                      }
+                    `}</style>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                )}
+              </button>
+            </Tooltip>
+            {recordingState === "recording" ? (
+              <Tooltip content="Stop recording">
+                <button
+                  type="button"
+                  onClick={handleMicClick}
+                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 min-w-[70px] flex items-center justify-center"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="1" />
+                  </svg>
+                </button>
+              </Tooltip>
+            ) : (
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim() || recordingState !== "idle"}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed min-w-[70px]"
+              >
+                Send
+              </button>
+            )}
+          </div>
+        </div>
       </form>
     </div>
   );
