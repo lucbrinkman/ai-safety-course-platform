@@ -137,14 +137,17 @@ async def send_message(
 
     # Only include transition tool for chat stages
     tools = [TRANSITION_TOOL] if isinstance(current_stage, ChatStage) else []
+    # Build kwargs - only include tools if we have them (API rejects tools=None)
+    stream_kwargs = {
+        "model": "claude-sonnet-4-20250514",
+        "max_tokens": 1024,
+        "system": system,
+        "messages": api_messages,
+    }
+    if tools:
+        stream_kwargs["tools"] = tools
 
-    async with client.messages.stream(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1024,
-        system=system,
-        messages=api_messages,
-        tools=tools if tools else None,
-    ) as stream:
+    async with client.messages.stream(**stream_kwargs) as stream:
         async for event in stream:
             if event.type == "content_block_start":
                 if event.content_block.type == "tool_use":
