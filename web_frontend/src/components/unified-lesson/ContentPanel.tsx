@@ -11,8 +11,8 @@ import {
   FloatingPortal,
 } from "@floating-ui/react";
 import type { Stage, PreviousStageInfo, ArticleData } from "../../types/unified-lesson";
-import ArticlePanel from "../article/ArticlePanel";
-import VideoPlayer from "../lesson/VideoPlayer";
+import ArticlePanel from "./ArticlePanel";
+import VideoPlayer from "./VideoPlayer";
 
 type ContentPanelProps = {
   stage: Stage | null;
