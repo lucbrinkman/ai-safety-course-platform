@@ -1,6 +1,6 @@
 // web_frontend/src/components/unified-lesson/StageProgressBar.tsx
-import { useState, useRef } from "react";
 import type { Stage } from "../../types/unified-lesson";
+import { Tooltip } from "../Tooltip";
 
 type StageProgressBarProps = {
   stages: Stage[];
@@ -40,6 +40,17 @@ function StageIcon({ type, small = false }: { type: string; small?: boolean }) {
   );
 }
 
+function getTooltipContent(stage: Stage, index: number, currentStageIndex: number): string {
+  const isFuture = index > currentStageIndex;
+  const isPastChat = stage.type === "chat" && index < currentStageIndex;
+  const isCurrentChat = stage.type === "chat" && index === currentStageIndex;
+
+  if (isFuture) return "Not yet reached";
+  if (isPastChat) return "Chat sections can't be revisited";
+  if (isCurrentChat) return "Return to chat";
+  return `View ${stage.type} section`;
+}
+
 export default function StageProgressBar({
   stages,
   currentStageIndex,
@@ -51,35 +62,6 @@ export default function StageProgressBar({
   canGoNext,
 }: StageProgressBarProps) {
   const viewingIndex = viewingStageIndex ?? currentStageIndex;
-  const [tooltipIndex, setTooltipIndex] = useState<number | null>(null);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showTooltip = (index: number) => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-    setTooltipIndex(index);
-  };
-
-  const hideTooltip = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-    setTooltipIndex(null);
-  };
-
-  const handleMouseEnter = (index: number, isPastChat: boolean) => {
-    if (!isPastChat) return;
-    hoverTimeoutRef.current = setTimeout(() => {
-      setTooltipIndex(index);
-    }, 500); // Match native tooltip delay
-  };
-
-  const handleMouseLeave = () => {
-    hideTooltip();
-  };
 
   const handleDotClick = (index: number, stage: Stage) => {
     if (index > currentStageIndex) {
@@ -88,8 +70,7 @@ export default function StageProgressBar({
     }
 
     if (stage.type === "chat" && index < currentStageIndex) {
-      // Past chat stages can't be revisited - show tooltip immediately on click
-      showTooltip(index);
+      // Past chat stages can't be revisited - tooltip explains why
       return;
     }
 
@@ -100,23 +81,23 @@ export default function StageProgressBar({
   return (
     <div className="flex items-center gap-2">
       {/* Previous button */}
-      <button
-        onClick={onPrevious}
-        disabled={!canGoPrevious}
-        className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-        title="Previous content"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+      <Tooltip content="Previous content">
+        <button
+          onClick={onPrevious}
+          disabled={!canGoPrevious}
+          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </Tooltip>
 
       {/* Stage dots */}
       <div className="flex items-center">
         {stages.map((stage, index) => {
           const isReached = index <= currentStageIndex;
           const isViewing = index === viewingIndex;
-          // Clickable: reached stages, except past chat stages (current chat IS clickable)
           const isPastChat = stage.type === "chat" && index < currentStageIndex;
           const isClickable = isReached && !isPastChat;
           const isFuture = index > currentStageIndex;
@@ -133,11 +114,13 @@ export default function StageProgressBar({
               )}
 
               {/* Dot */}
-              <div className="relative">
+              <Tooltip
+                content={getTooltipContent(stage, index, currentStageIndex)}
+                placement="bottom"
+                persistOnClick={isPastChat}
+              >
                 <button
                   onClick={() => handleDotClick(index, stage)}
-                  onMouseEnter={() => handleMouseEnter(index, isPastChat)}
-                  onMouseLeave={handleMouseLeave}
                   disabled={isFuture}
                   className={`
                     relative w-7 h-7 rounded-full flex items-center justify-center
@@ -146,48 +129,31 @@ export default function StageProgressBar({
                       ? isClickable
                         ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
                         : "bg-blue-500 text-white cursor-default"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-200 text-gray-400 cursor-default"
                     }
                     ${isViewing ? "ring-2 ring-offset-2 ring-blue-500" : ""}
                   `}
-                  title={
-                    isPastChat
-                      ? undefined // Custom tooltip instead
-                      : isFuture
-                        ? "Not yet reached"
-                        : stage.type === "chat"
-                          ? "Return to chat"
-                          : `View ${stage.type} section`
-                  }
                 >
                   <StageIcon type={stage.type} small />
                 </button>
-
-                {/* Tooltip for past chat sections */}
-                {tooltipIndex === index && isPastChat && (
-                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-10">
-                    <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      Chat sections can't be revisited
-                    </div>
-                  </div>
-                )}
-              </div>
+              </Tooltip>
             </div>
           );
         })}
       </div>
 
       {/* Next button */}
-      <button
-        onClick={onNext}
-        disabled={!canGoNext}
-        className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-        title="Next content"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      <Tooltip content="Next content">
+        <button
+          onClick={onNext}
+          disabled={!canGoNext}
+          className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </Tooltip>
     </div>
   );
 }

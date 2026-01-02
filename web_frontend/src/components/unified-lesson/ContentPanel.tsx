@@ -1,5 +1,15 @@
 // web_frontend/src/components/unified-lesson/ContentPanel.tsx
 import { useState, useCallback } from "react";
+import {
+  useFloating,
+  useClick,
+  useDismiss,
+  useInteractions,
+  offset,
+  flip,
+  shift,
+  FloatingPortal,
+} from "@floating-ui/react";
 import type { Stage, PreviousStageInfo, ArticleData } from "../../types/unified-lesson";
 import ArticlePanel from "../article/ArticlePanel";
 import VideoPlayer from "../lesson/VideoPlayer";
@@ -31,6 +41,25 @@ export default function ContentPanel({
   const handleScrolledToBottom = useCallback(() => {
     setHasScrolledToBottom(true);
   }, []);
+
+  // Popover for "haven't scrolled yet" confirmation
+  const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
+  const { refs, floatingStyles, context } = useFloating({
+    open: skipPopoverOpen,
+    onOpenChange: setSkipPopoverOpen,
+    placement: "top",
+    middleware: [offset(8), flip(), shift({ padding: 8 })],
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss]);
+
+  const handleReadButtonClick = () => {
+    if (hasScrolledToBottom) {
+      onNextClick();
+    }
+    // If not scrolled, the popover opens via useClick
+  };
 
   if (!stage) {
     return (
@@ -103,16 +132,44 @@ export default function ContentPanel({
         {!isReviewing && (
           <div className="p-4 border-t bg-white">
             <button
-              onClick={onNextClick}
-              disabled={!hasScrolledToBottom}
-              className={`w-full py-2 rounded-lg ${
-                hasScrolledToBottom
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+              ref={hasScrolledToBottom ? undefined : refs.setReference}
+              onClick={handleReadButtonClick}
+              {...(hasScrolledToBottom ? {} : getReferenceProps())}
+              className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400 cursor-pointer"
             >
               I've read the article
             </button>
+            {skipPopoverOpen && !hasScrolledToBottom && (
+              <FloatingPortal>
+                <div
+                  ref={refs.setFloating}
+                  style={floatingStyles}
+                  {...getFloatingProps()}
+                  className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-xs"
+                >
+                  <p className="text-sm text-gray-700 mb-3">
+                    It looks like you haven't reached the bottom of the article yet. What would you like to do?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSkipPopoverOpen(false);
+                        onNextClick();
+                      }}
+                      className="flex-1 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+                    >
+                      Skip anyway
+                    </button>
+                    <button
+                      onClick={() => setSkipPopoverOpen(false)}
+                      className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded"
+                    >
+                      Keep reading
+                    </button>
+                  </div>
+                </div>
+              </FloatingPortal>
+            )}
           </div>
         )}
       </div>

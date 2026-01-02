@@ -302,7 +302,7 @@ export default function UnifiedLesson() {
           ) : (
             <button
               onClick={handleAdvanceStage}
-              className="text-gray-500 hover:text-gray-700 text-sm"
+              className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
             >
               Skip section →
             </button>
