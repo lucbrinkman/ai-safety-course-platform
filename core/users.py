@@ -162,3 +162,33 @@ async def is_facilitator(discord_id: str) -> bool:
     """
     async with get_connection() as conn:
         return await user_queries.is_facilitator(conn, discord_id)
+
+
+async def become_facilitator(discord_id: str) -> bool:
+    """
+    Add a user to the facilitators table.
+
+    Args:
+        discord_id: Discord user ID
+
+    Returns:
+        True if successful or already a facilitator.
+        False if user doesn't exist.
+    """
+    from .tables import facilitators
+    from sqlalchemy import insert
+
+    async with get_transaction() as conn:
+        user = await user_queries.get_user_by_discord_id(conn, discord_id)
+        if not user:
+            return False
+
+        # Check if already a facilitator
+        if await user_queries.is_facilitator_by_user_id(conn, user["user_id"]):
+            return True
+
+        # Add to facilitators table
+        await conn.execute(
+            insert(facilitators).values(user_id=user["user_id"])
+        )
+        return True

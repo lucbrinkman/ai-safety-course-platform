@@ -140,6 +140,7 @@ class TestGetAvailableCohorts:
 
 
 from core.queries.users import is_facilitator_by_user_id
+from core.users import become_facilitator
 
 
 class TestIsFacilitatorByUserId:
@@ -180,3 +181,56 @@ class TestIsFacilitatorByUserId:
         result = await is_facilitator_by_user_id(db_conn, user["user_id"])
 
         assert result is True
+
+
+class TestBecomeFacilitator:
+    """Tests for become_facilitator function."""
+
+    @pytest.mark.asyncio
+    async def test_adds_user_to_facilitators(self, db_conn):
+        """Should add user to facilitators table."""
+        from core.tables import facilitators
+
+        user_result = await db_conn.execute(
+            insert(users).values(
+                discord_id="new_fac",
+                discord_username="newfac",
+            ).returning(users)
+        )
+        user = dict(user_result.mappings().first())
+
+        # Commit so become_facilitator can see the user
+        await db_conn.commit()
+
+        result = await become_facilitator("new_fac")
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_returns_true_if_already_facilitator(self, db_conn):
+        """Should return True even if already a facilitator."""
+        from core.tables import facilitators
+
+        user_result = await db_conn.execute(
+            insert(users).values(
+                discord_id="existing_fac",
+                discord_username="existingfac",
+            ).returning(users)
+        )
+        user = dict(user_result.mappings().first())
+
+        await db_conn.execute(
+            insert(facilitators).values(user_id=user["user_id"])
+        )
+        await db_conn.commit()
+
+        result = await become_facilitator("existing_fac")
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_returns_false_if_user_doesnt_exist(self, db_conn):
+        """Should return False if user doesn't exist."""
+        result = await become_facilitator("nonexistent_user_12345")
+
+        assert result is False

@@ -34,6 +34,7 @@ from .scheduling import (
 from .users import (
     get_user_profile, save_user_profile, update_user_profile,
     get_users_with_availability, get_facilitators, toggle_facilitator, is_facilitator,
+    become_facilitator,
 )
 
 # Nickname sync (async functions)
@@ -79,6 +80,7 @@ __all__ = [
     # User management (async)
     'get_user_profile', 'save_user_profile', 'update_user_profile',
     'get_users_with_availability', 'get_facilitators', 'toggle_facilitator', 'is_facilitator',
+    'become_facilitator',
     # Nickname sync (async)
     'get_user_nickname', 'update_user_nickname',
     # Cohorts / Availability
