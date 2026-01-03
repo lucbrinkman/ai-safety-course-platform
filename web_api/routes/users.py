@@ -3,6 +3,8 @@ User profile routes.
 
 Endpoints:
 - PATCH /api/users/me - Update current user's profile
+- GET /api/users/me/facilitator-status - Check if user is a facilitator
+- POST /api/users/me/become-facilitator - Add user to facilitators table
 """
 
 import sys
@@ -15,6 +17,9 @@ from pydantic import BaseModel
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core import update_user_profile
+from core import become_facilitator as core_become_facilitator
+from core.database import get_connection
+from core.queries.users import get_user_by_discord_id, is_facilitator_by_user_id
 from core.nickname_sync import update_nickname_in_discord
 from web_api.auth import get_current_user
 
@@ -60,3 +65,28 @@ async def update_my_profile(
         await update_nickname_in_discord(discord_id, updates.nickname)
 
     return {"status": "updated", "user": updated_user}
+
+
+@router.get("/me/facilitator-status")
+async def get_facilitator_status(
+    user: dict = Depends(get_current_user),
+) -> dict[str, bool]:
+    """Check if current user is a facilitator."""
+    discord_id = user["sub"]
+
+    async with get_connection() as conn:
+        db_user = await get_user_by_discord_id(conn, discord_id)
+        if not db_user:
+            return {"is_facilitator": False}
+        is_fac = await is_facilitator_by_user_id(conn, db_user["user_id"])
+        return {"is_facilitator": is_fac}
+
+
+@router.post("/me/become-facilitator")
+async def become_facilitator(
+    user: dict = Depends(get_current_user),
+) -> dict[str, bool]:
+    """Add current user to facilitators table."""
+    discord_id = user["sub"]
+    success = await core_become_facilitator(discord_id)
+    return {"success": success}
