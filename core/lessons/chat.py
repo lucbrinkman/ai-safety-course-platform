@@ -64,7 +64,7 @@ Do NOT:
 
     if isinstance(current_stage, ChatStage):
         # Active chat stage - use authored context
-        prompt = base + f"\n\nContext for this conversation:\n{current_stage.context}"
+        prompt = base + f"\n\nInstructions:\n{current_stage.instructions}"
 
         if current_stage.show_tutor_previous_content and previous_content:
             prompt += f"\n\nThe user just engaged with this content:\n---\n{previous_content}\n---"
@@ -102,7 +102,7 @@ def get_stage_content(stage: Stage) -> ArticleContent | None:
     if isinstance(stage, ArticleStage):
         try:
             return load_article_with_metadata(
-                stage.source_url,
+                stage.source,
                 stage.from_text,
                 stage.to_text,
             )
@@ -112,7 +112,7 @@ def get_stage_content(stage: Stage) -> ArticleContent | None:
     elif isinstance(stage, VideoStage):
         try:
             # Load video metadata to get video_id
-            transcript_data = load_video_transcript_with_metadata(stage.source_url)
+            transcript_data = load_video_transcript_with_metadata(stage.source)
             video_id = transcript_data.metadata.video_id
 
             if not video_id:

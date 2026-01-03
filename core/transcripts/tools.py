@@ -32,6 +32,24 @@ from pathlib import Path
 TRANSCRIPTS_DIR = Path(__file__).parent.parent.parent / "educational_content" / "video_transcripts"
 
 
+def _parse_timestamp(value: str | float | int) -> float:
+    """Parse a timestamp to seconds.
+
+    Accepts:
+    - str "M:SS.ms" (e.g., "2:52.25")
+    - float/int seconds (for backwards compat during migration)
+
+    Returns:
+        Time in seconds as float
+    """
+    if isinstance(value, (int, float)):
+        return float(value)
+    parts = value.split(":")
+    minutes = int(parts[0])
+    seconds = float(parts[1])
+    return minutes * 60 + seconds
+
+
 def find_transcript_timestamps(video_id: str, search_dir: Path | str | None = None) -> Path:
     """
     Find .timestamps.json file for a video ID.
@@ -87,7 +105,7 @@ def get_text_at_time(
     words_in_range = [
         w["text"]
         for w in words
-        if start <= w["start"] <= end
+        if start <= _parse_timestamp(w["start"]) <= end
     ]
 
     return " ".join(words_in_range)
@@ -112,7 +130,7 @@ def flatten_transcript(words: list[dict]) -> list[dict]:
     result = []
     for seg_idx, entry in enumerate(words):
         text = entry["text"]
-        start = entry["start"]
+        start = _parse_timestamp(entry["start"])
 
         # Split into individual words
         tokens = text.split()

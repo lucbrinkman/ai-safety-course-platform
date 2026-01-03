@@ -4,7 +4,7 @@
 
 export type ArticleStage = {
   type: "article";
-  source_url: string;
+  source: string;
   from: string | null;
   to: string | null;
 };
@@ -18,7 +18,7 @@ export type VideoStage = {
 
 export type ChatStage = {
   type: "chat";
-  context: string;
+  instructions: string;
   showUserPreviousContent: boolean;
   showTutorPreviousContent: boolean;
 };

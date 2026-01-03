@@ -43,7 +43,7 @@ from web_api.auth import get_optional_user
 def get_video_info(stage: VideoStage) -> dict:
     """Get video metadata from transcript file."""
     try:
-        result = load_video_transcript_with_metadata(stage.source_url)
+        result = load_video_transcript_with_metadata(stage.source)
         return {
             "video_id": result.metadata.video_id,
             "title": result.metadata.title,
@@ -57,7 +57,7 @@ def get_stage_title(stage) -> str:
     """Extract display title from a stage."""
     if isinstance(stage, ArticleStage):
         # Parse from source_url like "articles/four-background-claims.md"
-        filename = stage.source_url.split("/")[-1].replace(".md", "")
+        filename = stage.source.split("/")[-1].replace(".md", "")
         # Convert kebab-case to Title Case
         return " ".join(word.capitalize() for word in filename.split("-"))
     elif isinstance(stage, VideoStage):
@@ -146,7 +146,7 @@ async def get_lesson(lesson_id: str):
                     "type": s.type,
                     **(
                         {
-                            "source_url": s.source_url,
+                            "source": s.source_url,
                             "from": s.from_text,
                             "to": s.to_text,
                         }
@@ -156,7 +156,7 @@ async def get_lesson(lesson_id: str):
                     **(serialize_video_stage(s) if s.type == "video" else {}),
                     **(
                         {
-                            "context": s.context,
+                            "instructions": s.instructions,
                             "showUserPreviousContent": s.show_user_previous_content,
                             "showTutorPreviousContent": s.show_tutor_previous_content,
                         }
@@ -287,7 +287,7 @@ async def get_session_state(
                 "type": current_stage.type,
                 **(
                     {
-                        "source_url": current_stage.source_url,
+                        "source": current_stage.source,
                         "from": current_stage.from_text,
                         "to": current_stage.to_text,
                     }
@@ -322,7 +322,7 @@ async def get_session_state(
         "stages": [
             {
                 "type": s.type,
-                **({"source_url": s.source_url} if s.type == "article" else {}),
+                **({"source": s.source_url} if s.type == "article" else {}),
                 **(serialize_video_stage(s) if s.type == "video" else {}),
             }
             for s in lesson.stages

@@ -1,610 +1,610 @@
 [
   {
     "text": "In a very basic sense, if you've got a",
-    "start": 0.049
+    "start": "0:00.05"
   },
   {
     "text": "general intelligence which therefore has preferences over world states",
-    "start": 3.11
+    "start": "0:03.11"
   },
   {
     "text": "and takes actions in the world to change the world,",
-    "start": 7.66
+    "start": "0:07.66"
   },
   {
     "text": "we have to make sure that its preferences are aligned with ours",
-    "start": 10.67
+    "start": "0:10.67"
   },
   {
     "text": "- that it wants what we want.",
-    "start": 14.519
+    "start": "0:14.52"
   },
   {
     "text": "Because otherwise it's going to try and do things that we don't want it to do.",
-    "start": 17.42
+    "start": "0:17.42"
   },
   {
     "text": "That's the basic idea.",
-    "start": 20.82
+    "start": "0:20.82"
   },
   {
     "text": "Sci-fi comes to the fore - we're talking things like Terminator, The Matrix,",
-    "start": 24.74
+    "start": "0:24.74"
   },
   {
     "text": "that machines take over the world.",
-    "start": 28.34
+    "start": "0:28.34"
   },
   {
     "text": "\"I for one welcome our new robot overlords.\"",
-    "start": 29.74
+    "start": "0:29.74"
   },
   {
     "text": "It makes it difficult to think about the problem, right?",
-    "start": 32.56
+    "start": "0:32.56"
   },
   {
     "text": "When things happen in fiction, it's generally what would make a better story",
-    "start": 34.98
+    "start": "0:34.98"
   },
   {
     "text": "rather than what would actually happen. And I think a",
-    "start": 39.21
+    "start": "0:39.21"
   },
   {
     "text": "realistic \"AI takes over the world\" type story",
-    "start": 42.28
+    "start": "0:42.28"
   },
   {
     "text": "might not be any fun to read. So on the one side,",
-    "start": 46.289
+    "start": "0:46.29"
   },
   {
     "text": "this stuff is difficult to think about because of fiction, because we've all been",
-    "start": 49.309
+    "start": "0:49.31"
   },
   {
     "text": "exposed to something similar to these ideas before.",
-    "start": 52.48
+    "start": "0:52.48"
   },
   {
     "text": "The other side that makes this difficult to think about is anthropomorphism,",
-    "start": 55.02
+    "start": "0:55.02"
   },
   {
     "text": "because we are talking about general intelligence,",
-    "start": 58.94
+    "start": "0:58.94"
   },
   {
     "text": "so we're going to compare it to the examples of general intelligence that we",
-    "start": 62.67
+    "start": "1:02.67"
   },
   {
     "text": "have,",
-    "start": 65.619
+    "start": "1:05.62"
   },
   {
     "text": "which is human minds. And human minds and artificial general intelligences",
-    "start": 66.07
+    "start": "1:06.07"
   },
   {
     "text": "need not be anything alike,",
-    "start": 71.54
+    "start": "1:11.54"
   },
   {
     "text": "in the same way that a plane is not similar to a bird.",
-    "start": 73.979
+    "start": "1:13.98"
   },
   {
     "text": "A supersonic fighter jet is a threat to you in a way that",
-    "start": 77.409
+    "start": "1:17.41"
   },
   {
     "text": "no bird is. It's not a useful comparison to make. In fact,",
-    "start": 80.56
+    "start": "1:20.56"
   },
   {
     "text": "when you say, \"Oh, it's a thing, it has wings and it flies,\" people",
-    "start": 84.119
+    "start": "1:24.12"
   },
   {
     "text": "who don't know anything about planes immediately go to birds.",
-    "start": 87.59
+    "start": "1:27.59"
   },
   {
     "text": "\"Presumably a machine could be much more selfish than we can ever imagine.\"",
-    "start": 89.97
+    "start": "1:29.97"
   },
   {
     "text": "Absolutely. The space of minds in general is vast.",
-    "start": 93.29
+    "start": "1:33.29"
   },
   {
     "text": "I like this because we've already talked about spaces, so I can do this. If you",
-    "start": 98.09
+    "start": "1:38.09"
   },
   {
     "text": "take the space of all possible minds,",
-    "start": 101.18
+    "start": "1:41.18"
   },
   {
     "text": "it's huge. And then somewhere within that, you have the space of all minds",
-    "start": 103.03
+    "start": "1:43.03"
   },
   {
     "text": "that biological evolution can produce,",
-    "start": 106.32
+    "start": "1:46.32"
   },
   {
     "text": "and that's also huge. Somewhere within that, you have the space of",
-    "start": 108.369
+    "start": "1:48.37"
   },
   {
     "text": "actual minds that exist, which is much smaller but still huge.",
-    "start": 111.72
+    "start": "1:51.72"
   },
   {
     "text": "Within that, you've got human minds, right? And they're a tiny - they're a",
-    "start": 115.86
+    "start": "1:55.86"
   },
   {
     "text": "minuscule dot on a minuscule dot on a minuscule dot of the",
-    "start": 120.409
+    "start": "2:00.41"
   },
   {
     "text": "actual possibilities for intelligence that exist. And",
-    "start": 123.46
+    "start": "2:03.46"
   },
   {
     "text": "a general intelligence that we create is from a completely different part of the",
-    "start": 127.29
+    "start": "2:07.29"
   },
   {
     "text": "space.",
-    "start": 132.8
+    "start": "2:12.80"
   },
   {
     "text": "And it's extremely tempting to anthropomorphize,",
-    "start": 133.23
+    "start": "2:13.23"
   },
   {
     "text": "more so even than in other contexts, because",
-    "start": 136.64
+    "start": "2:16.64"
   },
   {
     "text": "it's a thing that's demonstrably intelligent, that makes plans, that takes",
-    "start": 140.01
+    "start": "2:20.01"
   },
   {
     "text": "actions in the real world.",
-    "start": 143.87
+    "start": "2:23.87"
   },
   {
     "text": "But it need not think",
-    "start": 145.0
+    "start": "2:25.00"
   },
   {
     "text": "anything like us, and it's a mistake to think of it",
-    "start": 148.02
+    "start": "2:28.02"
   },
   {
     "text": "as basically a person, because it isn't one. So there's actually a really good example",
-    "start": 151.25
+    "start": "2:31.25"
   },
   {
     "text": "that we can use. It's sort of a thought experiment.",
-    "start": 155.099
+    "start": "2:35.10"
   },
   {
     "text": "This is not a machine that could practically speaking be built",
-    "start": 158.44
+    "start": "2:38.44"
   },
   {
     "text": "- this is an example of an artificial general intelligence",
-    "start": 161.91
+    "start": "2:41.91"
   },
   {
     "text": "which is specified in overview,",
-    "start": 166.019
+    "start": "2:46.02"
   },
   {
     "text": "and it gives you something to think about when you're thinking about",
-    "start": 170.8
+    "start": "2:50.80"
   },
   {
     "text": "artificial general intelligences that makes it distinct from",
-    "start": 174.25
+    "start": "2:54.25"
   },
   {
     "text": "a sort of anthropomorphized human-type intelligence.",
-    "start": 178.0
+    "start": "2:58.00"
   },
   {
     "text": "So the story is, there's",
-    "start": 181.629
+    "start": "3:01.63"
   },
   {
     "text": "a stamp collector who is also an AI",
-    "start": 184.989
+    "start": "3:04.99"
   },
   {
     "text": "programmer, and he decides he would like to collect a lot more stamps,",
-    "start": 188.12
+    "start": "3:08.12"
   },
   {
     "text": "so he's going to write an AI to do this for him. So he builds a machine",
-    "start": 192.78
+    "start": "3:12.78"
   },
   {
     "text": "- he has some startling insight into general intelligence and he builds this",
-    "start": 196.709
+    "start": "3:16.71"
   },
   {
     "text": "machine",
-    "start": 200.489
+    "start": "3:20.49"
   },
   {
     "text": "which is connected to the internet, right?",
-    "start": 201.099
+    "start": "3:21.10"
   },
   {
     "text": "So the rules for this system are",
-    "start": 204.26
+    "start": "3:24.26"
   },
   {
     "text": "pretty straightforward. First thing: it's connected to the internet, and it will",
-    "start": 207.69
+    "start": "3:27.69"
   },
   {
     "text": "send and receive data",
-    "start": 211.349
+    "start": "3:31.35"
   },
   {
     "text": "for one year. So he's given himself a one-year time",
-    "start": 212.89
+    "start": "3:32.89"
   },
   {
     "text": "window within which to collect stamps. The second thing is",
-    "start": 216.94
+    "start": "3:36.94"
   },
   {
     "text": "it has an internal model of reality, of the universe.",
-    "start": 220.19
+    "start": "3:40.19"
   },
   {
     "text": "This is the thing that's a bit magic - we don't really know how to build an",
-    "start": 223.239
+    "start": "3:43.24"
   },
   {
     "text": "accurate",
-    "start": 226.87
+    "start": "3:46.87"
   },
   {
     "text": "model of reality. The point is, this allows it to",
-    "start": 227.59
+    "start": "3:47.59"
   },
   {
     "text": "make accurate predictions about what will happen if it does different things.",
-    "start": 230.86
+    "start": "3:50.86"
   },
   {
     "text": "The third thing is, for every possible sequence of packets it could send,",
-    "start": 235.159
+    "start": "3:55.16"
   },
   {
     "text": "it uses its model to predict",
-    "start": 239.189
+    "start": "3:59.19"
   },
   {
     "text": "how many stamps it ends up with at the end of that. And then",
-    "start": 242.7
+    "start": "4:02.70"
   },
   {
     "text": "the fourth thing is it outputs as its",
-    "start": 246.01
+    "start": "4:06.01"
   },
   {
     "text": "actual data to the internet",
-    "start": 249.239
+    "start": "4:09.24"
   },
   {
     "text": "whichever output it has predicted will produce the most stamps.",
-    "start": 252.65
+    "start": "4:12.65"
   },
   {
     "text": "You can see here",
-    "start": 256.07
+    "start": "4:16.07"
   },
   {
     "text": "that this has all the properties of a general intelligence.",
-    "start": 256.959
+    "start": "4:16.96"
   },
   {
     "text": "It has an internal model of reality. It has",
-    "start": 260.34
+    "start": "4:20.34"
   },
   {
     "text": "a utility function or an evaluation function, which is the number of stamps.",
-    "start": 263.419
+    "start": "4:23.42"
   },
   {
     "text": "And the optimization is",
-    "start": 267.74
+    "start": "4:27.74"
   },
   {
     "text": "extremely simple. And like so much in computer science,",
-    "start": 270.75
+    "start": "4:30.75"
   },
   {
     "text": "the simple things to specify are the hard things to compute.",
-    "start": 273.87
+    "start": "4:33.87"
   },
   {
     "text": "It looks at every possible output data - in other words, every",
-    "start": 277.009
+    "start": "4:37.01"
   },
   {
     "text": "point in that space - and it picks out",
-    "start": 280.6
+    "start": "4:40.60"
   },
   {
     "text": "the highest one. So this is a kind of magic intelligence",
-    "start": 284.32
+    "start": "4:44.32"
   },
   {
     "text": "that takes the entire space at once, finds the highest point, and says,",
-    "start": 287.56
+    "start": "4:47.56"
   },
   {
     "text": "\"That one.\" Which means it's an extremely powerful intelligence,",
-    "start": 291.81
+    "start": "4:51.81"
   },
   {
     "text": "right? It is - you could say it's extremely intelligent.",
-    "start": 296.61
+    "start": "4:56.61"
   },
   {
     "text": "The question is, how does this machine behave? Well, we can look at certain",
-    "start": 299.729
+    "start": "4:59.73"
   },
   {
     "text": "possible sequences of outputs",
-    "start": 303.09
+    "start": "5:03.09"
   },
   {
     "text": "and see how they fare in its evaluation criteria.",
-    "start": 304.789
+    "start": "5:04.79"
   },
   {
     "text": "First off, the vast majority of output sequences are complete junk,",
-    "start": 308.19
+    "start": "5:08.19"
   },
   {
     "text": "right? It's spewing random data onto the network. Nothing happens",
-    "start": 312.03
+    "start": "5:12.03"
   },
   {
     "text": "of any consequence.",
-    "start": 315.229
+    "start": "5:15.23"
   },
   {
     "text": "No stamps get collected. Those are all rated zero.",
-    "start": 317.38
+    "start": "5:17.38"
   },
   {
     "text": "But suppose one of the possible sequences",
-    "start": 321.699
+    "start": "5:21.70"
   },
   {
     "text": "sends a request to a server - let's say",
-    "start": 325.5
+    "start": "5:25.50"
   },
   {
     "text": "eBay - that results in a bid on some stamps,",
-    "start": 329.0
+    "start": "5:29.00"
   },
   {
     "text": "right? When that happens, there's a thing of 20 stamps,",
-    "start": 332.05
+    "start": "5:32.05"
   },
   {
     "text": "so that output is rated 20. This is the kind of thing that",
-    "start": 335.409
+    "start": "5:35.41"
   },
   {
     "text": "the stamp collecting machine's creator was expecting to happen.",
-    "start": 338.699
+    "start": "5:38.70"
   },
   {
     "text": "So then that's good - 20 stamps.",
-    "start": 342.659
+    "start": "5:42.66"
   },
   {
     "text": "Suppose it could do that lots of times. It could send out bids, for example, to",
-    "start": 345.99
+    "start": "5:45.99"
   },
   {
     "text": "30 different stamp collectors on eBay and buy 30 sets of different stamps,",
-    "start": 350.58
+    "start": "5:50.58"
   },
   {
     "text": "and that's even better, right? That would be rated even higher. But the thing is that",
-    "start": 354.63
+    "start": "5:54.63"
   },
   {
     "text": "the particularly highly rated options in this search space",
-    "start": 358.789
+    "start": "5:58.79"
   },
   {
     "text": "are probably things that the",
-    "start": 362.57
+    "start": "6:02.57"
   },
   {
     "text": "stamp collecting device's creator did not think of",
-    "start": 365.69
+    "start": "6:05.69"
   },
   {
     "text": "and did not anticipate. So for example, when he made it, he will have presumably given",
-    "start": 368.729
+    "start": "6:08.73"
   },
   {
     "text": "it his credit card details or something so it could engage in these bids.",
-    "start": 374.08
+    "start": "6:14.08"
   },
   {
     "text": "But ultimately it's searching every possible sequence of outputs. It needn't use",
-    "start": 378.849
+    "start": "6:18.85"
   },
   {
     "text": "his credit card.",
-    "start": 382.22
+    "start": "6:22.22"
   },
   {
     "text": "It needn't use money at all. There's a huge variety of things that it could do here.",
-    "start": 383.03
+    "start": "6:23.03"
   },
   {
     "text": "So it might send out an enormous number of emails to all the stamp collectors in the",
-    "start": 388.56
+    "start": "6:28.56"
   },
   {
     "text": "world",
-    "start": 392.72
+    "start": "6:32.72"
   },
   {
     "text": "and convince them through persuasive argument that",
-    "start": 393.3
+    "start": "6:33.30"
   },
   {
     "text": "he is opening a museum and wants to exhibit their stamps.",
-    "start": 397.32
+    "start": "6:37.32"
   },
   {
     "text": "It may build a fake website for that - whatever is necessary.",
-    "start": 402.56
+    "start": "6:42.56"
   },
   {
     "text": "It can predict the world, right? It has an internal model of reality. That internal",
-    "start": 406.53
+    "start": "6:46.53"
   },
   {
     "text": "model of reality",
-    "start": 410.21
+    "start": "6:50.21"
   },
   {
     "text": "includes the people, right? In the same way that it's modeling",
-    "start": 411.41
+    "start": "6:51.41"
   },
   {
     "text": "people to understand that if it bids on this",
-    "start": 414.51
+    "start": "6:54.51"
   },
   {
     "text": "offer, then a human being will mail the stamps to them, it understands this",
-    "start": 418.34
+    "start": "6:58.34"
   },
   {
     "text": "email might get more people to send stamps, for example, or something.",
-    "start": 421.92
+    "start": "7:01.92"
   },
   {
     "text": "But then, what exactly is a stamp? How is this defined?",
-    "start": 426.11
+    "start": "7:06.11"
   },
   {
     "text": "What counts as a stamp?",
-    "start": 429.77
+    "start": "7:09.77"
   },
   {
     "text": "If it's already written the sequence of outputs that collects",
-    "start": 431.5
+    "start": "7:11.50"
   },
   {
     "text": "all of the stamps in the world, you think you're done, right? You built this machine,",
-    "start": 434.29
+    "start": "7:14.29"
   },
   {
     "text": "suddenly it's collected all the stamps in the world.",
-    "start": 437.5
+    "start": "7:17.50"
   },
   {
     "text": "No. There could be more stamps. Within a year, we've got time to print more stamps.",
-    "start": 439.16
+    "start": "7:19.16"
   },
   {
     "text": "So maybe it hijacks the world's stamp printing factories and puts them into overdrive,",
-    "start": 442.88
+    "start": "7:22.88"
   },
   {
     "text": "producing stamps",
-    "start": 447.139
+    "start": "7:27.14"
   },
   {
     "text": "as many as you possibly can in that time. Or perhaps",
-    "start": 448.22
+    "start": "7:28.22"
   },
   {
     "text": "it writes a virus and it hijacks all the computers in the world to get all of",
-    "start": 451.22
+    "start": "7:31.22"
   },
   {
     "text": "the printers in the world to do nothing but print stamps.",
-    "start": 455.669
+    "start": "7:35.67"
   },
   {
     "text": "That's even better, right? The highest-rated",
-    "start": 457.919
+    "start": "7:37.92"
   },
   {
     "text": "outcomes for this machine are not good for people.",
-    "start": 461.64
+    "start": "7:41.64"
   },
   {
     "text": "There comes a point when the stamp collecting device is thinking,",
-    "start": 465.8
+    "start": "7:45.80"
   },
   {
     "text": "\"Okay, what are stamps made of?",
-    "start": 469.57
+    "start": "7:49.57"
   },
   {
     "text": "They're made of paper. Paper is made of carbon, hydrogen, oxygen.",
-    "start": 472.82
+    "start": "7:52.82"
   },
   {
     "text": "I'm going to need all of that I can get to make stamps.\"",
-    "start": 476.77
+    "start": "7:56.77"
   },
   {
     "text": "And it's going to notice that people are made of carbon, hydrogen, and oxygen,",
-    "start": 479.88
+    "start": "7:59.88"
   },
   {
     "text": "right? There comes a point where the stamp collecting device becomes",
-    "start": 483.289
+    "start": "8:03.29"
   },
   {
     "text": "extremely dangerous.",
-    "start": 486.18
+    "start": "8:06.18"
   },
   {
     "text": "And that point is as soon as you switch it on.",
-    "start": 487.55
+    "start": "8:07.55"
   },
   {
     "text": "So this is just a thought experiment example where we take a sort of maximally powerful intelligence",
-    "start": 495.34
+    "start": "8:15.34"
   },
   {
     "text": "and see how it behaves, so that we can think about",
-    "start": 499.88
+    "start": "8:19.88"
   },
   {
     "text": "how powerful intelligences behave, and most importantly,",
-    "start": 503.87
+    "start": "8:23.87"
   },
   {
     "text": "how they are not like people.",
-    "start": 507.36
+    "start": "8:27.36"
   }
 ]
