@@ -162,6 +162,11 @@ async def send_message(
 
     system = _build_system_prompt(current_stage, current_content, previous_content)
 
+    # Debug mode: show system prompt in chat
+    if os.environ.get("DEBUG") == "1":
+        debug_text = f"**[DEBUG - System Prompt]**\n\n```\n{system}\n```\n\n**[DEBUG - Messages]**\n\n```\n{messages}\n```\n\n---\n\n"
+        yield {"type": "text", "content": debug_text}
+
     # Filter out system messages (stage transition markers) - Claude API doesn't accept them
     api_messages = [m for m in messages if m["role"] != "system"]
 
