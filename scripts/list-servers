@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# List running dev servers with workspace info.
+# Helps identify which workspace started which server.
+#
+# Reads server info from /tmp/dev-servers/*.json (written by main.py)
+#
+
+SERVER_INFO_DIR="/tmp/dev-servers"
+
+# Print header
+printf "%-6s %-8s %s\n" "PORT" "PID" "WORKSPACE"
+printf "%-6s %-8s %s\n" "----" "---" "---------"
+
+# Check if any server info files exist
+if [[ ! -d "$SERVER_INFO_DIR" ]] || [[ -z "$(ls -A "$SERVER_INFO_DIR" 2>/dev/null)" ]]; then
+    exit 0
+fi
+
+# Read each server info file
+for info_file in "$SERVER_INFO_DIR"/*.json; do
+    [[ -f "$info_file" ]] || continue
+
+    # Parse JSON (using basic tools available on most systems)
+    pid=$(grep -o '"pid": *[0-9]*' "$info_file" | grep -o '[0-9]*')
+    workspace=$(grep -o '"workspace": *"[^"]*"' "$info_file" | sed 's/.*: *"\([^"]*\)"/\1/')
+    api_port=$(grep -o '"api_port": *[0-9]*' "$info_file" | grep -o '[0-9]*')
+    vite_port=$(grep -o '"vite_port": *[0-9]*' "$info_file" | grep -o '[0-9]*')
+
+    # Check if process is still running
+    if ! kill -0 "$pid" 2>/dev/null; then
+        # Process dead, clean up stale file
+        rm -f "$info_file"
+        continue
+    fi
+
+    # Print API server
+    if [[ -n "$api_port" ]]; then
+        printf "%-6s %-8s %s\n" "$api_port" "$pid" "$workspace"
+    fi
+
+    # Print Vite server if running
+    if [[ -n "$vite_port" ]]; then
+        # Find process listening on vite_port (Vite may use a different port if default is busy)
+        # Check configured port and up to 10 above it
+        for offset in $(seq 0 10); do
+            port=$((vite_port + offset))
+            vite_pid=$(lsof -ti:"$port" -sTCP:LISTEN 2>/dev/null)
+            if [[ -n "$vite_pid" ]]; then
+                # Verify this is a descendant of our main process
+                if pstree -p "$pid" 2>/dev/null | grep -q "$vite_pid"; then
+                    printf "%-6s %-8s %s\n" "$port" "$vite_pid" "$workspace (vite)"
+                    break
+                fi
+            fi
+        done
+    fi
+done | sort -t$'\t' -k1 -n

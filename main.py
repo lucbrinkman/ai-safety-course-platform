@@ -111,6 +111,7 @@ async def start_vite_dev():
             "--",
             "--port",
             str(port),
+            "--strictPort",  # Fail if port is busy instead of auto-escalating
             cwd=project_root / "web_frontend",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
@@ -295,8 +296,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--port",
         type=int,
-        default=8000,
-        help="Port to run the server on (default: 8000)",
+        default=int(os.getenv("API_PORT", "8000")),
+        help="Port for API server (default: from API_PORT env or 8000)",
     )
     parser.add_argument(
         "--dev",
@@ -306,10 +307,41 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vite-port",
         type=int,
-        default=5173,
-        help="Port for Vite dev server (default: 5173, only used with --dev)",
+        default=int(os.getenv("VITE_PORT", "5173")),
+        help="Port for Vite dev server (default: from VITE_PORT env or 5173)",
     )
     args = parser.parse_args()
+
+    # Log when using default ports (helps Claude understand port configuration)
+    api_port_from_env = os.getenv("API_PORT")
+    vite_port_from_env = os.getenv("VITE_PORT")
+    if not api_port_from_env or not vite_port_from_env:
+        print("Note: Ports not fully configured in .env.local")
+        if not api_port_from_env:
+            print(f"  API_PORT not set, using default: {args.port}")
+        if not vite_port_from_env:
+            print(f"  VITE_PORT not set, using default: {args.vite_port}")
+
+    # Set WORKSPACE from directory name (for server identification across workspaces)
+    workspace_name = Path.cwd().name
+    os.environ["WORKSPACE"] = workspace_name
+
+    # Write server info to temp file for list-servers script
+    # (os.environ changes don't appear in /proc/<pid>/environ)
+    server_info_dir = Path("/tmp/dev-servers")
+    server_info_dir.mkdir(exist_ok=True)
+    server_info_file = server_info_dir / f"{os.getpid()}.json"
+    import json
+    server_info_file.write_text(json.dumps({
+        "pid": os.getpid(),
+        "workspace": workspace_name,
+        "api_port": args.port,
+        "vite_port": args.vite_port if args.dev else None,
+    }))
+
+    # Register cleanup on exit
+    import atexit
+    atexit.register(lambda: server_info_file.unlink(missing_ok=True))
 
     # Set env vars so they persist across uvicorn reloads
     if args.no_bot:

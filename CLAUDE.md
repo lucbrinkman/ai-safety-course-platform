@@ -9,8 +9,8 @@ Run the server: `python main.py --dev`. This is a unified backend (FastAPI + Dis
 Options:
 --dev (runs Vite dev server. Without --dev, FastAPI serves the compiled frontend.)
 --no-bot (without Discord bot)
---port (defaults to 8000)
---vite-port (defaults to 5173)
+--port (defaults to API_PORT env var, or 8000)
+--vite-port (defaults to VITE_PORT env var, or 5173)
 
 **Tests:**
 
@@ -24,6 +24,30 @@ pytest discord_bot/tests/         # Scheduler algorithm tests
 cd discord_bot && python main.py  # Discord bot only
 cd web_api && python main.py      # FastAPI only
 ```
+
+## Dev Server Management
+
+Ports are configured via `.env.local` (gitignored):
+```bash
+API_PORT=8001
+VITE_PORT=5174
+```
+
+If not set, defaults to 8000/5173. The server prints a note when using defaults.
+
+**Before killing any server, always list first:**
+```bash
+./scripts/list-servers
+```
+This shows which workspace started each server. Only kill servers from YOUR workspace (matching your current directory name).
+
+**Killing a server by port:**
+```bash
+lsof -ti:<PORT> | xargs kill
+```
+Example: `lsof -ti:8000 | xargs kill` kills only the server on port 8000.
+
+**Never use:** `pkill -f "python main.py"` - this kills ALL dev servers across all workspaces.
 
 ## Architecture
 
