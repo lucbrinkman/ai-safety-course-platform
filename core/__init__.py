@@ -21,16 +21,12 @@ from .google_docs import extract_doc_id, fetch_google_doc, parse_doc_tabs, make_
 from .cohort_names import CohortNameGenerator, COHORT_NAMES
 
 # Scheduling algorithm
+import cohort_scheduler
 from .scheduling import (
-    Person, Group, CourseSchedulingResult, MultiCourseSchedulingResult, DAY_MAP,
-    CohortSchedulingResult,  # New: DB-backed cohort scheduling
-    SchedulingError, NoUsersError, NoFacilitatorsError,
-    parse_interval_string, calculate_total_available_time,
-    is_group_valid, find_cohort_time_options, format_time_range,
-    group_people_by_course, remove_blocked_intervals,
-    run_greedy_iteration, run_scheduling, balance_cohorts,
-    schedule_people, schedule, convert_user_data_to_people,
-    schedule_cohort,  # New: DB-backed cohort scheduling
+    Person, DAY_MAP,
+    CohortSchedulingResult,
+    calculate_total_available_time,
+    schedule_cohort,
 )
 
 
@@ -69,16 +65,13 @@ __all__ = [
     'extract_doc_id', 'fetch_google_doc', 'parse_doc_tabs', 'make_tab_url',
     # Cohort names
     'CohortNameGenerator', 'COHORT_NAMES',
-    # Scheduling
-    'Person', 'Group', 'CourseSchedulingResult', 'MultiCourseSchedulingResult', 'DAY_MAP',
-    'CohortSchedulingResult',  # New: DB-backed cohort scheduling
-    'SchedulingError', 'NoUsersError', 'NoFacilitatorsError',
-    'parse_interval_string', 'calculate_total_available_time',
-    'is_group_valid', 'find_cohort_time_options', 'format_time_range',
-    'group_people_by_course', 'remove_blocked_intervals',
-    'run_greedy_iteration', 'run_scheduling', 'balance_cohorts',
-    'schedule_people', 'schedule', 'convert_user_data_to_people',
-    'schedule_cohort',  # New: DB-backed cohort scheduling
+    # Scheduling (cohort_scheduler package for Group, parse_interval_string, etc.)
+    'cohort_scheduler',
+    # Scheduling (platform-specific)
+    'Person', 'DAY_MAP',
+    'CohortSchedulingResult',
+    'calculate_total_available_time',
+    'schedule_cohort',
     # User management (async)
     'get_user_profile', 'save_user_profile', 'update_user_profile',
     'get_users_with_availability', 'get_facilitators', 'toggle_facilitator', 'is_facilitator',

@@ -5,6 +5,9 @@
 discord.py>=2.3.0
 pytz>=2023.3
 
+# Cohort scheduling algorithm
+cohort-scheduler @ git+https://github.com/cpdally/cohort-scheduler.git
+
 # FastAPI web server
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0

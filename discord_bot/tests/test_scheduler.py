@@ -1,6 +1,6 @@
 """
 Unit tests for the scheduling algorithm.
-Tests the core scheduling functions in core/scheduling.py.
+Tests the cohort_scheduler package integration.
 """
 
 import pytest
@@ -10,18 +10,42 @@ from pathlib import Path
 # Add project root to path so we can import from core
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core import (
-    parse_interval_string,
-    is_group_valid,
-    calculate_total_available_time,
-    run_greedy_iteration,
-    find_cohort_time_options,
-    format_time_range,
-    balance_cohorts,
-    Person,
-    Group,
-    DAY_MAP
-)
+import cohort_scheduler
+from core import Person, DAY_MAP, calculate_total_available_time
+
+# Aliases for cohort_scheduler functions
+parse_interval_string = cohort_scheduler.parse_interval_string
+format_time_range = cohort_scheduler.format_time_range
+find_meeting_times = cohort_scheduler.find_meeting_times
+balance_groups = cohort_scheduler.balance_groups
+Group = cohort_scheduler.Group
+
+
+def is_group_valid(group, meeting_length, time_increment=30, use_if_needed=True, facilitator_ids=None):
+    """Test helper: check if group is valid (unwraps group.people for cohort_scheduler)."""
+    return cohort_scheduler.is_group_valid(
+        group.people, meeting_length, time_increment, use_if_needed, facilitator_ids
+    )
+
+
+def run_greedy_iteration(people, meeting_length, min_people, max_people, time_increment=30,
+                         randomness=0.5, facilitator_ids=None, facilitator_max_cohorts=None,
+                         use_if_needed=True):
+    """Test helper: single iteration of scheduling algorithm."""
+    result = cohort_scheduler.schedule(
+        people=people,
+        meeting_length=meeting_length,
+        min_people=min_people,
+        max_people=max_people,
+        num_iterations=1,
+        time_increment=time_increment,
+        randomness=randomness,
+        facilitator_ids=facilitator_ids,
+        facilitator_max_cohorts=facilitator_max_cohorts,
+        use_if_needed=use_if_needed,
+        balance=False,
+    )
+    return result.groups
 
 
 class TestParseIntervalString:
@@ -228,7 +252,7 @@ class TestIsGroupValid:
 
 
 class TestFindCohortTimeOptions:
-    """Tests for find_cohort_time_options function."""
+    """Tests for find_meeting_times function."""
 
     def test_single_person(self):
         """Find options for single person."""
@@ -237,7 +261,7 @@ class TestFindCohortTimeOptions:
             name="Test",
             intervals=[(540, 720)]  # Mon 9am-12pm (3 hours)
         )
-        options = find_cohort_time_options([person], meeting_length=60, time_increment=30)
+        options = find_meeting_times([person], meeting_length=60, time_increment=30)
         # Should have multiple 1-hour slots within the 3-hour window
         assert len(options) > 0
         # First option should start at 9am
@@ -247,7 +271,7 @@ class TestFindCohortTimeOptions:
         """Find options for two overlapping people."""
         person1 = Person(id="1", name="P1", intervals=[(540, 720)])  # 9am-12pm
         person2 = Person(id="2", name="P2", intervals=[(600, 780)])  # 10am-1pm
-        options = find_cohort_time_options([person1, person2], meeting_length=60, time_increment=30)
+        options = find_meeting_times([person1, person2], meeting_length=60, time_increment=30)
         # Overlap is 10am-12pm, so should find options there
         assert len(options) > 0
         # First option should start at 10am (600 minutes)
@@ -257,7 +281,7 @@ class TestFindCohortTimeOptions:
         """No options when people don't overlap."""
         person1 = Person(id="1", name="P1", intervals=[(540, 600)])  # 9-10am
         person2 = Person(id="2", name="P2", intervals=[(660, 720)])  # 11am-12pm
-        options = find_cohort_time_options([person1, person2], meeting_length=60, time_increment=30)
+        options = find_meeting_times([person1, person2], meeting_length=60, time_increment=30)
         assert len(options) == 0
 
 
@@ -504,7 +528,7 @@ class TestEdgeCases:
 
 
 class TestBalanceCohorts:
-    """Tests for balance_cohorts function."""
+    """Tests for balance_groups function."""
 
     def test_already_balanced(self):
         """Groups that are already balanced should not change."""
@@ -516,7 +540,7 @@ class TestBalanceCohorts:
             Group(id="2", name="G2", people=people2)
         ]
 
-        moves = balance_cohorts(groups, meeting_length=60)
+        moves = balance_groups(groups, meeting_length=60)
         assert moves == 0
 
     def test_balance_uneven_groups(self):
@@ -529,7 +553,7 @@ class TestBalanceCohorts:
             Group(id="2", name="G2", people=people2)
         ]
 
-        moves = balance_cohorts(groups, meeting_length=60)
+        moves = balance_groups(groups, meeting_length=60)
         assert moves > 0
         # Groups should be more balanced now
         sizes = [len(g.people) for g in groups]
@@ -540,7 +564,7 @@ class TestBalanceCohorts:
         people = [Person(id=str(i), name=f"P{i}", intervals=[(540, 720)]) for i in range(5)]
         groups = [Group(id="1", name="G1", people=people)]
 
-        moves = balance_cohorts(groups, meeting_length=60)
+        moves = balance_groups(groups, meeting_length=60)
         assert moves == 0
         assert len(groups[0].people) == 5
 
@@ -556,7 +580,7 @@ class TestBalanceCohorts:
             Group(id="2", name="G2", people=people2)
         ]
 
-        moves = balance_cohorts(groups, meeting_length=60)
+        moves = balance_groups(groups, meeting_length=60)
         # Cannot move because times don't overlap
         assert moves == 0
 
@@ -572,7 +596,7 @@ class TestBalanceCohorts:
             Group(id="3", name="G3", people=people3)
         ]
 
-        moves = balance_cohorts(groups, meeting_length=60)
+        moves = balance_groups(groups, meeting_length=60)
         assert moves > 0
         sizes = [len(g.people) for g in groups]
         assert max(sizes) - min(sizes) <= 1
@@ -642,7 +666,7 @@ class TestFacilitatorMode:
 
 
 class TestFindCohortTimeOptionsExtended:
-    """Extended tests for find_cohort_time_options."""
+    """Extended tests for find_meeting_times."""
 
     def test_with_if_needed_times(self):
         """Find options using if-needed availability."""
@@ -659,11 +683,11 @@ class TestFindCohortTimeOptionsExtended:
         )
 
         # With if-needed
-        options = find_cohort_time_options([person1, person2], meeting_length=60, use_if_needed=True)
+        options = find_meeting_times([person1, person2], meeting_length=60, use_if_needed=True)
         assert len(options) > 0
 
         # Without if-needed
-        options_no_if = find_cohort_time_options([person1, person2], meeting_length=60, use_if_needed=False)
+        options_no_if = find_meeting_times([person1, person2], meeting_length=60, use_if_needed=False)
         assert len(options_no_if) == 0
 
     def test_multiple_day_options(self):
@@ -679,7 +703,7 @@ class TestFindCohortTimeOptionsExtended:
             intervals=[(540, 720), (1980, 2160)]  # Same
         )
 
-        options = find_cohort_time_options([person1, person2], meeting_length=60)
+        options = find_meeting_times([person1, person2], meeting_length=60)
         # Should find options on both days
         assert len(options) >= 4  # At least 2 options per day
 
@@ -691,7 +715,7 @@ class TestFindCohortTimeOptionsExtended:
             intervals=[(540, 600)]  # Exactly 1 hour
         )
 
-        options = find_cohort_time_options([person], meeting_length=60, time_increment=30)
+        options = find_meeting_times([person], meeting_length=60, time_increment=30)
         assert len(options) == 1
         assert options[0] == (540, 600)
 
@@ -1040,7 +1064,7 @@ class TestIfNeededOnlyUsers:
             if_needed_intervals=[(600, 720)]  # Overlaps with person1
         )
 
-        options = find_cohort_time_options(
+        options = find_meeting_times(
             [person1, person2],
             meeting_length=60,
             use_if_needed=True
@@ -1143,7 +1167,7 @@ class TestIfNeededOnlyUsers:
             Group(id="2", name="G2", people=people2)
         ]
 
-        moves = balance_cohorts(groups, meeting_length=60, use_if_needed=True)
+        moves = balance_groups(groups, meeting_length=60, use_if_needed=True)
 
         # Should balance the groups
         assert moves > 0

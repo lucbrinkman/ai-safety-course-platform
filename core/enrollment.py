@@ -7,9 +7,11 @@ User profile functions are in core/users.py.
 
 import json
 
+import cohort_scheduler
+
 from .database import get_connection
 from .queries import users as user_queries
-from .scheduling import Person, parse_interval_string
+from .scheduling import Person
 from .constants import DAY_CODES
 
 
@@ -58,7 +60,7 @@ async def get_people_for_scheduling() -> tuple[list[Person], dict[str, dict]]:
                 interval_strs.append(interval_str)
 
         # Parse interval strings to (start_minutes, end_minutes) tuples
-        intervals = parse_interval_string(", ".join(interval_strs)) if interval_strs else []
+        intervals = cohort_scheduler.parse_interval_string(", ".join(interval_strs)) if interval_strs else []
 
         # Convert if_needed dict to interval strings, then parse to tuples
         if_needed_strs = []
@@ -70,7 +72,7 @@ async def get_people_for_scheduling() -> tuple[list[Person], dict[str, dict]]:
                 interval_str = f"{day_code}{slot} {day_code}{end_hour:02d}:00"
                 if_needed_strs.append(interval_str)
 
-        if_needed_intervals = parse_interval_string(", ".join(if_needed_strs)) if if_needed_strs else []
+        if_needed_intervals = cohort_scheduler.parse_interval_string(", ".join(if_needed_strs)) if if_needed_strs else []
 
         # Get name
         name = user.get("nickname") or user.get("discord_username") or f"User_{discord_id[:8]}"
