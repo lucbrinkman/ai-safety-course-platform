@@ -69,12 +69,13 @@ export function Tooltip({
         ...getReferenceProps({
           onClick: (e: React.MouseEvent) => {
             // Call original onClick if it exists
-            children.props.onClick?.(e);
+            const childProps = children.props as { onClick?: (e: React.MouseEvent) => void };
+            childProps.onClick?.(e);
             // Then handle tooltip click behavior
             handleClick?.();
           },
         }),
-      })}
+      } as React.HTMLAttributes<HTMLElement> & { ref: typeof refs.setReference })}
       {isOpen && (
         <FloatingPortal>
           <div

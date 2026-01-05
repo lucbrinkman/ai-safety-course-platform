@@ -10,8 +10,8 @@ type VideoPlayerProps = {
   hideControls?: boolean;
 };
 
-// Extend JSX to include the youtube-video custom element
-declare global {
+// Extend JSX to include the youtube-video custom element (React 19 style)
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       "youtube-video": React.DetailedHTMLProps<

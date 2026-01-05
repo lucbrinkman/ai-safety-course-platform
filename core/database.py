@@ -53,6 +53,9 @@ def get_engine() -> AsyncEngine:
             max_overflow=10,
             pool_timeout=30,
             pool_recycle=1800,  # Recycle connections every 30 minutes
+            # Disable prepared statement cache for Supabase pooler compatibility
+            # (pgbouncer in transaction mode doesn't support prepared statements)
+            connect_args={"statement_cache_size": 0},
         )
     return _engine
 

@@ -35,6 +35,23 @@ from dotenv import load_dotenv
 load_dotenv(project_root / ".env.local")  # Local overrides (gitignored)
 load_dotenv()  # Fallback to .env
 
+# Parse --dev flag early so DEV_MODE is set before importing auth routes
+# (auth.py computes DISCORD_REDIRECT_URI based on DEV_MODE at import time)
+if __name__ == "__main__":
+    import argparse
+    _early_parser = argparse.ArgumentParser(add_help=False)
+    _early_parser.add_argument("--dev", action="store_true")
+    _early_parser.add_argument("--port", type=int, default=int(os.getenv("API_PORT", "8000")))
+    _early_parser.add_argument("--vite-port", type=int, default=int(os.getenv("VITE_PORT", "5173")))
+    _early_args, _ = _early_parser.parse_known_args()
+    if _early_args.dev:
+        os.environ["DEV_MODE"] = "true"
+        os.environ["API_PORT"] = str(_early_args.port)
+        os.environ["VITE_PORT"] = str(_early_args.vite_port)
+    else:
+        # Production single-service mode: frontend served from same port as API
+        os.environ["API_PORT"] = str(_early_args.port)
+
 from fastapi import FastAPI
 
 from core.database import close_engine
@@ -360,6 +377,7 @@ if __name__ == "__main__":
     # Run with uvicorn
     # Pass app object directly (not string) to avoid module reimport issues
     # Note: --reload requires string import; use `uvicorn main:app --reload` if needed
+    print(f"Starting server on port {args.port} (PORT env: {os.environ.get('PORT', 'not set')})")
     uvicorn.run(
         app,
         host="0.0.0.0",

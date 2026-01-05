@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Default to empty string for relative URLs (works for single-service deployment)
+// Set VITE_API_URL for dev mode when API is on different port
+const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export interface User {
   user_id: number;

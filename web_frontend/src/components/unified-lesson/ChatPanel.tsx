@@ -58,7 +58,7 @@ export default function ChatPanel({
   const isRecordingRef = useRef(false); // For animation loop (avoids stale closure)
   const recordingTimeRef = useRef(0); // For stopRecording check (avoids stale closure)
   const smoothedVolumeRef = useRef(0); // For decay calculation
-  const pcmDataRef = useRef<Float32Array | null>(null); // Reuse buffer
+  const pcmDataRef = useRef<Float32Array<ArrayBuffer> | null>(null); // Reuse buffer
 
   const MAX_RECORDING_TIME = 120; // 2 minutes
   const WARNING_TIME = 60; // Show warning after 1 minute

@@ -9,7 +9,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 type Step = 1 | 2 | 3 | "complete";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export default function SignupWizard() {
   const { isAuthenticated, isLoading, user, discordUsername, login } =

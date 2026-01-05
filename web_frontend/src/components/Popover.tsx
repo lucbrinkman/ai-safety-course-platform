@@ -50,7 +50,7 @@ export function Popover({
       {cloneElement(children, {
         ref: refs.setReference,
         ...getReferenceProps(),
-      })}
+      } as React.HTMLAttributes<HTMLElement> & { ref: typeof refs.setReference })}
       {isOpen && (
         <FloatingPortal>
           <div

@@ -28,10 +28,28 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # Discord OAuth configuration
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET")
-DISCORD_REDIRECT_URI = os.environ.get(
-    "DISCORD_REDIRECT_URI", "http://localhost:8000/auth/discord/callback"
-)
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+
+# Compute URLs based on mode:
+# - Dev mode: separate Vite server (VITE_PORT) for frontend, API on API_PORT
+# - Production (Railway): use env vars DISCORD_REDIRECT_URI and FRONTEND_URL
+# - Local production mode: calculate from API_PORT (single-service)
+_dev_mode = os.environ.get("DEV_MODE", "").lower() in ("true", "1", "yes")
+_is_railway = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
+_api_port = os.environ.get("API_PORT", "8000")
+_vite_port = os.environ.get("VITE_PORT", "5173")
+
+if _dev_mode:
+    # Dev mode: Vite runs on separate port
+    DISCORD_REDIRECT_URI = f"http://localhost:{_api_port}/auth/discord/callback"
+    FRONTEND_URL = f"http://localhost:{_vite_port}"
+elif _is_railway:
+    # Production: use explicit env vars
+    DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", f"http://localhost:{_api_port}/auth/discord/callback")
+    FRONTEND_URL = os.environ.get("FRONTEND_URL", f"http://localhost:{_api_port}")
+else:
+    # Local production mode (single-service): calculate from API_PORT
+    DISCORD_REDIRECT_URI = f"http://localhost:{_api_port}/auth/discord/callback"
+    FRONTEND_URL = f"http://localhost:{_api_port}"
 
 # Allowed origins for redirect (security whitelist)
 ALLOWED_ORIGINS = [
