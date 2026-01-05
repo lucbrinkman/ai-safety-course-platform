@@ -5,7 +5,7 @@ stages:
   - type: article
     source: articles/karnofsky-most-important-century.md
     from: "## The long-run future could come much faster than we think"
-    to: "why-ai-alignment-could-be-hard-with-modern-deep-learning/)"
+    to: "quickly go sideways.)"
 
   - type: chat
     instructions: >

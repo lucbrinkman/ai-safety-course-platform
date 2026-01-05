@@ -430,7 +430,7 @@ lesson_sessions = Table(
         "user_id",
         Integer,
         ForeignKey("users.user_id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
     ),
     Column("lesson_id", Text, nullable=False),
     Column("current_stage_index", Integer, server_default="0"),

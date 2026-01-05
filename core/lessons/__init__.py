@@ -30,7 +30,9 @@ from .sessions import (
     add_message,
     advance_stage,
     complete_session,
+    claim_session,
     SessionNotFoundError,
+    SessionAlreadyClaimedError,
 )
 from .chat import send_message as send_lesson_message, get_stage_content
 from .course_loader import (
@@ -64,7 +66,9 @@ __all__ = [
     "add_message",
     "advance_stage",
     "complete_session",
+    "claim_session",
     "SessionNotFoundError",
+    "SessionAlreadyClaimedError",
     "send_lesson_message",
     "get_stage_content",
     "load_course",

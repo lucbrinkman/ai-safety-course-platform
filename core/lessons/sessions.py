@@ -13,7 +13,12 @@ class SessionNotFoundError(Exception):
     pass
 
 
-async def create_session(user_id: int, lesson_id: str) -> dict:
+class SessionAlreadyClaimedError(Exception):
+    """Raised when trying to claim a session that already has a user."""
+    pass
+
+
+async def create_session(user_id: int | None, lesson_id: str) -> dict:
     """
     Create a new lesson session.
 
@@ -153,6 +158,41 @@ async def complete_session(session_id: int) -> dict:
             .where(lesson_sessions.c.session_id == session_id)
             .values(
                 completed_at=datetime.now(timezone.utc),
+                last_active_at=datetime.now(timezone.utc),
+            )
+        )
+
+    return await get_session(session_id)
+
+
+async def claim_session(session_id: int, user_id: int) -> dict:
+    """
+    Claim an anonymous session for a user.
+
+    Args:
+        session_id: The session to claim
+        user_id: The user claiming the session
+
+    Returns:
+        Updated session dict
+
+    Raises:
+        SessionNotFoundError: If session doesn't exist
+        SessionAlreadyClaimedError: If session already has a user
+    """
+    session = await get_session(session_id)
+
+    if session["user_id"] is not None:
+        raise SessionAlreadyClaimedError(
+            f"Session {session_id} already claimed by user {session['user_id']}"
+        )
+
+    async with get_transaction() as conn:
+        await conn.execute(
+            update(lesson_sessions)
+            .where(lesson_sessions.c.session_id == session_id)
+            .values(
+                user_id=user_id,
                 last_active_at=datetime.now(timezone.utc),
             )
         )
