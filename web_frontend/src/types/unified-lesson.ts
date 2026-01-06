@@ -79,4 +79,6 @@ export type SessionState = {
   previous_article: ArticleData | null;
   previous_stage: PreviousStageInfo | null;
   show_user_previous_content: boolean;
+  // User ID if session is claimed, null for anonymous sessions
+  user_id: number | null;
 };

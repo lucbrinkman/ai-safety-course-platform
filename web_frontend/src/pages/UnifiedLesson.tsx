@@ -2,11 +2,15 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import type { SessionState, PendingMessage, ArticleData } from "../types/unified-lesson";
-import { createSession, getSession, advanceStage, sendMessage } from "../api/lessons";
+import { createSession, getSession, advanceStage, sendMessage, claimSession } from "../api/lessons";
+import { useAuth } from "../hooks/useAuth";
+import { useAnonymousSession } from "../hooks/useAnonymousSession";
 import ChatPanel from "../components/unified-lesson/ChatPanel";
 import ContentPanel from "../components/unified-lesson/ContentPanel";
 import StageProgressBar from "../components/unified-lesson/StageProgressBar";
 import LessonCompleteModal from "../components/unified-lesson/LessonCompleteModal";
+import AuthStatusBanner from "../components/unified-lesson/AuthStatusBanner";
+import AuthPromptModal from "../components/unified-lesson/AuthPromptModal";
 
 export default function UnifiedLesson() {
   const { courseId, lessonId } = useParams<{ courseId?: string; lessonId: string }>();
@@ -21,6 +25,12 @@ export default function UnifiedLesson() {
   const [viewingStageIndex, setViewingStageIndex] = useState<number | null>(null);
   // Cache for viewed stage content - prevents overwriting current stage's article
   const [viewedContentCache, setViewedContentCache] = useState<Record<number, ArticleData>>({});
+
+  // Anonymous session flow
+  const { isAuthenticated, login } = useAuth();
+  const { getStoredSessionId, storeSessionId, clearSessionId } = useAnonymousSession(lessonId!);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [hasPromptedAuth, setHasPromptedAuth] = useState(false);
 
   // Messages derived from session (server is source of truth)
   const messages = session?.messages ?? [];
@@ -39,7 +49,31 @@ export default function UnifiedLesson() {
     async function init() {
       const startTime = Date.now();
       try {
+        // Check for existing anonymous session
+        const storedId = getStoredSessionId();
+        if (storedId) {
+          try {
+            const state = await getSession(storedId);
+            setSessionId(storedId);
+            setSession(state);
+
+            // If user is now authenticated, try to claim the session
+            if (isAuthenticated && state.user_id === null) {
+              await claimSession(storedId);
+            }
+            completed = true;
+            clearTimeout(timeoutId);
+            console.log(`[UnifiedLesson] Restored session ${storedId} in ${Date.now() - startTime}ms`);
+            return;
+          } catch {
+            // Session expired or invalid, create new one
+            clearSessionId();
+          }
+        }
+
+        // Create new session
         const sid = await createSession(lessonId!);
+        storeSessionId(sid);
         setSessionId(sid);
         const state = await getSession(sid);
         completed = true;
@@ -57,7 +91,7 @@ export default function UnifiedLesson() {
     init();
 
     return () => clearTimeout(timeoutId);
-  }, [lessonId]);
+  }, [lessonId, isAuthenticated, getStoredSessionId, storeSessionId, clearSessionId]);
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!sessionId) return;
@@ -117,9 +151,9 @@ export default function UnifiedLesson() {
     handleSendMessage(content);
   }, [pendingMessage, handleSendMessage]);
 
-  const handleAdvanceStage = useCallback(async () => {
+  // Helper to perform stage advancement (used by both handleAdvanceStage and handleAuthDismiss)
+  const performAdvance = useCallback(async () => {
     if (!sessionId) return;
-
     try {
       const result = await advanceStage(sessionId);
       setPendingTransition(false);
@@ -136,9 +170,35 @@ export default function UnifiedLesson() {
     }
   }, [sessionId]);
 
+  const handleAdvanceStage = useCallback(async () => {
+    if (!sessionId) return;
+
+    // If anonymous and completing first non-chat stage, prompt for auth
+    const currentStage = session?.stages?.[session.current_stage_index];
+    if (!isAuthenticated && !hasPromptedAuth && currentStage?.type !== "chat") {
+      setShowAuthPrompt(true);
+      setHasPromptedAuth(true);
+      return; // Don't advance yet, wait for auth decision
+    }
+
+    await performAdvance();
+  }, [sessionId, isAuthenticated, hasPromptedAuth, session, performAdvance]);
+
   const handleContinueChatting = useCallback(() => {
     setPendingTransition(false);
   }, []);
+
+  const handleLoginClick = useCallback(() => {
+    // Store that we're mid-lesson so we can return
+    sessionStorage.setItem("returnToLesson", lessonId!);
+    login();
+  }, [lessonId, login]);
+
+  const handleAuthDismiss = useCallback(async () => {
+    setShowAuthPrompt(false);
+    // Continue with the advance they initiated
+    await performAdvance();
+  }, [performAdvance]);
 
   const isChatStage = session?.current_stage?.type === "chat";
   const currentStageIndex = session?.current_stage_index ?? null;
@@ -346,6 +406,9 @@ export default function UnifiedLesson() {
         </div>
       </header>
 
+      {/* Auth status banner */}
+      <AuthStatusBanner onLoginClick={handleLoginClick} />
+
       {/* Main content - split panel */}
       <div className="flex-1 flex overflow-hidden">
         {/* Chat panel - left */}
@@ -401,6 +464,12 @@ export default function UnifiedLesson() {
         courseId={courseId}
         lessonId={lessonId!}
         isOpen={session.completed || !session.current_stage}
+      />
+
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onLogin={handleLoginClick}
+        onDismiss={handleAuthDismiss}
       />
     </div>
   );
