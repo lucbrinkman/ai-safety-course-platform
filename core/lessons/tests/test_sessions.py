@@ -74,6 +74,16 @@ async def test_advance_stage(test_user_id):
 
 
 @pytest.mark.asyncio
+async def test_create_anonymous_session():
+    """Can create a session without a user_id."""
+    session = await create_session(user_id=None, lesson_id="test-lesson")
+
+    assert session["user_id"] is None
+    assert session["lesson_id"] == "test-lesson"
+    assert session["session_id"] is not None
+
+
+@pytest.mark.asyncio
 async def test_claim_unclaimed_session(test_user_id, another_test_user_id):
     """Claiming an unclaimed session assigns it to the user."""
     # Create anonymous session
