@@ -13,13 +13,16 @@ import {
 import type { Stage, PreviousStageInfo, ArticleData } from "../../types/unified-lesson";
 import ArticlePanel from "./ArticlePanel";
 import VideoPlayer from "./VideoPlayer";
+import OptionalBanner from "./OptionalBanner";
 
 type ContentPanelProps = {
   stage: Stage | null;
   article?: ArticleData | null;
   onVideoEnded: () => void;
   onNextClick: () => void;
+  onSkipOptional?: () => void;
   isReviewing?: boolean;
+  isPreviewing?: boolean;  // Viewing future stage
   // For chat stages: show previous content (blurred or visible)
   previousArticle?: ArticleData | null;
   previousStage?: PreviousStageInfo | null;
@@ -31,7 +34,9 @@ export default function ContentPanel({
   article,
   onVideoEnded,
   onNextClick,
+  onSkipOptional,
   isReviewing = false,
+  isPreviewing = false,
   previousArticle,
   previousStage,
   showUserPreviousContent = true,
@@ -81,14 +86,24 @@ export default function ContentPanel({
 
   // Unified article rendering - same JSX position for both article and chat-after-article
   if (shouldShowArticle && articleToShow) {
+    const isOptional = stage && 'optional' in stage && stage.optional === true;
+    const showOptionalBanner = isOptional && !isReviewing && !isPreviewing && onSkipOptional;
+
     return (
       <div className="h-full flex flex-col">
         <div className="flex-1 overflow-hidden">
-          <ArticlePanel
-            article={articleToShow}
-            blurred={isBlurred}
-            onScrolledToBottom={showButton ? handleScrolledToBottom : undefined}
-          />
+          <div className="h-full overflow-y-auto">
+            {showOptionalBanner && (
+              <div className="px-4 pt-4 max-w-[620px] mx-auto">
+                <OptionalBanner onSkip={onSkipOptional} />
+              </div>
+            )}
+            <ArticlePanel
+              article={articleToShow}
+              blurred={isBlurred}
+              onScrolledToBottom={showButton ? handleScrolledToBottom : undefined}
+            />
+          </div>
         </div>
         {/* Always reserve space for button area to prevent layout shift */}
         <div className="p-4 border-t border-gray-200 bg-white">
@@ -202,14 +217,24 @@ export default function ContentPanel({
 
   // Video stage
   if (stage.type === "video") {
+    const isOptional = 'optional' in stage && stage.optional === true;
+    const showOptionalBanner = isOptional && !isReviewing && !isPreviewing && onSkipOptional;
+
     return (
-      <div className="h-full flex flex-col justify-center">
-        <VideoPlayer
-          videoId={stage.videoId}
-          start={stage.from}
-          end={stage.to || 9999}
-          onEnded={isReviewing ? () => {} : onVideoEnded}
-        />
+      <div className="h-full flex flex-col">
+        {showOptionalBanner && (
+          <div className="px-4 pt-4 max-w-[620px] mx-auto">
+            <OptionalBanner onSkip={onSkipOptional} />
+          </div>
+        )}
+        <div className="flex-1 flex flex-col justify-center">
+          <VideoPlayer
+            videoId={stage.videoId}
+            start={stage.from}
+            end={stage.to || 9999}
+            onEnded={isReviewing ? () => {} : onVideoEnded}
+          />
+        </div>
       </div>
     );
   }

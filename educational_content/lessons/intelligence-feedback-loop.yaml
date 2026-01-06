@@ -41,6 +41,7 @@ stages:
 
   - type: article
     source: articles/yudkowsky-recursive-self-improvement.md
+    optional: true
 
   - type: article
     source: articles/urban-ai-revolution-superintelligence.md

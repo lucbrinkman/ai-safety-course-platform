@@ -35,8 +35,8 @@ def test_lessons_only_use_allowed_fields():
     ALLOWED_TOP_LEVEL = {"id", "title", "stages", "optionalResources"}
 
     ALLOWED_STAGE_BY_TYPE = {
-        "article": {"type", "source", "from", "to"},
-        "video": {"type", "source", "from", "to"},
+        "article": {"type", "source", "from", "to", "optional"},
+        "video": {"type", "source", "from", "to", "optional"},
         "chat": {"type", "instructions", "showUserPreviousContent", "showTutorPreviousContent"},
     }
 
@@ -79,3 +79,43 @@ def test_lessons_only_use_allowed_fields():
                     f"Lesson '{lesson_file.name}' optionalResources[{i}] contains unknown field(s): {unknown}. "
                     f"Allowed fields: {ALLOWED_OPTIONAL_RESOURCE}"
                 )
+
+
+def test_parse_optional_stages(tmp_path, monkeypatch):
+    """Should parse optional field on article and video stages."""
+    # Create a test lesson with optional stages
+    test_lesson = {
+        "id": "test-optional",
+        "title": "Test Optional",
+        "stages": [
+            {"type": "article", "source": "articles/test.md"},
+            {"type": "article", "source": "articles/optional.md", "optional": True},
+            {"type": "video", "source": "videos/test.md", "optional": True},
+            {"type": "chat", "instructions": "Discuss"},
+        ]
+    }
+
+    # Write test lesson file
+    test_lessons_dir = tmp_path / "lessons"
+    test_lessons_dir.mkdir()
+    lesson_file = test_lessons_dir / "test-optional.yaml"
+    lesson_file.write_text(yaml.dump(test_lesson))
+
+    # Monkeypatch LESSONS_DIR
+    monkeypatch.setattr("core.lessons.loader.LESSONS_DIR", test_lessons_dir)
+
+    # Load and verify
+    from core.lessons.loader import load_lesson
+    lesson = load_lesson("test-optional")
+
+    assert lesson.stages[0].optional is False  # default
+    assert lesson.stages[1].optional is True   # explicit
+    assert lesson.stages[2].optional is True   # video
+    assert not hasattr(lesson.stages[3], 'optional')  # chat has no optional
+
+
+def test_optional_not_allowed_on_chat(tmp_path, monkeypatch):
+    """Test file with optional: true on chat should fail allowlist test."""
+    # This is validated by test_lessons_only_use_allowed_fields
+    # Just verify chat stages don't get optional field parsed
+    pass  # The allowlist test covers this

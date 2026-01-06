@@ -7,6 +7,7 @@ export type ArticleStage = {
   source: string;
   from: string | null;
   to: string | null;
+  optional?: boolean;
 };
 
 export type VideoStage = {
@@ -14,6 +15,7 @@ export type VideoStage = {
   videoId: string;
   from: number;
   to: number | null;
+  optional?: boolean;
 };
 
 export type ChatStage = {

@@ -17,6 +17,7 @@ type ChatPanelProps = {
   onContinueChatting: () => void;
   showDisclaimer?: boolean;
   isReviewing?: boolean;
+  isPreviewing?: boolean;
 };
 
 type RecordingState = "idle" | "recording" | "transcribing";
@@ -34,6 +35,7 @@ export default function ChatPanel({
   onContinueChatting,
   showDisclaimer = false,
   isReviewing = false,
+  isPreviewing = false,
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -431,9 +433,16 @@ export default function ChatPanel({
       {showDisclaimer && (
         <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 relative z-20">
           <div className="max-w-[620px] mx-auto">
-          {isReviewing ? (
+          {isPreviewing ? (
             <>
-              <p className="text-sm font-medium text-gray-800">You're reviewing a previous article/video</p>
+              <p className="text-sm font-medium text-gray-800">You're previewing upcoming content</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Complete earlier stages to continue here. You can still ask the AI tutor questions.
+              </p>
+            </>
+          ) : isReviewing ? (
+            <>
+              <p className="text-sm font-medium text-gray-800">You're reviewing previous content</p>
               <p className="text-sm text-gray-500 mt-1">
                 You can ask the AI tutor questions, but it doesn't know that you're reviewing older content.
               </p>

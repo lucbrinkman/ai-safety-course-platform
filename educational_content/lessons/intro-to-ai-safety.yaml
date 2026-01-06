@@ -7,6 +7,12 @@ stages:
     from: "MIRI's mission is to ensure"
     to: "build powerful generally intelligent AI systems."
 
+  - type: article
+    source: articles/four-background-claims.md
+    from: "build powerful generally intelligent AI systems."
+    to: "We call this the problem of AI alignment"
+    optional: true
+
   - type: chat
     instructions: >
       The user just read an introduction to AI Safety.

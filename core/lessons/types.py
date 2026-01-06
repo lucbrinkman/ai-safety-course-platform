@@ -13,6 +13,7 @@ class ArticleStage:
     source: str  # Path to article markdown file
     from_text: str | None = None  # None means full article
     to_text: str | None = None
+    optional: bool = False  # Whether this stage can be skipped
 
 
 @dataclass
@@ -22,6 +23,7 @@ class VideoStage:
     source: str  # Path to transcript markdown file
     from_seconds: int = 0
     to_seconds: int | None = None  # None means to end
+    optional: bool = False  # Whether this stage can be skipped
 
 
 @dataclass

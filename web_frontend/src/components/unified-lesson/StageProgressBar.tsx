@@ -43,12 +43,16 @@ function StageIcon({ type, small = false }: { type: string; small?: boolean }) {
 function getTooltipContent(stage: Stage, index: number, currentStageIndex: number): string {
   const isFuture = index > currentStageIndex;
   const isPastChat = stage.type === "chat" && index < currentStageIndex;
+  const isFutureChat = stage.type === "chat" && index > currentStageIndex;
   const isCurrentChat = stage.type === "chat" && index === currentStageIndex;
+  const isOptional = 'optional' in stage && stage.optional === true;
+  const optionalPrefix = isOptional ? "(Optional) " : "";
 
-  if (isFuture) return "Not yet reached";
+  if (isFutureChat) return "Chat sections can't be previewed";
+  if (isFuture) return `${optionalPrefix}Preview ${stage.type} section`;
   if (isPastChat) return "Chat sections can't be revisited";
   if (isCurrentChat) return "Return to chat";
-  return `View ${stage.type} section`;
+  return `${optionalPrefix}View ${stage.type} section`;
 }
 
 export default function StageProgressBar({
@@ -64,17 +68,17 @@ export default function StageProgressBar({
   const viewingIndex = viewingStageIndex ?? currentStageIndex;
 
   const handleDotClick = (index: number, stage: Stage) => {
-    if (index > currentStageIndex) {
-      // Can't click future stages
-      return;
-    }
-
+    // Past chat stages can't be revisited
     if (stage.type === "chat" && index < currentStageIndex) {
-      // Past chat stages can't be revisited - tooltip explains why
       return;
     }
 
-    // Navigate to stage
+    // Future chat stages can't be previewed (no content to show)
+    if (stage.type === "chat" && index > currentStageIndex) {
+      return;
+    }
+
+    // Navigate to stage (including future for preview)
     onStageClick(index);
   };
 
@@ -99,8 +103,11 @@ export default function StageProgressBar({
           const isReached = index <= currentStageIndex;
           const isViewing = index === viewingIndex;
           const isPastChat = stage.type === "chat" && index < currentStageIndex;
+          const isFutureChat = stage.type === "chat" && index > currentStageIndex;
           const isClickable = isReached && !isPastChat;
           const isFuture = index > currentStageIndex;
+          const isOptional = 'optional' in stage && stage.optional === true;
+          const canPreview = isFuture && !isFutureChat; // Future non-chat stages can be previewed
 
           return (
             <div key={index} className="flex items-center">
@@ -121,17 +128,23 @@ export default function StageProgressBar({
               >
                 <button
                   onClick={() => handleDotClick(index, stage)}
-                  disabled={isFuture}
+                  disabled={stage.type === "chat" && index !== currentStageIndex && index !== viewingIndex}
                   className={`
                     relative w-7 h-7 rounded-full flex items-center justify-center
                     transition-all duration-150
-                    ${isReached
-                      ? isClickable
-                        ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                        : "bg-blue-500 text-white cursor-default"
-                      : "bg-gray-200 text-gray-400 cursor-default"
+                    ${isOptional
+                      ? "bg-transparent text-gray-400 border-2 border-dashed border-gray-400 hover:border-gray-500 cursor-pointer"
+                      : isReached
+                        ? isClickable
+                          ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                          : "bg-blue-500 text-white cursor-default"
+                        : canPreview
+                          ? "bg-gray-300 text-gray-500 hover:bg-gray-400 cursor-pointer"
+                          : "bg-gray-300 text-gray-500 cursor-default"
                     }
                     ${isViewing ? "ring-2 ring-offset-2 ring-blue-500" : ""}
+                    ${isFuture ? "opacity-50" : ""}
+                    ${!isFuture && isClickable ? "cursor-pointer" : ""}
                   `}
                 >
                   <StageIcon type={stage.type} small />

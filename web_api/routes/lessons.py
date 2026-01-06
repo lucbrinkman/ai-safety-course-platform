@@ -130,6 +130,7 @@ def serialize_video_stage(s: VideoStage) -> dict:
         "title": info["title"],
         "from": s.from_seconds,
         "to": s.to_seconds,
+        "optional": s.optional,
     }
 
 
@@ -146,9 +147,10 @@ async def get_lesson(lesson_id: str):
                     "type": s.type,
                     **(
                         {
-                            "source": s.source_url,
+                            "source": s.source,
                             "from": s.from_text,
                             "to": s.to_text,
+                            "optional": s.optional,
                         }
                         if s.type == "article"
                         else {}
@@ -225,12 +227,10 @@ async def get_session_state(
     # Determine which stage to get content for
     content_stage_index = view_stage if view_stage is not None else session["current_stage_index"]
 
-    # Validate view_stage is within bounds and not beyond current progress
+    # Validate view_stage is within bounds
     if view_stage is not None:
         if view_stage < 0 or view_stage >= len(lesson.stages):
             raise HTTPException(status_code=400, detail="Invalid stage index")
-        if view_stage > session["current_stage_index"]:
-            raise HTTPException(status_code=400, detail="Cannot view future stages")
 
     current_stage = (
         lesson.stages[session["current_stage_index"]]
@@ -330,7 +330,7 @@ async def get_session_state(
         "stages": [
             {
                 "type": s.type,
-                **({"source": s.source} if s.type == "article" else {}),
+                **({"source": s.source, "optional": s.optional} if s.type == "article" else {}),
                 **(serialize_video_stage(s) if s.type == "video" else {}),
             }
             for s in lesson.stages

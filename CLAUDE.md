@@ -172,7 +172,11 @@ from core import (
 
 **Adding business logic:** Add to `core/` module, export in `core/__init__.py`, then import in cogs.
 
+## UI/UX Patterns
+
+**Never use `cursor-not-allowed`** - use `cursor-default` instead for non-interactive elements. The not-allowed cursor is visually aggressive and unnecessary; a default cursor with lack of hover feedback is sufficient to indicate non-interactivity.
+
 ## Hosting
 
 Single Railway service running the unified backend (`uvicorn main:app`).
-Database: PostgreSQL (Supabase-hosted, accessed via SQLAlchemy).z
+Database: PostgreSQL (Supabase-hosted, accessed via SQLAlchemy).

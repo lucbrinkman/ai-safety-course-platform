@@ -143,8 +143,10 @@ export default function UnifiedLesson() {
   const isChatStage = session?.current_stage?.type === "chat";
   const currentStageIndex = session?.current_stage_index ?? null;
 
-  // Derived values for reviewing previous stages
-  const isReviewing = viewingStageIndex !== null;
+  // Derived values for viewing non-current stages
+  const isReviewing = viewingStageIndex !== null && currentStageIndex !== null && viewingStageIndex < currentStageIndex;
+  const isPreviewing = viewingStageIndex !== null && currentStageIndex !== null && viewingStageIndex > currentStageIndex;
+  const isViewingOther = isReviewing || isPreviewing;
 
   // Get indices of reviewable stages (article/video only, before current)
   const getReviewableStages = useCallback(() => {
@@ -328,7 +330,7 @@ export default function UnifiedLesson() {
         </div>
         {/* Skip/return button - absolute right */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          {isReviewing ? (
+          {isViewingOther ? (
             <button
               onClick={handleReturnToCurrent}
               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -350,12 +352,12 @@ export default function UnifiedLesson() {
       <div className="flex-1 flex overflow-hidden">
         {/* Chat panel - left */}
         <div className={`w-1/2 relative ${
-          isChatStage && !isReviewing
+          isChatStage && !isViewingOther
             ? "bg-white z-30"
             : "bg-gray-50"
         }`}>
           {/* Dimming overlay when not focused */}
-          {(!isChatStage || isReviewing) && (
+          {(!isChatStage || isViewingOther) && (
             <div className="absolute inset-0 bg-gray-50/25 pointer-events-none z-10" />
           )}
           <ChatPanel
@@ -369,19 +371,20 @@ export default function UnifiedLesson() {
             pendingTransition={pendingTransition}
             onConfirmTransition={handleAdvanceStage}
             onContinueChatting={handleContinueChatting}
-            showDisclaimer={!isChatStage || isReviewing}
+            showDisclaimer={!isChatStage || isViewingOther}
             isReviewing={isReviewing}
+            isPreviewing={isPreviewing}
           />
         </div>
 
         {/* Content panel - right */}
         <div className={`w-1/2 relative ${
-          !isChatStage || isReviewing
+          !isChatStage || isViewingOther
             ? "bg-white z-30"
             : "bg-gray-50"
         }`}>
           {/* Dimming overlay when not focused */}
-          {(isChatStage && !isReviewing) && (
+          {(isChatStage && !isViewingOther) && (
             <div className="absolute inset-0 bg-gray-50/25 pointer-events-none z-10" />
           )}
           <ContentPanel
@@ -389,7 +392,9 @@ export default function UnifiedLesson() {
             article={articleToDisplay}
             onVideoEnded={handleAdvanceStage}
             onNextClick={handleAdvanceStage}
+            onSkipOptional={handleAdvanceStage}
             isReviewing={isReviewing}
+            isPreviewing={isPreviewing}
             previousArticle={session.previous_article}
             previousStage={session.previous_stage}
             showUserPreviousContent={session.show_user_previous_content}
