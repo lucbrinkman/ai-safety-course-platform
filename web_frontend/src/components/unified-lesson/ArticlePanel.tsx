@@ -6,12 +6,16 @@ type ArticlePanelProps = {
   article: ArticleData;
   blurred?: boolean;   // For active recall - blur the content
   onScrolledToBottom?: () => void;
+  afterContent?: React.ReactNode;  // Content to render after article (e.g., button)
+  onContentFitsChange?: (fits: boolean) => void;  // Called when content fit status changes
 };
 
 export default function ArticlePanel({
   article,
   blurred = false,
   onScrolledToBottom,
+  afterContent,
+  onContentFitsChange,
 }: ArticlePanelProps) {
   const { content, title, author, sourceUrl, isExcerpt } = article;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,6 +38,26 @@ export default function ArticlePanel({
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [onScrolledToBottom, content]);
+
+  // Detect if content fits without scrolling
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !onContentFitsChange) return;
+
+    const checkFit = () => {
+      const fits = container.scrollHeight <= container.clientHeight;
+      onContentFitsChange(fits);
+    };
+
+    // Check after render
+    checkFit();
+
+    // Re-check on resize
+    const resizeObserver = new ResizeObserver(checkFit);
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [onContentFitsChange, content]);
 
   return (
     <div className="h-full relative">
@@ -118,6 +142,7 @@ export default function ArticlePanel({
           {content}
         </ReactMarkdown>
       </article>
+      {afterContent}
       </div>
 
       {blurred && (

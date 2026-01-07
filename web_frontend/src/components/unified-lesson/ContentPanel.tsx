@@ -1,5 +1,5 @@
 // web_frontend/src/components/unified-lesson/ContentPanel.tsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   useFloating,
   useClick,
@@ -47,6 +47,17 @@ export default function ContentPanel({
     setHasScrolledToBottom(true);
   }, []);
 
+  // Track if article content fits without scrolling
+  const [contentFits, setContentFits] = useState<boolean | null>(null);
+  const handleContentFitsChange = useCallback((fits: boolean) => {
+    setContentFits(fits);
+  }, []);
+
+  // Reset contentFits when article changes
+  useEffect(() => {
+    setContentFits(null);
+  }, [article?.content]);
+
   // Popover for "haven't scrolled yet" confirmation
   const [skipPopoverOpen, setSkipPopoverOpen] = useState(false);
   const { refs, floatingStyles, context } = useFloating({
@@ -89,73 +100,86 @@ export default function ContentPanel({
     const isOptional = stage && 'optional' in stage && stage.optional === true;
     const showOptionalBanner = isOptional && !isReviewing && !isPreviewing && onSkipOptional;
 
+    // Button component (reused for inline and sticky)
+    const buttonElement = showButton && (
+      <>
+        <button
+          ref={hasScrolledToBottom ? undefined : refs.setReference}
+          onClick={handleReadButtonClick}
+          {...(hasScrolledToBottom ? {} : getReferenceProps())}
+          className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400 cursor-pointer"
+        >
+          Done reading
+        </button>
+        {skipPopoverOpen && !hasScrolledToBottom && (
+          <FloatingPortal>
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+              className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-xs"
+            >
+              <p className="text-sm text-gray-700 mb-3">
+                It looks like you haven't reached the bottom of the article yet. What would you like to do?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setSkipPopoverOpen(false);
+                    onNextClick();
+                  }}
+                  className="flex-1 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+                >
+                  Skip anyway
+                </button>
+                <button
+                  onClick={() => setSkipPopoverOpen(false)}
+                  className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded"
+                >
+                  Keep reading
+                </button>
+              </div>
+            </div>
+          </FloatingPortal>
+        )}
+      </>
+    );
+
+    // Short article: button inline after content
+    // Long article: button in sticky footer
+    const useInlineButton = contentFits === true;
+    const useStickyFooter = contentFits === false;
+
+    const afterContent = showButton && useInlineButton ? (
+      <div className="max-w-[620px] mx-auto px-6 pb-6">
+        {buttonElement}
+      </div>
+    ) : undefined;
+
     return (
       <div className="h-full flex flex-col">
         <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            {showOptionalBanner && (
-              <div className="px-4 pt-4 max-w-[620px] mx-auto">
-                <OptionalBanner stageType="article" onSkip={onSkipOptional} />
-              </div>
-            )}
-            <ArticlePanel
-              article={articleToShow}
-              blurred={isBlurred}
-              onScrolledToBottom={showButton ? handleScrolledToBottom : undefined}
-            />
-          </div>
-        </div>
-        {/* Always reserve space for button area to prevent layout shift */}
-        <div className="p-4 border-t border-gray-200 bg-white">
-          <div className="max-w-[620px] mx-auto">
-          {showButton ? (
-            <>
-              <button
-                ref={hasScrolledToBottom ? undefined : refs.setReference}
-                onClick={handleReadButtonClick}
-                {...(hasScrolledToBottom ? {} : getReferenceProps())}
-                className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400 cursor-pointer"
-              >
-                Done reading
-              </button>
-              {skipPopoverOpen && !hasScrolledToBottom && (
-                <FloatingPortal>
-                  <div
-                    ref={refs.setFloating}
-                    style={floatingStyles}
-                    {...getFloatingProps()}
-                    className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-xs"
-                  >
-                    <p className="text-sm text-gray-700 mb-3">
-                      It looks like you haven't reached the bottom of the article yet. What would you like to do?
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSkipPopoverOpen(false);
-                          onNextClick();
-                        }}
-                        className="flex-1 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded"
-                      >
-                        Skip anyway
-                      </button>
-                      <button
-                        onClick={() => setSkipPopoverOpen(false)}
-                        className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded"
-                      >
-                        Keep reading
-                      </button>
-                    </div>
-                  </div>
-                </FloatingPortal>
-              )}
-            </>
-          ) : (
-            /* Invisible placeholder to maintain layout */
-            <div className="py-2 invisible">Placeholder</div>
+          {showOptionalBanner && (
+            <div className="px-4 pt-4 max-w-[620px] mx-auto">
+              <OptionalBanner stageType="article" onSkip={onSkipOptional} />
+            </div>
           )}
-          </div>
+          <ArticlePanel
+            article={articleToShow}
+            blurred={isBlurred}
+            onScrolledToBottom={showButton ? handleScrolledToBottom : undefined}
+            onContentFitsChange={showButton ? handleContentFitsChange : undefined}
+            afterContent={afterContent}
+          />
         </div>
+        {/* Sticky footer for long articles */}
+        {showButton && useStickyFooter && (
+          <div className="p-4 border-t border-gray-200 bg-white">
+            <div className="max-w-[620px] mx-auto">
+              {buttonElement}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
