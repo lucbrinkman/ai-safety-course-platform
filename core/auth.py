@@ -10,6 +10,7 @@ from .queries.users import get_or_create_user as _get_or_create_user
 async def get_or_create_user(
     discord_id: str,
     discord_username: str | None = None,
+    discord_avatar: str | None = None,
     email: str | None = None,
     email_verified: bool = False,
 ) -> dict:
@@ -22,6 +23,7 @@ async def get_or_create_user(
     Args:
         discord_id: The Discord user ID
         discord_username: Optional username to set/update
+        discord_avatar: Optional avatar hash from Discord
         email: Optional email to set/update
         email_verified: Whether the email is verified (from Discord)
 
@@ -30,7 +32,7 @@ async def get_or_create_user(
     """
     async with get_transaction() as conn:
         return await _get_or_create_user(
-            conn, discord_id, discord_username, email, email_verified
+            conn, discord_id, discord_username, discord_avatar, email, email_verified
         )
 
 

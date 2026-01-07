@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default function HeaderAuthStatus({ onLoginClick }: Props) {
-  const { isAuthenticated, isLoading, discordUsername, logout } = useAuth();
+  const { isAuthenticated, isLoading, discordUsername, discordAvatarUrl, logout } = useAuth();
 
   if (isLoading) return null;
 
@@ -37,9 +37,11 @@ export default function HeaderAuthStatus({ onLoginClick }: Props) {
       )}
     >
       <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900">
-        <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-medium">
-          {discordUsername?.[0]?.toUpperCase() || "?"}
-        </div>
+        <img
+          src={discordAvatarUrl || undefined}
+          alt={discordUsername || "User avatar"}
+          className="w-6 h-6 rounded-full"
+        />
         <span>{discordUsername}</span>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

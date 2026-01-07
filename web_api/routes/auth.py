@@ -166,11 +166,12 @@ async def discord_oauth_callback(
     # Extract user info
     discord_id = discord_user["id"]
     discord_username = discord_user.get("global_name") or discord_user["username"]
+    discord_avatar = discord_user.get("avatar")  # Avatar hash from Discord
     email = discord_user.get("email")
     email_verified = discord_user.get("verified", False)
 
     # Create or update user in database
-    await get_or_create_user(discord_id, discord_username, email, email_verified)
+    await get_or_create_user(discord_id, discord_username, discord_avatar, email, email_verified)
 
     # Create JWT and set cookie
     token = create_jwt(discord_id, discord_username)
@@ -254,12 +255,24 @@ async def logout(response: Response):
     return {"status": "logged_out"}
 
 
+def _get_discord_avatar_url(discord_id: str, avatar_hash: str | None) -> str:
+    """Construct Discord avatar URL from user ID and avatar hash."""
+    if avatar_hash:
+        # User has a custom avatar
+        ext = "gif" if avatar_hash.startswith("a_") else "png"
+        return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.{ext}"
+    else:
+        # Default avatar based on user ID (modern Discord calculation)
+        index = (int(discord_id) >> 22) % 6
+        return f"https://cdn.discordapp.com/embed/avatars/{index}.png"
+
+
 @router.get("/me")
 async def get_me(request: Request):
     """
     Get current authenticated user info.
 
-    Returns the user's Discord ID, username, and profile from the database.
+    Returns the user's Discord ID, username, avatar URL, and profile from the database.
     """
     user = await get_current_user(request)
 
@@ -268,8 +281,14 @@ async def get_me(request: Request):
     if not db_user:
         raise HTTPException(404, "User not found in database")
 
+    avatar_url = _get_discord_avatar_url(
+        user["sub"],
+        db_user.get("discord_avatar")
+    )
+
     return {
         "discord_id": user["sub"],
         "discord_username": user["username"],
+        "discord_avatar_url": avatar_url,
         "user": db_user,
     }

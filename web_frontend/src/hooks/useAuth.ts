@@ -18,6 +18,7 @@ export interface AuthState {
   user: User | null;
   discordId: string | null;
   discordUsername: string | null;
+  discordAvatarUrl: string | null;
 }
 
 export interface UseAuthReturn extends AuthState {
@@ -39,6 +40,7 @@ export function useAuth(): UseAuthReturn {
     user: null,
     discordId: null,
     discordUsername: null,
+    discordAvatarUrl: null,
   });
 
   const fetchUser = useCallback(async () => {
@@ -55,6 +57,7 @@ export function useAuth(): UseAuthReturn {
           user: data.user,
           discordId: data.discord_id,
           discordUsername: data.discord_username,
+          discordAvatarUrl: data.discord_avatar_url,
         });
       } else {
         setState({
@@ -63,6 +66,7 @@ export function useAuth(): UseAuthReturn {
           user: null,
           discordId: null,
           discordUsername: null,
+          discordAvatarUrl: null,
         });
       }
     } catch (error) {
@@ -73,6 +77,7 @@ export function useAuth(): UseAuthReturn {
         user: null,
         discordId: null,
         discordUsername: null,
+        discordAvatarUrl: null,
       });
     }
   }, []);
@@ -100,6 +105,7 @@ export function useAuth(): UseAuthReturn {
         user: null,
         discordId: null,
         discordUsername: null,
+        discordAvatarUrl: null,
       });
     } catch (error) {
       console.error("Failed to logout:", error);

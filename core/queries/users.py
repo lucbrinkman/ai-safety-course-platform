@@ -25,6 +25,7 @@ async def create_user(
     conn: AsyncConnection,
     discord_id: str,
     discord_username: str | None = None,
+    discord_avatar: str | None = None,
     email: str | None = None,
     email_verified: bool = False,
 ) -> dict[str, Any]:
@@ -33,6 +34,8 @@ async def create_user(
         "discord_id": discord_id,
         "discord_username": discord_username or f"User_{discord_id[:8]}",
     }
+    if discord_avatar:
+        values["discord_avatar"] = discord_avatar
     if email:
         values["email"] = email
         if email_verified:
@@ -64,6 +67,7 @@ async def get_or_create_user(
     conn: AsyncConnection,
     discord_id: str,
     discord_username: str | None = None,
+    discord_avatar: str | None = None,
     email: str | None = None,
     email_verified: bool = False,
 ) -> dict[str, Any]:
@@ -80,6 +84,8 @@ async def get_or_create_user(
         updates = {}
         if discord_username and discord_username != existing.get("discord_username"):
             updates["discord_username"] = discord_username
+        if discord_avatar and discord_avatar != existing.get("discord_avatar"):
+            updates["discord_avatar"] = discord_avatar
         if email and email != existing.get("email"):
             updates["email"] = email
             # Update verification status when email changes from Discord
@@ -92,7 +98,7 @@ async def get_or_create_user(
             return await update_user(conn, discord_id, **updates)
         return existing
 
-    return await create_user(conn, discord_id, discord_username, email, email_verified)
+    return await create_user(conn, discord_id, discord_username, discord_avatar, email, email_verified)
 
 
 async def get_user_profile(

@@ -50,6 +50,7 @@ users = Table(
     Column("user_id", Integer, primary_key=True, autoincrement=True),
     Column("discord_id", Text),
     Column("discord_username", Text),
+    Column("discord_avatar", Text),  # Avatar hash from Discord API
     Column("nickname", Text),
     Column("email", Text),
     Column("email_verified_at", TIMESTAMP(timezone=True)),
