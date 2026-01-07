@@ -30,6 +30,7 @@ stages:
     source: video_transcripts/fa8k8IQ1_X0_A.I._‐_Humanity's_Final_Invention.md
     from: "0:00"
     to: "5:00"
+    optional: true
 
   - type: chat
     instructions: >
@@ -45,6 +46,7 @@ stages:
 
   - type: article
     source: articles/urban-ai-revolution-superintelligence.md
+    
 
   - type: chat
     instructions: >

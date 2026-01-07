@@ -95,7 +95,7 @@ export default function ContentPanel({
           <div className="h-full overflow-y-auto">
             {showOptionalBanner && (
               <div className="px-4 pt-4 max-w-[620px] mx-auto">
-                <OptionalBanner onSkip={onSkipOptional} />
+                <OptionalBanner stageType="article" onSkip={onSkipOptional} />
               </div>
             )}
             <ArticlePanel
@@ -224,7 +224,7 @@ export default function ContentPanel({
       <div className="h-full flex flex-col">
         {showOptionalBanner && (
           <div className="px-4 pt-4 max-w-[620px] mx-auto">
-            <OptionalBanner onSkip={onSkipOptional} />
+            <OptionalBanner stageType="video" onSkip={onSkipOptional} />
           </div>
         )}
         <div className="flex-1 flex flex-col justify-center">

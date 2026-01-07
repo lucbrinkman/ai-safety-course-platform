@@ -290,6 +290,7 @@ async def get_session_state(
                         "source": current_stage.source,
                         "from": current_stage.from_text,
                         "to": current_stage.to_text,
+                        "optional": current_stage.optional,
                     }
                     if current_stage and current_stage.type == "article"
                     else {}
