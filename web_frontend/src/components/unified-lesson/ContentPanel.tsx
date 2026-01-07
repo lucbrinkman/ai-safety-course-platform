@@ -116,7 +116,7 @@ export default function ContentPanel({
                 {...(hasScrolledToBottom ? {} : getReferenceProps())}
                 className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400 cursor-pointer"
               >
-                I've read the article
+                Done reading
               </button>
               {skipPopoverOpen && !hasScrolledToBottom && (
                 <FloatingPortal>
