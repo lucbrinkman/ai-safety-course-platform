@@ -107,7 +107,7 @@ export default function ContentPanel({
           ref={hasScrolledToBottom ? undefined : refs.setReference}
           onClick={handleReadButtonClick}
           {...(hasScrolledToBottom ? {} : getReferenceProps())}
-          className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400 cursor-pointer"
+          className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400"
           data-testid="done-reading-button"
         >
           Done reading
@@ -250,6 +250,7 @@ export default function ContentPanel({
   if (stage.type === "video") {
     const isOptional = 'optional' in stage && stage.optional === true;
     const showOptionalBanner = isOptional && !isReviewing && !isPreviewing && onSkipOptional;
+    const showDoneWatching = !isReviewing && !isPreviewing;
 
     return (
       <div className="h-full flex flex-col">
@@ -265,6 +266,22 @@ export default function ContentPanel({
             end={stage.to || 9999}
             onEnded={isReviewing ? () => {} : onVideoEnded}
           />
+        </div>
+        {/* Always reserve footer space to prevent layout shift between stages */}
+        <div className="p-4 border-t border-gray-200 bg-white">
+          <div className="max-w-[620px] mx-auto">
+            {showDoneWatching ? (
+              <button
+                onClick={onNextClick}
+                className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400"
+              >
+                Done watching
+              </button>
+            ) : (
+              /* Invisible placeholder to maintain layout */
+              <div className="py-2 invisible">Placeholder</div>
+            )}
+          </div>
         </div>
       </div>
     );
