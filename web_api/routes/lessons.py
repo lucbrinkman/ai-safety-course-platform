@@ -36,6 +36,7 @@ from core.lessons import (
     get_stage_content,
     ArticleStage,
     VideoStage,
+    load_article_with_metadata,
     load_video_transcript_with_metadata,
 )
 from core import get_or_create_user
@@ -56,36 +57,36 @@ def get_video_info(stage: VideoStage) -> dict:
 
 
 def get_stage_title(stage) -> str:
-    """Extract display title from a stage."""
+    """Extract display title from a stage using actual content metadata."""
     if isinstance(stage, ArticleStage):
-        # Parse from source_url like "articles/four-background-claims.md"
-        filename = stage.source.split("/")[-1].replace(".md", "")
-        # Convert kebab-case to Title Case
-        return " ".join(word.capitalize() for word in filename.split("-"))
+        try:
+            result = load_article_with_metadata(stage.source)
+            return result.metadata.title or "Article"
+        except FileNotFoundError:
+            return "Article"
     elif isinstance(stage, VideoStage):
-        # Get title from transcript file
         info = get_video_info(stage)
         return info.get("title") or "Video"
     return ""
 
 
-def get_started_message(stage) -> str | None:
+def get_started_message(stage) -> dict | None:
     """Get 'Started' system message for a stage, or None if not applicable."""
     if isinstance(stage, ArticleStage):
         title = get_stage_title(stage)
-        return f"📖 Started reading: {title}"
+        return {"content": f"Started reading: {title}", "icon": "article"}
     elif isinstance(stage, VideoStage):
         title = get_stage_title(stage)
-        return f"📺 Started watching: {title}"
+        return {"content": f"Started watching: {title}", "icon": "video"}
     return None
 
 
-def get_finished_message(stage) -> str | None:
+def get_finished_message(stage) -> dict | None:
     """Get 'Finished' system message for a stage, or None if not applicable."""
     if isinstance(stage, ArticleStage):
-        return "📖 Finished reading"
+        return {"content": "Finished reading", "icon": "article"}
     elif isinstance(stage, VideoStage):
-        return "📺 Finished watching"
+        return {"content": "Finished watching", "icon": "video"}
     return None
 
 
@@ -208,7 +209,7 @@ async def start_session(
         first_stage = lesson.stages[0]
         started_msg = get_started_message(first_stage)
         if started_msg:
-            await add_message(session["session_id"], "system", started_msg)
+            await add_message(session["session_id"], "system", started_msg["content"], started_msg.get("icon"))
 
     return {"session_id": session["session_id"]}
 
@@ -458,14 +459,14 @@ async def advance_session(session_id: int, request: Request):
         # Add "Finished" message for current stage before completing
         finished_msg = get_finished_message(current_stage)
         if finished_msg:
-            await add_message(session_id, "system", finished_msg)
+            await add_message(session_id, "system", finished_msg["content"], finished_msg.get("icon"))
         await complete_session(session_id)
         return {"completed": True}
 
     # Add "Finished" message for current stage
     finished_msg = get_finished_message(current_stage)
     if finished_msg:
-        await add_message(session_id, "system", finished_msg)
+        await add_message(session_id, "system", finished_msg["content"], finished_msg.get("icon"))
 
     await advance_stage(session_id)
 
@@ -473,7 +474,7 @@ async def advance_session(session_id: int, request: Request):
     new_stage = lesson.stages[current_stage_index + 1]
     started_msg = get_started_message(new_stage)
     if started_msg:
-        await add_message(session_id, "system", started_msg)
+        await add_message(session_id, "system", started_msg["content"], started_msg.get("icon"))
 
     return {"completed": False, "new_stage_index": current_stage_index + 1}
 

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import type { ChatMessage, Stage, PendingMessage } from "../../types/unified-lesson";
 import { transcribeAudio } from "../../api/lessons";
 import { Tooltip } from "../Tooltip";
+import { StageIcon } from "./StageProgressBar";
 
 type ChatPanelProps = {
   messages: ChatMessage[];
@@ -342,7 +343,8 @@ export default function ChatPanel({
         {messages.map((msg, i) =>
           msg.role === "system" ? (
             <div key={i} className="flex justify-center my-3">
-              <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+                {msg.icon && <StageIcon type={msg.icon} small />}
                 {msg.content}
               </span>
             </div>

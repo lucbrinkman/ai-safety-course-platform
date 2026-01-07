@@ -88,20 +88,24 @@ async def get_user_sessions(user_id: int) -> list[dict]:
         return [dict(row) for row in result.mappings().all()]
 
 
-async def add_message(session_id: int, role: str, content: str) -> dict:
+async def add_message(session_id: int, role: str, content: str, icon: str | None = None) -> dict:
     """
     Add a message to session history.
 
     Args:
         session_id: The session ID
-        role: "user" or "assistant"
+        role: "user", "assistant", or "system"
         content: Message content
+        icon: Optional icon type for system messages ("article", "video", "chat")
 
     Returns:
         Updated session dict
     """
     session = await get_session(session_id)
-    messages = session["messages"] + [{"role": role, "content": content}]
+    message = {"role": role, "content": content}
+    if icon:
+        message["icon"] = icon
+    messages = session["messages"] + [message]
 
     async with get_transaction() as conn:
         await conn.execute(

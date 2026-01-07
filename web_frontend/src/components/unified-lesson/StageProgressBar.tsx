@@ -13,7 +13,7 @@ type StageProgressBarProps = {
   canGoNext: boolean;
 };
 
-function StageIcon({ type, small = false }: { type: string; small?: boolean }) {
+export function StageIcon({ type, small = false }: { type: string; small?: boolean }) {
   if (type === "article") {
     const size = small ? "w-4 h-4" : "w-5 h-5";
     return (

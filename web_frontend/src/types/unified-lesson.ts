@@ -36,6 +36,7 @@ export type Lesson = {
 export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
+  icon?: "article" | "video" | "chat";  // For system messages
 };
 
 export type PendingMessage = {
