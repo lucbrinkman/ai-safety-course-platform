@@ -8,6 +8,7 @@ import Availability from "./pages/Availability";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import UnifiedLesson from "./pages/UnifiedLesson";
+import CourseOverview from "./pages/CourseOverview";
 
 function App() {
   const [showMobileWarning, setShowMobileWarning] = useState(true);
@@ -23,6 +24,8 @@ function App() {
       {/* Full-screen pages (no Layout) */}
       <Route path="/lesson/:lessonId" element={<UnifiedLesson />} />
       <Route path="/course/:courseId/lesson/:lessonId" element={<UnifiedLesson />} />
+      <Route path="/course/:courseId" element={<CourseOverview />} />
+      <Route path="/course" element={<CourseOverview />} />
 
       {/* Standard pages with Layout */}
       <Route element={<Layout />}>
