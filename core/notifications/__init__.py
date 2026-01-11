@@ -7,14 +7,13 @@ Public API:
     cancel_reminders(pattern) - Cancel scheduled jobs
 """
 
-# These imports will be enabled as modules are implemented:
-# from .dispatcher import send_notification
-# from .scheduler import schedule_reminder, cancel_reminders, init_scheduler, shutdown_scheduler
+from .dispatcher import send_notification
+from .scheduler import schedule_reminder, cancel_reminders, init_scheduler, shutdown_scheduler
 
 __all__ = [
-    # "send_notification",
-    # "schedule_reminder",
-    # "cancel_reminders",
-    # "init_scheduler",
-    # "shutdown_scheduler",
+    "send_notification",
+    "schedule_reminder",
+    "cancel_reminders",
+    "init_scheduler",
+    "shutdown_scheduler",
 ]
