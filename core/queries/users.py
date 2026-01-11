@@ -70,12 +70,15 @@ async def get_or_create_user(
     discord_avatar: str | None = None,
     email: str | None = None,
     email_verified: bool = False,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], bool]:
     """
     Get or create a user by Discord ID.
 
     If user exists and new fields are provided, updates them.
     When email changes or is newly set with verification, updates email_verified_at.
+
+    Returns:
+        Tuple of (user_dict, is_new_user)
     """
     existing = await get_user_by_discord_id(conn, discord_id)
 
@@ -95,10 +98,11 @@ async def get_or_create_user(
                 updates["email_verified_at"] = None
 
         if updates:
-            return await update_user(conn, discord_id, **updates)
-        return existing
+            return await update_user(conn, discord_id, **updates), False
+        return existing, False
 
-    return await create_user(conn, discord_id, discord_username, discord_avatar, email, email_verified)
+    new_user = await create_user(conn, discord_id, discord_username, discord_avatar, email, email_verified)
+    return new_user, True
 
 
 async def get_user_profile(

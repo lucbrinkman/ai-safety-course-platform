@@ -6,6 +6,7 @@ from core.config import get_frontend_url
 
 
 DISCORD_SERVER_ID = os.environ.get("DISCORD_SERVER_ID", "")
+DISCORD_INVITE_URL = "https://discord.gg/9UERVTXs"
 
 
 def build_lesson_url(lesson_id: str) -> str:
@@ -30,3 +31,8 @@ def build_discord_channel_url(server_id: str | None = None, channel_id: str = ""
     """
     sid = server_id or DISCORD_SERVER_ID
     return f"https://discord.com/channels/{sid}/{channel_id}"
+
+
+def build_discord_invite_url() -> str:
+    """Get the Discord server invite URL."""
+    return DISCORD_INVITE_URL

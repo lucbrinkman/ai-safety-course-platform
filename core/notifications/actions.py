@@ -5,18 +5,23 @@ These functions are called by business logic (cogs, routes) to send notification
 They handle building context, generating calendar invites, and scheduling reminders.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from core.notifications.dispatcher import send_notification
 from core.notifications.scheduler import schedule_reminder, cancel_reminders
 from core.notifications.channels.calendar import create_calendar_invite
-from core.notifications.urls import build_profile_url, build_discord_channel_url, build_lesson_url
+from core.notifications.urls import (
+    build_profile_url,
+    build_discord_channel_url,
+    build_discord_invite_url,
+    build_lesson_url,
+)
 
 
 async def notify_welcome(user_id: int) -> dict:
     """
-    Send welcome notification when user signs up.
+    Send welcome notification when user enrolls in a cohort.
 
     Args:
         user_id: Database user ID
@@ -29,6 +34,7 @@ async def notify_welcome(user_id: int) -> dict:
         message_type="welcome",
         context={
             "profile_url": build_profile_url(),
+            "discord_invite_url": build_discord_invite_url(),
         },
     )
 
@@ -200,7 +206,7 @@ def schedule_trial_nudge(session_id: int, user_id: int, lesson_url: str) -> None
     """
     schedule_reminder(
         job_id=f"trial_{session_id}_nudge",
-        run_at=datetime.utcnow() + timedelta(hours=24),
+        run_at=datetime.now(timezone.utc) + timedelta(hours=24),
         message_type="trial_nudge",
         user_ids=[user_id],
         context={"lesson_url": lesson_url},

@@ -31,9 +31,11 @@ async def get_or_create_user(
         The user record from the database
     """
     async with get_transaction() as conn:
-        return await _get_or_create_user(
+        user, _is_new = await _get_or_create_user(
             conn, discord_id, discord_username, discord_avatar, email, email_verified
         )
+
+    return user
 
 
 async def create_auth_code(discord_id: str, expires_minutes: int = 5) -> str:
@@ -51,7 +53,7 @@ async def create_auth_code(discord_id: str, expires_minutes: int = 5) -> str:
 
     async with get_transaction() as conn:
         # Ensure user exists first (auth_codes.user_id is NOT NULL)
-        user = await _get_or_create_user(conn, discord_id)
+        user, _is_new = await _get_or_create_user(conn, discord_id)
 
         await _create_auth_code(
             conn,

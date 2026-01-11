@@ -4,6 +4,7 @@ User profile management.
 All functions are async and use the database.
 """
 
+import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
@@ -242,4 +243,17 @@ async def enroll_in_cohort(
         # Convert enums to strings for JSON serialization
         enrollment["role_in_cohort"] = enrollment["role_in_cohort"].value
         enrollment["grouping_status"] = enrollment["grouping_status"].value
-        return enrollment
+
+    # Send welcome notification (fire and forget)
+    asyncio.create_task(_send_welcome_notification(user["user_id"]))
+
+    return enrollment
+
+
+async def _send_welcome_notification(user_id: int) -> None:
+    """Send welcome notification, logging any errors."""
+    try:
+        from .notifications import notify_welcome
+        await notify_welcome(user_id)
+    except Exception as e:
+        print(f"[Notifications] Failed to send welcome notification to user {user_id}: {e}")

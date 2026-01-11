@@ -3,6 +3,7 @@ Groups Cog - Discord adapter for realizing groups from database.
 Creates Discord channels, scheduled events, and welcome messages.
 """
 
+import asyncio
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -22,6 +23,10 @@ from core.queries.groups import (
     get_realized_groups_for_discord_user,
 )
 from core.cohorts import format_local_time
+from core.notifications import (
+    notify_group_assigned,
+    schedule_meeting_reminders,
+)
 
 
 class GroupsCog(commands.Cog):
@@ -185,6 +190,16 @@ class GroupsCog(commands.Cog):
                 group_data,
                 cohort_data,
                 events[0].url if events else None,
+            )
+
+            # Send email/DM notifications to each member (fire and forget)
+            asyncio.create_task(
+                self._send_group_notifications(
+                    group_data,
+                    cohort_data,
+                    str(text_channel.id),
+                    events,
+                )
             )
 
             created_count += 1
@@ -351,6 +366,74 @@ class GroupsCog(commands.Cog):
 Questions? Ask in this channel. We're here to help each other learn!
 """
         await channel.send(message)
+
+    async def _send_group_notifications(
+        self,
+        group_data: dict,
+        cohort_data: dict,
+        discord_channel_id: str,
+        events: list[discord.ScheduledEvent],
+    ) -> None:
+        """
+        Send group assignment notifications and schedule meeting reminders.
+
+        Sends email/DM to each member and schedules reminders for all meetings.
+        """
+        try:
+            # Build member names list
+            member_names = [
+                m.get("name") or m.get("nickname") or m.get("discord_username") or f"User {m['user_id']}"
+                for m in group_data["members"]
+            ]
+
+            # Get meeting time info
+            meeting_time_utc = group_data.get("recurring_meeting_time_utc", "TBD")
+
+            # Get first meeting datetime from events (if available)
+            first_meeting_datetime = None
+            if events:
+                first_meeting_datetime = events[0].start_time
+
+            recurrence_weeks = cohort_data.get("number_of_group_meetings", 8)
+
+            # Notify each member
+            for member_data in group_data["members"]:
+                user_id = member_data.get("user_id")
+                if not user_id:
+                    continue
+
+                try:
+                    await notify_group_assigned(
+                        user_id=user_id,
+                        group_name=group_data["group_name"],
+                        meeting_time_utc=meeting_time_utc,
+                        member_names=member_names,
+                        discord_channel_id=discord_channel_id,
+                        meeting_id=group_data["group_id"],
+                        meeting_datetime=first_meeting_datetime,
+                        recurrence_weeks=recurrence_weeks,
+                    )
+                except Exception as e:
+                    print(f"[Notifications] Failed to notify user {user_id} of group assignment: {e}")
+
+            # Schedule reminders for each meeting (event)
+            user_ids = [m["user_id"] for m in group_data["members"] if m.get("user_id")]
+
+            for i, event in enumerate(events):
+                try:
+                    # Use event ID as meeting ID for uniqueness
+                    schedule_meeting_reminders(
+                        meeting_id=int(f"{group_data['group_id']}{i+1:02d}"),  # e.g., 101, 102, etc.
+                        meeting_time=event.start_time,
+                        user_ids=user_ids,
+                        group_name=group_data["group_name"],
+                        discord_channel_id=discord_channel_id,
+                    )
+                except Exception as e:
+                    print(f"[Notifications] Failed to schedule reminders for meeting {i+1}: {e}")
+
+        except Exception as e:
+            print(f"[Notifications] Error in _send_group_notifications: {e}")
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):

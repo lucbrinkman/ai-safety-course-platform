@@ -71,6 +71,14 @@ from .config import (
     get_allowed_origins,
 )
 
+# Notifications
+from .notifications import (
+    notify_welcome,
+    notify_group_assigned,
+    schedule_meeting_reminders,
+    cancel_meeting_reminders,
+)
+
 __all__ = [
     # Database (SQLAlchemy)
     'get_connection', 'get_transaction', 'get_engine', 'close_engine', 'is_configured',
@@ -108,4 +116,7 @@ __all__ = [
     'is_dev_mode', 'is_production',
     'get_api_port', 'get_vite_port',
     'get_frontend_url', 'get_allowed_origins',
+    # Notifications
+    'notify_welcome', 'notify_group_assigned',
+    'schedule_meeting_reminders', 'cancel_meeting_reminders',
 ]

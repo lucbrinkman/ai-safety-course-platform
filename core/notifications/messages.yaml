@@ -10,19 +10,22 @@ welcome:
   email_body: |
     Hi {name},
 
-    Thanks for signing up! We're excited to have you.
+    Thanks for enrolling! We're excited to have you.
 
-    Next steps:
-    - Complete your availability form: {profile_url}
-    - We'll match you with a study group
+    What happens next:
+    - We'll match you with a study group based on your availability
+    - You'll receive an email with your group details and calendar invite
+
+    Join our Discord server to chat with your group:
+    {discord_invite_url}
 
     Questions? Reply to this email.
 
     Best,
     The AI Safety Course Team
   discord: |
-    Welcome {name}! Thanks for signing up.
-    Complete your availability form to get matched with a group: {profile_url}
+    Welcome {name}! Thanks for enrolling.
+    We'll match you with a study group soon based on your availability.
 
 group_assigned:
   email_subject: "You've been assigned to a group: {group_name}"
