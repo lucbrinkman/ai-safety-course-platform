@@ -3,6 +3,7 @@
  */
 
 import type { Lesson, SessionState } from "../types/unified-lesson";
+import type { CourseProgress } from "../types/course";
 
 const API_BASE = "";
 
@@ -142,4 +143,12 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
 
   const data = await res.json();
   return data.text;
+}
+
+export async function getCourseProgress(courseId: string): Promise<CourseProgress> {
+  const res = await fetch(`${API_BASE}/api/courses/${courseId}/progress`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to fetch course progress");
+  return res.json();
 }

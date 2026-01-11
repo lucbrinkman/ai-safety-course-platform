@@ -206,3 +206,48 @@ async def claim_session(session_id: int, user_id: int) -> dict:
         )
         row = result.mappings().one()
         return dict(row)
+
+
+async def get_user_lesson_progress(user_id: int | None) -> dict[str, dict]:
+    """
+    Get progress for all lessons a user has started.
+
+    Args:
+        user_id: The user's database ID (None for anonymous)
+
+    Returns:
+        Dict mapping lesson_id to progress info:
+        {
+            "lesson-id": {
+                "status": "completed" | "in_progress" | "not_started",
+                "current_stage_index": int | None,
+                "session_id": int | None,
+            }
+        }
+    """
+    if user_id is None:
+        return {}
+
+    async with get_connection() as conn:
+        result = await conn.execute(
+            select(lesson_sessions)
+            .where(lesson_sessions.c.user_id == user_id)
+            .order_by(lesson_sessions.c.last_active_at.desc())
+        )
+        rows = result.mappings().all()
+
+    progress = {}
+    for row in rows:
+        lesson_id = row["lesson_id"]
+        # Only keep the most recent session per lesson
+        if lesson_id not in progress:
+            if row["completed_at"] is not None:
+                status = "completed"
+            else:
+                status = "in_progress"
+            progress[lesson_id] = {
+                "status": status,
+                "current_stage_index": row["current_stage_index"],
+                "session_id": row["session_id"],
+            }
+    return progress

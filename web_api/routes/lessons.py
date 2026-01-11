@@ -38,6 +38,7 @@ from core.lessons import (
     VideoStage,
     load_article_with_metadata,
     load_video_transcript_with_metadata,
+    get_stage_title,
 )
 from core import get_or_create_user
 from core.notifications import schedule_trial_nudge, cancel_trial_nudge
@@ -56,20 +57,6 @@ def get_video_info(stage: VideoStage) -> dict:
         }
     except FileNotFoundError:
         return {"video_id": None, "title": None, "url": None}
-
-
-def get_stage_title(stage) -> str:
-    """Extract display title from a stage using actual content metadata."""
-    if isinstance(stage, ArticleStage):
-        try:
-            result = load_article_with_metadata(stage.source)
-            return result.metadata.title or "Article"
-        except FileNotFoundError:
-            return "Article"
-    elif isinstance(stage, VideoStage):
-        info = get_video_info(stage)
-        return info.get("title") or "Video"
-    return ""
 
 
 def get_started_message(stage) -> dict | None:

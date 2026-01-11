@@ -265,3 +265,29 @@ def load_video_transcript_with_metadata(source_url: str) -> VideoTranscriptConte
         metadata=metadata,
         is_excerpt=False,
     )
+
+
+def get_stage_title(stage) -> str:
+    """Extract display title from a stage using actual content metadata.
+
+    Args:
+        stage: A stage object (ArticleStage, VideoStage, or ChatStage)
+
+    Returns:
+        Display title string for the stage
+    """
+    from .types import ArticleStage, VideoStage
+
+    if isinstance(stage, ArticleStage):
+        try:
+            result = load_article_with_metadata(stage.source)
+            return result.metadata.title or "Article"
+        except FileNotFoundError:
+            return "Article"
+    elif isinstance(stage, VideoStage):
+        try:
+            result = load_video_transcript_with_metadata(stage.source)
+            return result.metadata.title or "Video"
+        except FileNotFoundError:
+            return "Video"
+    return "Discussion"

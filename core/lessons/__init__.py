@@ -22,6 +22,7 @@ from .content import (
     ArticleMetadata,
     VideoTranscriptContent,
     VideoTranscriptMetadata,
+    get_stage_title,
 )
 from .sessions import (
     create_session,
@@ -31,6 +32,7 @@ from .sessions import (
     advance_stage,
     complete_session,
     claim_session,
+    get_user_lesson_progress,
     SessionNotFoundError,
     SessionAlreadyClaimedError,
 )
@@ -60,6 +62,7 @@ __all__ = [
     "ArticleMetadata",
     "VideoTranscriptContent",
     "VideoTranscriptMetadata",
+    "get_stage_title",
     "create_session",
     "get_session",
     "get_user_sessions",
@@ -67,6 +70,7 @@ __all__ = [
     "advance_stage",
     "complete_session",
     "claim_session",
+    "get_user_lesson_progress",
     "SessionNotFoundError",
     "SessionAlreadyClaimedError",
     "send_lesson_message",
