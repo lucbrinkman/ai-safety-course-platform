@@ -37,6 +37,11 @@ from .users import (
 
 # Nickname sync (async functions)
 from .nickname import get_user_nickname, update_user_nickname
+from .nickname_sync import (
+    register_nickname_callback,
+    unregister_nickname_callback,
+    update_nickname_in_discord,
+)
 
 # Cohorts / Availability
 from .cohorts import (
@@ -55,7 +60,16 @@ from .auth import create_auth_code, get_or_create_user, validate_and_use_auth_co
 
 # Stampy chatbot
 from . import stampy
-from . import lesson_chat
+
+# Configuration
+from .config import (
+    is_dev_mode,
+    is_production,
+    get_api_port,
+    get_vite_port,
+    get_frontend_url,
+    get_allowed_origins,
+)
 
 __all__ = [
     # Database (SQLAlchemy)
@@ -81,6 +95,7 @@ __all__ = [
     'become_facilitator', 'enroll_in_cohort',
     # Nickname sync (async)
     'get_user_nickname', 'update_user_nickname',
+    'register_nickname_callback', 'unregister_nickname_callback', 'update_nickname_in_discord',
     # Cohorts / Availability
     'find_availability_overlap', 'format_local_time', 'get_timezone_abbrev',
     # Availability format conversion
@@ -89,5 +104,8 @@ __all__ = [
     'create_auth_code', 'get_or_create_user', 'validate_and_use_auth_code',
     # Stampy
     'stampy',
-    'lesson_chat',
+    # Configuration
+    'is_dev_mode', 'is_production',
+    'get_api_port', 'get_vite_port',
+    'get_frontend_url', 'get_allowed_origins',
 ]

@@ -22,6 +22,7 @@ from fastapi.responses import RedirectResponse
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core import get_or_create_user, get_user_profile, validate_and_use_auth_code
+from core import is_dev_mode, is_production, get_api_port, get_vite_port, get_allowed_origins
 from web_api.auth import create_jwt, get_optional_user, set_session_cookie
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -30,20 +31,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET")
 
-# Compute URLs based on mode:
-# - Dev mode: separate Vite server (VITE_PORT) for frontend, API on API_PORT
-# - Production (Railway): use env vars DISCORD_REDIRECT_URI and FRONTEND_URL
-# - Local production mode: calculate from API_PORT (single-service)
-_dev_mode = os.environ.get("DEV_MODE", "").lower() in ("true", "1", "yes")
-_is_railway = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
-_api_port = os.environ.get("API_PORT", "8000")
-_vite_port = os.environ.get("VITE_PORT", "5173")
+# Compute URLs based on mode - using centralized config
+_api_port = get_api_port()
+_vite_port = get_vite_port()
 
-if _dev_mode:
+if is_dev_mode():
     # Dev mode: Vite runs on separate port
     DISCORD_REDIRECT_URI = f"http://localhost:{_api_port}/auth/discord/callback"
     FRONTEND_URL = f"http://localhost:{_vite_port}"
-elif _is_railway:
+elif is_production():
     # Production: use explicit env vars
     DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", f"http://localhost:{_api_port}/auth/discord/callback")
     FRONTEND_URL = os.environ.get("FRONTEND_URL", f"http://localhost:{_api_port}")
@@ -52,22 +48,8 @@ else:
     DISCORD_REDIRECT_URI = f"http://localhost:{_api_port}/auth/discord/callback"
     FRONTEND_URL = f"http://localhost:{_api_port}"
 
-# Allowed origins for redirect (security whitelist)
-ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8000",
-    "http://localhost:8001",
-    "http://localhost:8002",
-    "http://localhost:8003",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:8001",
-    "http://127.0.0.1:8002",
-    "http://127.0.0.1:8003",
-]
-# Add production domain via env var if not already in list
-if FRONTEND_URL not in ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS.append(FRONTEND_URL)
+# Use centralized allowed origins
+ALLOWED_ORIGINS = get_allowed_origins()
 
 
 def _validate_origin(origin: str | None) -> str:
@@ -260,11 +242,11 @@ async def validate_auth_code_api(response: Response, code: str, next: str = "/")
     Sets the session cookie on the response.
     """
     if not code:
-        return {"status": "error", "error": "missing_code"}
+        raise HTTPException(status_code=400, detail="missing_code")
 
     auth_code, error = await validate_and_use_auth_code(code)
     if error:
-        return {"status": "error", "error": error}
+        raise HTTPException(status_code=400, detail=error)
 
     # Get or create user
     discord_id = auth_code["discord_id"]

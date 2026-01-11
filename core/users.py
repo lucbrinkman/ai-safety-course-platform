@@ -29,10 +29,10 @@ async def get_user_profile(discord_id: str) -> dict[str, Any] | None:
 
 async def save_user_profile(
     discord_id: str,
-    nickname: str = None,
-    timezone_str: str = None,
-    availability_local: str = None,
-    if_needed_availability_local: str = None,
+    nickname: str | None = None,
+    timezone_str: str | None = None,
+    availability_local: str | None = None,
+    if_needed_availability_local: str | None = None,
 ) -> dict[str, Any]:
     """
     Save or update a user's profile (create or upsert).
@@ -63,10 +63,10 @@ async def save_user_profile(
 
 async def update_user_profile(
     discord_id: str,
-    nickname: str = None,
-    email: str = None,
-    timezone_str: str = None,
-    availability_local: str = None,
+    nickname: str | None = None,
+    email: str | None = None,
+    timezone_str: str | None = None,
+    availability_local: str | None = None,
 ) -> dict[str, Any] | None:
     """
     Update a user's profile with email verification handling.

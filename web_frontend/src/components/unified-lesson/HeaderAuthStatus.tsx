@@ -37,11 +37,15 @@ export default function HeaderAuthStatus({ onLoginClick }: Props) {
       )}
     >
       <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900">
-        <img
-          src={discordAvatarUrl || undefined}
-          alt={discordUsername || "User avatar"}
-          className="w-6 h-6 rounded-full"
-        />
+        {discordAvatarUrl ? (
+          <img
+            src={discordAvatarUrl}
+            alt={`${discordUsername}'s avatar`}
+            className="w-6 h-6 rounded-full"
+          />
+        ) : (
+          <div className="w-6 h-6 rounded-full bg-gray-300" />
+        )}
         <span>{discordUsername}</span>
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

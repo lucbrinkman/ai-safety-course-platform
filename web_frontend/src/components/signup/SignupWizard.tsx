@@ -6,10 +6,9 @@ import CohortRoleStep from "./CohortRoleStep";
 import AvailabilityStep from "./AvailabilityStep";
 import SuccessMessage from "./SuccessMessage";
 import { useAuth } from "../../hooks/useAuth";
+import { API_URL } from "../../config";
 
 type Step = 1 | 2 | 3 | "complete";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export default function SignupWizard() {
   const { isAuthenticated, isLoading, user, discordUsername, login } =
@@ -26,7 +25,8 @@ export default function SignupWizard() {
     selectedCohortId: null,
     selectedRole: null,
   });
-  const [_isSubmitting, setIsSubmitting] = useState(false);
+  // Submission state tracked for future UI improvements (e.g., disable button during submit)
+  const [, setIsSubmitting] = useState(false);
 
   // Cohort data
   const [enrolledCohorts, setEnrolledCohorts] = useState<Cohort[]>([]);

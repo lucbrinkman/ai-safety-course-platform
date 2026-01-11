@@ -1,31 +1,57 @@
 """
-Nickname sync - re-exports Discord nickname update for web API.
+Nickname sync - bridges web API and Discord bot for nickname updates.
 
-Actual logic lives in discord_bot/cogs/nickname_cog.py.
-This module exists so web_api imports from core (not discord_bot directly).
+Uses callback registration pattern so:
+1. core/ has no imports from discord_bot/
+2. discord_bot/ registers its implementation at startup
+3. web_api/ calls through core/ without knowing about Discord
 
-NOTE: Discord.py's load_extension() creates a NEW module instance (for reload support),
-so we can't import the function at module load time. Instead, we access the bot's
-loaded extension at call time via sys.modules.
+This maintains the 3-layer architecture documented in CLAUDE.md.
 """
 
-import sys
+from typing import Callable, Awaitable
+
+# Type for the nickname update callback
+NicknameUpdateCallback = Callable[[str, str | None], Awaitable[bool]]
+
+# Registered callback - set by discord_bot at startup
+_nickname_callback: NicknameUpdateCallback | None = None
+
+
+def register_nickname_callback(callback: NicknameUpdateCallback) -> None:
+    """
+    Register the Discord nickname update callback.
+
+    Called by discord_bot/cogs/nickname_cog.py during setup.
+    """
+    global _nickname_callback
+    _nickname_callback = callback
+
+
+def unregister_nickname_callback() -> None:
+    """
+    Unregister the callback (for testing or bot shutdown).
+    """
+    global _nickname_callback
+    _nickname_callback = None
 
 
 async def update_nickname_in_discord(discord_id: str, nickname: str | None) -> bool:
     """
-    Update user's nickname in Discord. Delegates to the bot's loaded nickname_cog.
+    Update user's nickname in Discord.
 
-    Must be called after the bot has loaded its extensions.
+    Delegates to the registered callback from discord_bot.
+    Returns False if no callback is registered (bot not running).
     """
-    # Access the module that discord.py's load_extension() created
-    # This is the one with _bot set, not our import-time copy
-    module = sys.modules.get("discord_bot.cogs.nickname_cog")
-    if module is None:
-        print("[nickname_sync] Module not loaded yet")
+    if _nickname_callback is None:
+        print("[nickname_sync] No callback registered (bot not running?)")
         return False
 
-    return await module.update_nickname_in_discord(discord_id, nickname)
+    return await _nickname_callback(discord_id, nickname)
 
 
-__all__ = ["update_nickname_in_discord"]
+__all__ = [
+    "register_nickname_callback",
+    "unregister_nickname_callback",
+    "update_nickname_in_discord",
+]

@@ -90,16 +90,35 @@ def get_finished_message(stage) -> dict | None:
     return None
 
 
-async def get_user_id_for_lesson(request: Request) -> int:
-    """Get user_id, with dev fallback for unauthenticated requests."""
+def check_session_access(session: dict, user_id: int | None) -> None:
+    """Raise 403 if user doesn't own the session.
+
+    Anonymous sessions (user_id=None in session) are accessible by anyone.
+    Owned sessions require the requesting user_id to match.
+    """
+    if session["user_id"] is not None and session["user_id"] != user_id:
+        raise HTTPException(status_code=403, detail="Not your session")
+
+
+async def get_user_id_for_lesson(request: Request) -> int | None:
+    """Get user_id from authenticated user, or None for anonymous requests.
+
+    In DEV_MODE only, unauthenticated requests get a test user.
+    In production, unauthenticated requests remain anonymous (user_id=None).
+    """
+    import os
+
     user_jwt = await get_optional_user(request)
 
     if user_jwt:
         # Authenticated user
         discord_id = user_jwt["sub"]
-    else:
-        # Dev fallback: use a test discord_id
+    elif os.environ.get("DEV_MODE", "").lower() in ("true", "1", "yes"):
+        # Dev fallback: use a test discord_id (only in dev mode)
         discord_id = "dev_test_user_123"
+    else:
+        # Production: anonymous user (no database record)
+        return None
 
     user = await get_or_create_user(discord_id)
     return user["user_id"]
@@ -228,11 +247,7 @@ async def get_session_state(
     except SessionNotFoundError:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Allow access if:
-    # 1. Session is anonymous (user_id is None) - anyone with session_id can access
-    # 2. Session belongs to the requesting user
-    if session["user_id"] is not None and session["user_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not your session")
+    check_session_access(session, user_id)
 
     # Load lesson to include stage info
     lesson = load_lesson(session["lesson_id"])
@@ -370,11 +385,7 @@ async def send_message_endpoint(
     except SessionNotFoundError:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Allow access if:
-    # 1. Session is anonymous (user_id is None) - anyone with session_id can access
-    # 2. Session belongs to the requesting user
-    if session["user_id"] is not None and session["user_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not your session")
+    check_session_access(session, user_id)
 
     # Load lesson and current stage
     lesson = load_lesson(session["lesson_id"])
@@ -445,11 +456,7 @@ async def advance_session(session_id: int, request: Request):
     except SessionNotFoundError:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Allow access if:
-    # 1. Session is anonymous (user_id is None) - anyone with session_id can access
-    # 2. Session belongs to the requesting user
-    if session["user_id"] is not None and session["user_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not your session")
+    check_session_access(session, user_id)
 
     lesson = load_lesson(session["lesson_id"])
     current_stage_index = session["current_stage_index"]

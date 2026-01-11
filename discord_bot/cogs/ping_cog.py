@@ -8,6 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 from datetime import datetime
 import asyncio
+import io
 
 
 class PingCog(commands.Cog):
@@ -76,8 +77,6 @@ We believe that by bringing together motivated individuals from diverse backgrou
     @app_commands.command(name="txt", description="Test text file attachment")
     async def txt_test(self, interaction: discord.Interaction):
         """Send a long text file as attachment to see how Discord collapses it."""
-        import io
-
         content = """AI SAFETY FUNDAMENTALS COURSE
 =============================
 
@@ -615,7 +614,6 @@ class CoTExpandView(discord.ui.View):
         if self.expanded:
             button.label = "▲ Hide reasoning"
             # Send full CoT as a file attachment to avoid message length limits
-            import io
             file = discord.File(io.StringIO(self.full_cot), filename="chain_of_thought.txt")
             await interaction.response.edit_message(
                 content="**Stampy's full reasoning:**",

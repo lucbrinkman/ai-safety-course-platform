@@ -21,6 +21,12 @@ from core import (
 )
 
 
+def _build_auth_link(code: str, next_path: str) -> str:
+    """Build an authenticated web link with the given auth code and redirect path."""
+    web_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+    return f"{web_url}/auth/code?code={code}&next={next_path}"
+
+
 class EnrollmentCog(commands.Cog):
     """Cog for user enrollment and profile management."""
 
@@ -33,9 +39,7 @@ class EnrollmentCog(commands.Cog):
         """Generate a web signup link with an auth code."""
         discord_id = str(interaction.user.id)
         code = await create_auth_code(discord_id)
-
-        web_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
-        link = f"{web_url}/auth/code?code={code}&next=/signup"
+        link = _build_auth_link(code, "/signup")
 
         await interaction.response.send_message(
             f"Click here to sign up: {link}\n\nThis link expires in 5 minutes.",
@@ -47,9 +51,7 @@ class EnrollmentCog(commands.Cog):
         """Generate a web link with an auth code to edit availability."""
         discord_id = str(interaction.user.id)
         code = await create_auth_code(discord_id)
-
-        web_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
-        link = f"{web_url}/auth/code?code={code}&next=/availability"
+        link = _build_auth_link(code, "/availability")
 
         await interaction.response.send_message(
             f"Click here to view and edit your availability: {link}\n\nThis link expires in 5 minutes.",

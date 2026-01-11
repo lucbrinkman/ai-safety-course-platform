@@ -82,8 +82,10 @@ class SchedulerCog(commands.Cog):
                             f"Iteration: {current}/{total} | "
                             f"Best: {best_score}/{total_people}"
                 )
-            except Exception:
-                pass
+            except discord.HTTPException:
+                pass  # Rate limited or message deleted, expected
+            except Exception as e:
+                print(f"[SchedulerCog] Progress update failed: {e}")
 
         # Run scheduling
         try:

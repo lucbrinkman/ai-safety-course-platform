@@ -13,3 +13,14 @@
     cursor: pointer;
   }
 }
+
+/* Animations for unified lesson components */
+@keyframes mic-pulse {
+  0%, 100% { stroke: #4b5563; }
+  50% { stroke: #000000; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

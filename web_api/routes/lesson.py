@@ -9,13 +9,15 @@ import json
 import sys
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core import lesson_chat
+from core.lessons.chat import send_message
+from core.lessons.types import ChatStage
+from web_api.auth import get_current_user
 
 router = APIRouter(prefix="/api/chat", tags=["lesson"])
 
@@ -36,8 +38,13 @@ class LessonChatRequest(BaseModel):
 
 async def event_generator(messages: list[dict], system_context: str | None):
     """Generate SSE events from Claude stream."""
+    # Create a ChatStage with the system_context as instructions
+    stage = ChatStage(
+        type="chat",
+        instructions=system_context or "Help the user learn about AI safety.",
+    )
     try:
-        async for chunk in lesson_chat.send_message(messages, system_context):
+        async for chunk in send_message(messages, stage, None, None):
             yield f"data: {json.dumps(chunk)}\n\n"
     except Exception as e:
         yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
@@ -45,9 +52,14 @@ async def event_generator(messages: list[dict], system_context: str | None):
 
 
 @router.post("/lesson")
-async def chat_lesson(request: LessonChatRequest) -> StreamingResponse:
+async def chat_lesson(
+    request: LessonChatRequest,
+    user: dict = Depends(get_current_user),
+) -> StreamingResponse:
     """
     Send a message to the lesson chat and stream the response.
+
+    Requires authentication to prevent API cost abuse.
 
     Returns Server-Sent Events with:
     - {"type": "text", "content": "..."} for text chunks

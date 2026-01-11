@@ -94,4 +94,9 @@ class NicknameCog(commands.Cog):
 async def setup(bot):
     global _bot
     _bot = bot
+
+    # Register the callback with core so web API can trigger nickname updates
+    from core.nickname_sync import register_nickname_callback
+    register_nickname_callback(update_nickname_in_discord)
+
     await bot.add_cog(NicknameCog(bot))

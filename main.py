@@ -55,6 +55,7 @@ if __name__ == "__main__":
 from fastapi import FastAPI
 
 from core.database import close_engine, check_connection
+from core import get_allowed_origins, is_dev_mode
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -214,24 +215,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS configuration
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
-
+# CORS configuration (uses centralized config from core/)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        FRONTEND_URL,
-        "http://localhost:5173",
-        "http://localhost:8000",
-        "http://localhost:8001",
-        "http://localhost:8002",
-        "http://localhost:8003",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8000",
-        "http://127.0.0.1:8001",
-        "http://127.0.0.1:8002",
-        "http://127.0.0.1:8003",
-    ],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -255,8 +242,7 @@ spa_path = project_root / "web_frontend" / "dist"  # React SPA build
 @app.get("/")
 async def root():
     """Serve landing page if it exists, otherwise return API status."""
-    dev_mode = os.getenv("DEV_MODE", "").lower() in ("true", "1", "yes")
-    if dev_mode:
+    if is_dev_mode():
         return {
             "status": "ok",
             "message": "API-only mode. Access frontend at Vite dev server.",
@@ -291,8 +277,7 @@ async def health():
 
 
 # SPA routes - serve React app for frontend routes (only in production, not dev mode)
-dev_mode = os.getenv("DEV_MODE", "").lower() in ("true", "1", "yes")
-if spa_path.exists() and not dev_mode:
+if spa_path.exists() and not is_dev_mode():
 
     @app.get("/signup")
     @app.get("/auth/code")

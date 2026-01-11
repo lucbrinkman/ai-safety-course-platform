@@ -26,6 +26,8 @@ If you update the lookup logic, update both files.
 """
 
 from pathlib import Path
+import json
+import re
 
 
 # Default directory for transcript files (educational_content/video_transcripts/)
@@ -97,8 +99,6 @@ def get_text_at_time(
     Returns:
         Text spoken between start and end times
     """
-    import json
-
     timestamps_path = find_transcript_timestamps(video_id, search_dir)
     words = json.loads(timestamps_path.read_text())
 
@@ -113,7 +113,6 @@ def get_text_at_time(
 
 def normalize_for_matching(text: str) -> str:
     """Normalize text for fuzzy matching: lowercase, strip punctuation."""
-    import re
     return re.sub(r'[^\w\s]', '', text).lower()
 
 
@@ -220,8 +219,6 @@ def get_time_from_text(
     Raises:
         ValueError: If anchors cannot be found in transcript
     """
-    import json
-
     timestamps_path = find_transcript_timestamps(video_id, search_dir)
     timestamps = json.loads(timestamps_path.read_text())
 

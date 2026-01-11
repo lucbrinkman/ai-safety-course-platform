@@ -81,6 +81,18 @@ class BreakoutCog(commands.Cog):
         self.bot = bot
         self._active_sessions: dict[int, BreakoutSession] = {}
 
+    async def _send_response(
+        self,
+        interaction: discord.Interaction,
+        content: str,
+        ephemeral: bool = True,
+    ):
+        """Send a response, using followup if the interaction was already responded to."""
+        if interaction.response.is_done():
+            await interaction.followup.send(content, ephemeral=ephemeral)
+        else:
+            await interaction.response.send_message(content, ephemeral=ephemeral)
+
     async def run_breakout(self, interaction: discord.Interaction, group_size: int, include_bots: bool = False):
         """Core breakout logic - can be called from command or GUI."""
         guild = interaction.guild
@@ -88,20 +100,17 @@ class BreakoutCog(commands.Cog):
 
         # Validate caller is in a voice channel
         if not member.voice or not member.voice.channel:
-            if interaction.response.is_done():
-                await interaction.followup.send("You must be in a voice channel.", ephemeral=True)
-            else:
-                await interaction.response.send_message("You must be in a voice channel.", ephemeral=True)
+            await self._send_response(interaction, "You must be in a voice channel.")
             return
 
         source_channel = member.voice.channel
 
         # Check for existing session
         if guild.id in self._active_sessions:
-            if interaction.response.is_done():
-                await interaction.followup.send("A breakout session is already active. Use `/collect` first.", ephemeral=True)
-            else:
-                await interaction.response.send_message("A breakout session is already active. Use `/collect` first.", ephemeral=True)
+            await self._send_response(
+                interaction,
+                "A breakout session is already active. Use `/collect` first."
+            )
             return
 
         # Get other users in the channel (exclude facilitator, optionally include bots)
@@ -111,10 +120,10 @@ class BreakoutCog(commands.Cog):
         ]
 
         if not other_members:
-            if interaction.response.is_done():
-                await interaction.followup.send("There are no other users in the voice channel to split.", ephemeral=True)
-            else:
-                await interaction.response.send_message("There are no other users in the voice channel to split.", ephemeral=True)
+            await self._send_response(
+                interaction,
+                "There are no other users in the voice channel to split."
+            )
             return
 
         # Defer if not already done
@@ -239,10 +248,10 @@ class BreakoutCog(commands.Cog):
 
         # Check for active session
         if guild.id not in self._active_sessions:
-            if interaction.response.is_done():
-                await interaction.followup.send("No active breakout session to collect.", ephemeral=True)
-            else:
-                await interaction.response.send_message("No active breakout session to collect.", ephemeral=True)
+            await self._send_response(
+                interaction,
+                "No active breakout session to collect."
+            )
             return
 
         session = self._active_sessions[guild.id]

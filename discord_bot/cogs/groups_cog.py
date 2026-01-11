@@ -30,6 +30,26 @@ class GroupsCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def _grant_channel_permissions(
+        self,
+        member: discord.Member,
+        text_channel: discord.TextChannel,
+        voice_channel: discord.VoiceChannel,
+    ):
+        """Grant standard group channel permissions to a member."""
+        await text_channel.set_permissions(
+            member,
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+        )
+        await voice_channel.set_permissions(
+            member,
+            view_channel=True,
+            connect=True,
+            speak=True,
+        )
+
     async def cohort_autocomplete(
         self,
         interaction: discord.Interaction,
@@ -130,17 +150,8 @@ class GroupsCog(commands.Cog):
                 if discord_id:
                     try:
                         member = await interaction.guild.fetch_member(int(discord_id))
-                        await text_channel.set_permissions(
-                            member,
-                            view_channel=True,
-                            send_messages=True,
-                            read_message_history=True,
-                        )
-                        await voice_channel.set_permissions(
-                            member,
-                            view_channel=True,
-                            connect=True,
-                            speak=True,
+                        await self._grant_channel_permissions(
+                            member, text_channel, voice_channel
                         )
                     except discord.NotFound:
                         # Member not in guild - track for reporting
@@ -363,19 +374,9 @@ Questions? Ask in this channel. We're here to help each other learn!
                 text_channel = member.guild.get_channel(int(group["discord_text_channel_id"]))
                 voice_channel = member.guild.get_channel(int(group["discord_voice_channel_id"]))
 
-                if text_channel:
-                    await text_channel.set_permissions(
-                        member,
-                        view_channel=True,
-                        send_messages=True,
-                        read_message_history=True,
-                    )
-                if voice_channel:
-                    await voice_channel.set_permissions(
-                        member,
-                        view_channel=True,
-                        connect=True,
-                        speak=True,
+                if text_channel and voice_channel:
+                    await self._grant_channel_permissions(
+                        member, text_channel, voice_channel
                     )
 
                 granted_groups.append(group["group_name"])

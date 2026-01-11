@@ -108,16 +108,17 @@ async def add_message(session_id: int, role: str, content: str, icon: str | None
     messages = session["messages"] + [message]
 
     async with get_transaction() as conn:
-        await conn.execute(
+        result = await conn.execute(
             update(lesson_sessions)
             .where(lesson_sessions.c.session_id == session_id)
             .values(
                 messages=messages,
                 last_active_at=datetime.now(timezone.utc),
             )
+            .returning(lesson_sessions)
         )
-
-    return await get_session(session_id)
+        row = result.mappings().one()
+        return dict(row)
 
 
 async def advance_stage(session_id: int) -> dict:
@@ -134,16 +135,17 @@ async def advance_stage(session_id: int) -> dict:
     new_index = session["current_stage_index"] + 1
 
     async with get_transaction() as conn:
-        await conn.execute(
+        result = await conn.execute(
             update(lesson_sessions)
             .where(lesson_sessions.c.session_id == session_id)
             .values(
                 current_stage_index=new_index,
                 last_active_at=datetime.now(timezone.utc),
             )
+            .returning(lesson_sessions)
         )
-
-    return await get_session(session_id)
+        row = result.mappings().one()
+        return dict(row)
 
 
 async def complete_session(session_id: int) -> dict:
@@ -157,16 +159,17 @@ async def complete_session(session_id: int) -> dict:
         Updated session dict
     """
     async with get_transaction() as conn:
-        await conn.execute(
+        result = await conn.execute(
             update(lesson_sessions)
             .where(lesson_sessions.c.session_id == session_id)
             .values(
                 completed_at=datetime.now(timezone.utc),
                 last_active_at=datetime.now(timezone.utc),
             )
+            .returning(lesson_sessions)
         )
-
-    return await get_session(session_id)
+        row = result.mappings().one()
+        return dict(row)
 
 
 async def claim_session(session_id: int, user_id: int) -> dict:
@@ -192,13 +195,14 @@ async def claim_session(session_id: int, user_id: int) -> dict:
         )
 
     async with get_transaction() as conn:
-        await conn.execute(
+        result = await conn.execute(
             update(lesson_sessions)
             .where(lesson_sessions.c.session_id == session_id)
             .values(
                 user_id=user_id,
                 last_active_at=datetime.now(timezone.utc),
             )
+            .returning(lesson_sessions)
         )
-
-    return await get_session(session_id)
+        row = result.mappings().one()
+        return dict(row)

@@ -1,7 +1,5 @@
-import { Outlet } from "react-router";
-
-const DISCORD_INVITE_URL =
-  import.meta.env.VITE_DISCORD_INVITE_URL || "https://discord.gg/YOUR_INVITE";
+import { Outlet } from "react-router-dom";
+import { DISCORD_INVITE_URL } from "../config";
 
 export default function Layout() {
   return (

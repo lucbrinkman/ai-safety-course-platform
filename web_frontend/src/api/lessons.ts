@@ -2,7 +2,7 @@
  * API client for lesson endpoints.
  */
 
-import type { SessionState } from "../types/unified-lesson";
+import type { Lesson, SessionState } from "../types/unified-lesson";
 
 const API_BASE = "";
 

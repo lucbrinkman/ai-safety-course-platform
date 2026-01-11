@@ -255,12 +255,6 @@ export default function VideoPlayer({
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
       {/* Video + progress bar container with hover detection */}
       <div
         className="w-full"

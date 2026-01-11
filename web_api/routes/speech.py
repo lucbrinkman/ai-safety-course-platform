@@ -1,8 +1,9 @@
 """Speech-to-text API endpoints."""
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from core.speech import transcribe_audio
+from web_api.auth import get_current_user
 
 router = APIRouter(prefix="/api", tags=["speech"])
 
@@ -10,9 +11,10 @@ MAX_FILE_SIZE = 25 * 1024 * 1024  # 25MB (Whisper API limit)
 
 
 @router.post("/transcribe")
-async def transcribe(audio: UploadFile):
+async def transcribe(audio: UploadFile, user: dict = Depends(get_current_user)):
     """Transcribe audio to text using Whisper API.
 
+    Requires authentication to prevent API cost abuse.
     Accepts audio files in webm, mp3, wav, m4a, flac, ogg formats.
     Returns the transcribed text.
     """

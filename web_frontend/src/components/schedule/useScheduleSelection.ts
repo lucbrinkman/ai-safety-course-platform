@@ -163,18 +163,6 @@ export function useScheduleSelection({
     setHoveredCell(null);
   }, []);
 
-  const handleMouseUp = useCallback(() => {
-    if (selectionState.isSelecting) {
-      applySelection();
-      setSelectionState({
-        isSelecting: false,
-        startCell: null,
-        currentCell: null,
-        selectionMode: null,
-      });
-    }
-  }, [selectionState.isSelecting, applySelection]);
-
   const handleTouchStart = useCallback(
     (day: DayName, hour: number) => {
       const isCurrentlySelected = isSelected(day, hour);
@@ -269,7 +257,6 @@ export function useScheduleSelection({
       onMouseDown: handleMouseDown,
       onMouseEnter: handleMouseEnter,
       onMouseLeave: handleMouseLeave,
-      onMouseUp: handleMouseUp,
       onTouchStart: handleTouchStart,
     },
   };

@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-
-// Default to empty string for relative URLs (works for single-service deployment)
-// Set VITE_API_URL for dev mode when API is on different port
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+import { API_URL } from "../config";
 
 export interface User {
   user_id: number;

@@ -13,7 +13,7 @@ import HeaderAuthStatus from "../components/unified-lesson/HeaderAuthStatus";
 import AuthPromptModal from "../components/unified-lesson/AuthPromptModal";
 
 export default function UnifiedLesson() {
-  const { courseId, lessonId } = useParams<{ courseId?: string; lessonId: string }>();
+  const { courseId: _courseId, lessonId } = useParams<{ courseId?: string; lessonId: string }>();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
   const [pendingMessage, setPendingMessage] = useState<PendingMessage | null>(null);
@@ -230,10 +230,10 @@ export default function UnifiedLesson() {
   const handleGoForward = useCallback(() => {
     const reviewable = getReviewableStages();
     const currentViewing = viewingStageIndex ?? session?.current_stage_index ?? 0;
-    const currentStageIndex = session?.current_stage_index ?? 0;
+    const sessionStageIndex = session?.current_stage_index ?? 0;
 
     // Find next reviewable stage between here and current
-    const later = reviewable.filter(s => s.index > currentViewing && s.index < currentStageIndex);
+    const later = reviewable.filter(s => s.index > currentViewing && s.index < sessionStageIndex);
     if (later.length) {
       setViewingStageIndex(later[0].index);
     } else {

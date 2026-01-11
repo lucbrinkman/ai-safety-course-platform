@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Routes, Route } from "react-router";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import MobileWarning from "./components/MobileWarning";
 import Home from "./pages/Home";

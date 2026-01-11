@@ -42,6 +42,43 @@ class ArticleContent:
     is_excerpt: bool = False  # True if from/to were used to extract a section
 
 
+def _parse_frontmatter_generic(
+    text: str,
+    field_mapping: dict[str, str],
+) -> tuple[dict[str, str], str]:
+    """
+    Generic YAML frontmatter parser.
+
+    Args:
+        text: Full markdown text, possibly with frontmatter
+        field_mapping: Dict mapping YAML keys to output field names
+                       e.g., {"source_url": "source_url", "video_id": "video_id"}
+
+    Returns:
+        Tuple of (metadata_dict, content_without_frontmatter)
+    """
+    pattern = r'^---\s*\n(.*?)\n---\s*\n'
+    match = re.match(pattern, text, re.DOTALL)
+
+    if not match:
+        return {}, text
+
+    frontmatter_text = match.group(1)
+    content = text[match.end():]
+
+    metadata = {}
+    for line in frontmatter_text.split('\n'):
+        line = line.strip()
+        if ':' in line:
+            key, value = line.split(':', 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key in field_mapping:
+                metadata[field_mapping[key]] = value
+
+    return metadata, content
+
+
 def parse_frontmatter(text: str) -> tuple[ArticleMetadata, str]:
     """
     Parse YAML frontmatter from markdown text.
@@ -52,32 +89,18 @@ def parse_frontmatter(text: str) -> tuple[ArticleMetadata, str]:
     Returns:
         Tuple of (metadata, content_without_frontmatter)
     """
-    # Match frontmatter: starts with ---, ends with ---
-    pattern = r'^---\s*\n(.*?)\n---\s*\n'
-    match = re.match(pattern, text, re.DOTALL)
+    field_mapping = {
+        "title": "title",
+        "author": "author",
+        "source_url": "source_url",
+    }
+    raw_metadata, content = _parse_frontmatter_generic(text, field_mapping)
 
-    if not match:
-        return ArticleMetadata(), text
-
-    frontmatter_text = match.group(1)
-    content = text[match.end():]
-
-    # Simple YAML parsing (just key: value pairs)
-    metadata = ArticleMetadata()
-    for line in frontmatter_text.split('\n'):
-        line = line.strip()
-        if ':' in line:
-            key, value = line.split(':', 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-            if key == 'title':
-                metadata.title = value
-            elif key == 'author':
-                metadata.author = value
-            elif key == 'source_url':
-                metadata.source_url = value
-
-    return metadata, content
+    return ArticleMetadata(
+        title=raw_metadata.get("title"),
+        author=raw_metadata.get("author"),
+        source_url=raw_metadata.get("source_url"),
+    ), content
 
 
 def load_article(source_url: str) -> str:
@@ -185,32 +208,18 @@ def parse_video_frontmatter(text: str) -> tuple[VideoTranscriptMetadata, str]:
     Returns:
         Tuple of (metadata, transcript_without_frontmatter)
     """
-    # Match frontmatter: starts with ---, ends with ---
-    pattern = r'^---\s*\n(.*?)\n---\s*\n'
-    match = re.match(pattern, text, re.DOTALL)
+    field_mapping = {
+        "video_id": "video_id",
+        "title": "title",
+        "url": "url",
+    }
+    raw_metadata, content = _parse_frontmatter_generic(text, field_mapping)
 
-    if not match:
-        return VideoTranscriptMetadata(), text
-
-    frontmatter_text = match.group(1)
-    content = text[match.end():]
-
-    # Simple YAML parsing (just key: value pairs)
-    metadata = VideoTranscriptMetadata()
-    for line in frontmatter_text.split('\n'):
-        line = line.strip()
-        if ':' in line:
-            key, value = line.split(':', 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-            if key == 'video_id':
-                metadata.video_id = value
-            elif key == 'title':
-                metadata.title = value
-            elif key == 'url':
-                metadata.url = value
-
-    return metadata, content
+    return VideoTranscriptMetadata(
+        video_id=raw_metadata.get("video_id"),
+        title=raw_metadata.get("title"),
+        url=raw_metadata.get("url"),
+    ), content
 
 
 def load_video_transcript(source_url: str) -> str:

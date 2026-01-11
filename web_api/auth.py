@@ -17,6 +17,10 @@ JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
+# Validate JWT_SECRET at startup in production
+if not JWT_SECRET and os.environ.get("RAILWAY_ENVIRONMENT"):
+    raise RuntimeError("JWT_SECRET must be set in production (RAILWAY_ENVIRONMENT detected)")
+
 
 def create_jwt(discord_user_id: str, discord_username: str) -> str:
     """
@@ -69,11 +73,12 @@ def set_session_cookie(response: Response, token: str) -> None:
         response: The FastAPI response object
         token: The JWT token to store
     """
+    is_production = bool(os.environ.get("RAILWAY_ENVIRONMENT"))
     response.set_cookie(
         key="session",
         value=token,
         httponly=True,
-        secure=False,  # TODO: True in production with HTTPS
+        secure=is_production,
         samesite="lax",
         max_age=60 * 60 * 24,  # 24 hours
     )

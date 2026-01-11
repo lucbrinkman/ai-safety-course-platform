@@ -36,7 +36,9 @@ def get_dst_transitions(timezone_str: str, weeks_ahead: int = 12) -> list[dateti
     except pytz.UnknownTimeZoneError:
         return []
 
-    # Get transition times from pytz
+    # Note: Using pytz private attribute _utc_transition_times.
+    # This is necessary because pytz doesn't expose a public API for DST transitions.
+    # If this breaks in a future pytz version, consider migrating to python-dateutil.
     if not hasattr(tz, '_utc_transition_times') or not tz._utc_transition_times:
         return []  # No DST for this timezone
 

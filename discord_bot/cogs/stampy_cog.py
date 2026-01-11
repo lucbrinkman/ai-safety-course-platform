@@ -10,6 +10,7 @@ import traceback
 import asyncio
 import time
 import os
+import re
 
 import sys
 from pathlib import Path
@@ -57,8 +58,6 @@ def format_scrolling_codeblock(text: str, num_lines: int = SCROLL_LINES) -> str:
     display_lines = lines[-num_lines:] if len(lines) > num_lines else lines
     return "```\n" + "\n".join(display_lines) + "\n```"
 
-
-import re
 
 def get_ref_mapping(text: str) -> tuple[list[str], dict[str, str]]:
     """Extract reference mapping from text.
