@@ -91,7 +91,7 @@ export default function PersonalInfoStep({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             />
             <p className="mt-1 text-sm text-gray-500">
-              This will be set as your nickname in the Coursey McCourseface Discord server, visible to all members.
+              This will be set as your nickname in the Lens Academy Discord server, visible to all members.
             </p>
           </div>
         </div>

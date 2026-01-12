@@ -8,7 +8,7 @@ export default function Layout() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <a href="/" className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-              Coursey McCourseface
+              Lens Academy
             </a>
             <a
               href={DISCORD_INVITE_URL}
