@@ -30,3 +30,6 @@ sendgrid>=6.11.0
 apscheduler>=3.10.0
 PyYAML>=6.0
 icalendar>=5.0.0
+
+# Error tracking
+sentry-sdk[fastapi]>=1.40.0
