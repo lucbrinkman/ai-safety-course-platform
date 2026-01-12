@@ -74,12 +74,12 @@ def _parse_stage(data: dict) -> Stage:
         raise ValueError(f"Unknown stage type: {stage_type}")
 
 
-def load_lesson(lesson_id: str) -> Lesson:
+def load_lesson(lesson_slug: str) -> Lesson:
     """
-    Load a lesson by ID from the lessons directory.
+    Load a lesson by slug from the lessons directory.
 
     Args:
-        lesson_id: The lesson ID (filename without .yaml extension)
+        lesson_slug: The lesson slug (filename without .yaml extension)
 
     Returns:
         Lesson dataclass with parsed stages
@@ -87,10 +87,10 @@ def load_lesson(lesson_id: str) -> Lesson:
     Raises:
         LessonNotFoundError: If lesson file doesn't exist
     """
-    lesson_path = LESSONS_DIR / f"{lesson_id}.yaml"
+    lesson_path = LESSONS_DIR / f"{lesson_slug}.yaml"
 
     if not lesson_path.exists():
-        raise LessonNotFoundError(f"Lesson not found: {lesson_id}")
+        raise LessonNotFoundError(f"Lesson not found: {lesson_slug}")
 
     with open(lesson_path) as f:
         data = yaml.safe_load(f)
@@ -98,7 +98,7 @@ def load_lesson(lesson_id: str) -> Lesson:
     stages = [_parse_stage(s) for s in data["stages"]]
 
     return Lesson(
-        id=data["id"],
+        slug=data["slug"],
         title=data["title"],
         stages=stages,
     )
@@ -106,10 +106,10 @@ def load_lesson(lesson_id: str) -> Lesson:
 
 def get_available_lessons() -> list[str]:
     """
-    Get list of available lesson IDs.
+    Get list of available lesson slugs.
 
     Returns:
-        List of lesson IDs (filenames without .yaml extension)
+        List of lesson slugs (filenames without .yaml extension)
     """
     if not LESSONS_DIR.exists():
         return []

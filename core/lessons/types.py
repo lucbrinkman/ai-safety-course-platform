@@ -42,7 +42,7 @@ Stage = ArticleStage | VideoStage | ChatStage
 @dataclass
 class Lesson:
     """A complete lesson definition."""
-    id: str
+    slug: str
     title: str
     stages: list[Stage]
 
@@ -52,14 +52,14 @@ class Module:
     """A module within a course."""
     id: str
     title: str
-    lessons: list[str]  # List of lesson IDs
+    lessons: list[str]  # List of lesson slugs
     due_by_meeting: int | None = None  # Which meeting this module should be completed by
 
 
 @dataclass
 class Course:
     """A complete course definition."""
-    id: str
+    slug: str
     title: str
     modules: list[Module]
 
@@ -67,5 +67,5 @@ class Course:
 @dataclass
 class NextLesson:
     """Information about the next lesson."""
-    lesson_id: str
+    lesson_slug: str
     lesson_title: str

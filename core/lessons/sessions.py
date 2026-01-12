@@ -18,13 +18,13 @@ class SessionAlreadyClaimedError(Exception):
     pass
 
 
-async def create_session(user_id: int | None, lesson_id: str) -> dict:
+async def create_session(user_id: int | None, lesson_slug: str) -> dict:
     """
     Create a new lesson session.
 
     Args:
         user_id: The user's database ID
-        lesson_id: The lesson ID to start
+        lesson_slug: The lesson slug to start
 
     Returns:
         Dict with session data including session_id
@@ -34,7 +34,7 @@ async def create_session(user_id: int | None, lesson_id: str) -> dict:
             insert(lesson_sessions)
             .values(
                 user_id=user_id,
-                lesson_id=lesson_id,
+                lesson_slug=lesson_slug,
                 current_stage_index=0,
                 messages=[],
             )
@@ -216,9 +216,9 @@ async def get_user_lesson_progress(user_id: int | None) -> dict[str, dict]:
         user_id: The user's database ID (None for anonymous)
 
     Returns:
-        Dict mapping lesson_id to progress info:
+        Dict mapping lesson_slug to progress info:
         {
-            "lesson-id": {
+            "lesson-slug": {
                 "status": "completed" | "in_progress" | "not_started",
                 "current_stage_index": int | None,
                 "session_id": int | None,
@@ -238,14 +238,14 @@ async def get_user_lesson_progress(user_id: int | None) -> dict[str, dict]:
 
     progress = {}
     for row in rows:
-        lesson_id = row["lesson_id"]
+        lesson_slug = row["lesson_slug"]
         # Only keep the most recent session per lesson
-        if lesson_id not in progress:
+        if lesson_slug not in progress:
             if row["completed_at"] is not None:
                 status = "completed"
             else:
                 status = "in_progress"
-            progress[lesson_id] = {
+            progress[lesson_slug] = {
                 "status": status,
                 "current_stage_index": row["current_stage_index"],
                 "session_id": row["session_id"],

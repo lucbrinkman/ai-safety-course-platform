@@ -7,6 +7,47 @@ from core.notifications.channels.email import send_email
 from core.notifications.channels.discord import send_discord_dm, send_discord_channel_message
 
 
+async def log_notification(
+    user_id: int | None,
+    channel_id: str | None,
+    message_type: str,
+    channel: str,
+    success: bool,
+    error_message: str | None = None,
+) -> None:
+    """
+    Log a notification to the database.
+
+    Args:
+        user_id: Database user ID (None for channel-only messages)
+        channel_id: Discord channel ID (for channel messages)
+        message_type: Message type key from messages.yaml
+        channel: "email", "discord_dm", or "discord_channel"
+        success: Whether the notification was sent successfully
+        error_message: Error details if failed
+    """
+    from sqlalchemy import insert
+    from core.database import get_connection
+    from core.tables import notification_log
+
+    try:
+        async with get_connection() as conn:
+            await conn.execute(
+                insert(notification_log).values(
+                    user_id=user_id,
+                    channel_id=channel_id,
+                    message_type=message_type,
+                    channel=channel,
+                    status="sent" if success else "failed",
+                    error_message=error_message,
+                )
+            )
+            await conn.commit()
+    except Exception as e:
+        # Don't let logging failures break notification sending
+        print(f"Warning: Failed to log notification: {e}")
+
+
 async def get_user_by_id(user_id: int) -> dict | None:
     """Fetch user data from database."""
     from sqlalchemy import select
@@ -69,6 +110,13 @@ async def send_notification(
                 body=body,
                 calendar_ics=calendar_ics,
             )
+            await log_notification(
+                user_id=user_id,
+                channel_id=None,
+                message_type=message_type,
+                channel="email",
+                success=result["email"],
+            )
 
     # Send Discord message if enabled
     if user.get("dm_notifications_enabled", True) and user.get("discord_id"):
@@ -76,9 +124,23 @@ async def send_notification(
         if channel_id and "discord_channel" in message_templates:
             message = get_message(message_type, "discord_channel", full_context)
             result["discord"] = await send_discord_channel_message(channel_id, message)
+            await log_notification(
+                user_id=user_id,
+                channel_id=channel_id,
+                message_type=message_type,
+                channel="discord_channel",
+                success=result["discord"],
+            )
         elif "discord" in message_templates:
             message = get_message(message_type, "discord", full_context)
             result["discord"] = await send_discord_dm(user["discord_id"], message)
+            await log_notification(
+                user_id=user_id,
+                channel_id=None,
+                message_type=message_type,
+                channel="discord_dm",
+                success=result["discord"],
+            )
 
     return result
 
@@ -107,4 +169,14 @@ async def send_channel_notification(
         return False
 
     message = get_message(message_type, "discord_channel", context)
-    return await send_discord_channel_message(channel_id, message)
+    success = await send_discord_channel_message(channel_id, message)
+
+    await log_notification(
+        user_id=None,
+        channel_id=channel_id,
+        message_type=message_type,
+        channel="discord_channel",
+        success=success,
+    )
+
+    return success

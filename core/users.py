@@ -198,22 +198,22 @@ async def become_facilitator(discord_id: str) -> bool:
 async def enroll_in_cohort(
     discord_id: str,
     cohort_id: int,
-    role_in_cohort: str,
+    role: str,
 ) -> dict[str, Any] | None:
     """
-    Enroll a user in a cohort.
+    Enroll a user in a cohort by creating a signup.
 
     Args:
         discord_id: User's Discord ID
         cohort_id: Cohort to enroll in
-        role_in_cohort: "participant" or "facilitator"
+        role: "participant" or "facilitator"
 
     Returns:
-        The created enrollment record (with enums converted to strings), or None if user/cohort not found.
+        The created signup record (with enums converted to strings), or None if user/cohort not found.
     """
     from .queries.cohorts import get_cohort_by_id
-    from .tables import courses_users
-    from .enums import CohortRole, GroupingStatus
+    from .tables import signups
+    from .enums import CohortRole
     from sqlalchemy import insert
 
     async with get_transaction() as conn:
@@ -225,29 +225,26 @@ async def enroll_in_cohort(
         if not cohort:
             return None
 
-        role_enum = CohortRole.facilitator if role_in_cohort == "facilitator" else CohortRole.participant
+        role_enum = CohortRole.facilitator if role == "facilitator" else CohortRole.participant
 
         result = await conn.execute(
-            insert(courses_users)
+            insert(signups)
             .values(
                 user_id=user["user_id"],
-                course_id=cohort["course_id"],
                 cohort_id=cohort_id,
-                role_in_cohort=role_enum,
-                grouping_status=GroupingStatus.awaiting_grouping,
+                role=role_enum,
             )
-            .returning(courses_users)
+            .returning(signups)
         )
         row = result.mappings().first()
-        enrollment = dict(row)
+        signup = dict(row)
         # Convert enums to strings for JSON serialization
-        enrollment["role_in_cohort"] = enrollment["role_in_cohort"].value
-        enrollment["grouping_status"] = enrollment["grouping_status"].value
+        signup["role"] = signup["role"].value
 
     # Send welcome notification (fire and forget)
     asyncio.create_task(_send_welcome_notification(user["user_id"]))
 
-    return enrollment
+    return signup
 
 
 async def _send_welcome_notification(user_id: int) -> None:

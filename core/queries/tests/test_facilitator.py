@@ -12,11 +12,13 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from sqlalchemy import update
+
 from core.tables import (
-    users, courses, cohorts, groups, groups_users, roles_users,
+    users, courses, cohorts, groups, groups_users,
     lesson_sessions, content_events,
 )
-from core.enums import UserRole, GroupUserRole, GroupUserStatus, StageType, ContentEventType
+from core.enums import GroupUserRole, GroupUserStatus, StageType, ContentEventType
 from core.queries.facilitator import (
     is_admin, get_facilitator_group_ids, get_accessible_groups, can_access_group
 )
@@ -89,15 +91,11 @@ async def add_user_to_group(
     return dict(result.mappings().first())
 
 
-async def make_admin(conn, user_id: int) -> dict:
-    """Grant admin role to a user."""
-    result = await conn.execute(
-        insert(roles_users).values(
-            user_id=user_id,
-            role=UserRole.admin,
-        ).returning(roles_users)
+async def make_admin(conn, user_id: int) -> None:
+    """Grant admin role to a user by setting is_admin flag."""
+    await conn.execute(
+        update(users).where(users.c.user_id == user_id).values(is_admin=True)
     )
-    return dict(result.mappings().first())
 
 
 async def create_lesson_session(

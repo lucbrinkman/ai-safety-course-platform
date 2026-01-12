@@ -49,7 +49,7 @@ describe("Anonymous Session Flow", () => {
     (lessonsApi.getSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       session_id: 123,
       user_id: null,
-      lesson_id: "test",
+      lesson_slug: "test",
       lesson_title: "Test Lesson",
       current_stage_index: 0,
       total_stages: 1,
@@ -91,7 +91,7 @@ describe("Anonymous Session Flow", () => {
     (lessonsApi.getSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       session_id: 123,
       user_id: null, // Still unclaimed
-      lesson_id: "test",
+      lesson_slug: "test",
       lesson_title: "Test Lesson",
       current_stage_index: 0,
       total_stages: 1,
@@ -130,7 +130,7 @@ describe("Anonymous Session Flow", () => {
     (lessonsApi.getSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       session_id: 123,
       user_id: null,
-      lesson_id: "test",
+      lesson_slug: "test",
       lesson_title: "Test Lesson",
       current_stage_index: 1, // On article stage
       total_stages: 2,

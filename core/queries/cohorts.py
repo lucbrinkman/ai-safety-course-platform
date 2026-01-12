@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from ..tables import cohorts, courses, courses_users
+from ..tables import cohorts, signups
 
 
 async def get_schedulable_cohorts(
@@ -18,25 +18,25 @@ async def get_schedulable_cohorts(
     Returns list of dicts with cohort_id, cohort_name, course_name, pending_users count.
     """
     # Subquery to count pending users per cohort
+    # (row exists in signups = awaiting grouping, ungroupable_reason is NULL = not yet processed)
     pending_count = (
         select(
-            courses_users.c.cohort_id,
+            signups.c.cohort_id,
             func.count().label("pending_users")
         )
-        .where(courses_users.c.grouping_status == "awaiting_grouping")
-        .group_by(courses_users.c.cohort_id)
+        .where(signups.c.ungroupable_reason.is_(None))
+        .group_by(signups.c.cohort_id)
         .subquery()
     )
 
-    # Join cohorts with courses and pending counts
+    # Join cohorts with pending counts
     query = (
         select(
             cohorts.c.cohort_id,
             cohorts.c.cohort_name,
-            courses.c.course_name,
+            cohorts.c.course_slug,
             pending_count.c.pending_users,
         )
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
         .join(pending_count, cohorts.c.cohort_id == pending_count.c.cohort_id)
         .where(pending_count.c.pending_users > 0)
         .order_by(cohorts.c.cohort_start_date)
@@ -68,10 +68,9 @@ async def get_realizable_cohorts(
         select(
             cohorts.c.cohort_id,
             cohorts.c.cohort_name,
-            courses.c.course_name,
+            cohorts.c.course_slug,
             cohorts.c.number_of_group_meetings,
         )
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
         .join(unrealized, cohorts.c.cohort_id == unrealized.c.cohort_id)
         .order_by(cohorts.c.cohort_start_date)
     )
@@ -84,10 +83,9 @@ async def get_cohort_by_id(
     conn: AsyncConnection,
     cohort_id: int,
 ) -> dict[str, Any] | None:
-    """Get a cohort by ID with course name."""
+    """Get a cohort by ID."""
     query = (
-        select(cohorts, courses.c.course_name)
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
+        select(cohorts)
         .where(cohorts.c.cohort_id == cohort_id)
     )
     result = await conn.execute(query)
@@ -135,10 +133,8 @@ async def get_available_cohorts(
             cohorts.c.cohort_id,
             cohorts.c.cohort_name,
             cohorts.c.cohort_start_date,
-            courses.c.course_id,
-            courses.c.course_name,
+            cohorts.c.course_slug,
         )
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
         .where(cohorts.c.cohort_start_date > today)
         .where(cohorts.c.status == "active")
         .order_by(cohorts.c.cohort_start_date)
@@ -150,16 +146,16 @@ async def get_available_cohorts(
     if not user_id:
         return {"enrolled": [], "available": all_cohorts}
 
-    # Get user's enrollments
+    # Get user's signups (pending enrollments)
     enrollment_query = (
         select(
-            courses_users.c.cohort_id,
-            courses_users.c.role_in_cohort,
+            signups.c.cohort_id,
+            signups.c.role,
         )
-        .where(courses_users.c.user_id == user_id)
+        .where(signups.c.user_id == user_id)
     )
     enrollment_result = await conn.execute(enrollment_query)
-    enrollments = {row["cohort_id"]: row["role_in_cohort"] for row in enrollment_result.mappings()}
+    enrollments = {row["cohort_id"]: row["role"] for row in enrollment_result.mappings()}
 
     enrolled = []
     available = []

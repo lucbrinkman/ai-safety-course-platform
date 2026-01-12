@@ -7,25 +7,25 @@ import type { CourseProgress } from "../types/course";
 
 const API_BASE = "";
 
-export async function listLessons(): Promise<{ id: string; title: string }[]> {
+export async function listLessons(): Promise<{ slug: string; title: string }[]> {
   const res = await fetch(`${API_BASE}/api/lessons`);
   if (!res.ok) throw new Error("Failed to fetch lessons");
   const data = await res.json();
   return data.lessons;
 }
 
-export async function getLesson(lessonId: string): Promise<Lesson> {
-  const res = await fetch(`${API_BASE}/api/lessons/${lessonId}`);
+export async function getLesson(lessonSlug: string): Promise<Lesson> {
+  const res = await fetch(`${API_BASE}/api/lessons/${lessonSlug}`);
   if (!res.ok) throw new Error("Failed to fetch lesson");
   return res.json();
 }
 
-export async function createSession(lessonId: string): Promise<number> {
+export async function createSession(lessonSlug: string): Promise<number> {
   const res = await fetch(`${API_BASE}/api/lesson-sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ lesson_id: lessonId }),
+    body: JSON.stringify({ lesson_slug: lessonSlug }),
   });
   if (!res.ok) throw new Error("Failed to create session");
   const data = await res.json();
@@ -103,11 +103,11 @@ export async function* sendMessage(
 }
 
 export async function getNextLesson(
-  courseId: string,
-  currentLessonId: string
-): Promise<{ nextLessonId: string; nextLessonTitle: string } | null> {
+  courseSlug: string,
+  currentLessonSlug: string
+): Promise<{ nextLessonSlug: string; nextLessonTitle: string } | null> {
   const res = await fetch(
-    `${API_BASE}/api/courses/${courseId}/next-lesson?current=${currentLessonId}`
+    `${API_BASE}/api/courses/${courseSlug}/next-lesson?current=${currentLessonSlug}`
   );
   if (!res.ok) throw new Error("Failed to fetch next lesson");
   return res.json();
@@ -145,8 +145,8 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   return data.text;
 }
 
-export async function getCourseProgress(courseId: string): Promise<CourseProgress> {
-  const res = await fetch(`${API_BASE}/api/courses/${courseId}/progress`, {
+export async function getCourseProgress(courseSlug: string): Promise<CourseProgress> {
+  const res = await fetch(`${API_BASE}/api/courses/${courseSlug}/progress`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to fetch course progress");

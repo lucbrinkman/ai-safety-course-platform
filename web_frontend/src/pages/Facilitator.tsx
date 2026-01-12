@@ -261,13 +261,13 @@ export default function Facilitator() {
               <div className="space-y-3">
                 {userProgress.lessons.map((lesson) => {
                   const chatForLesson = userChats.find(
-                    (chat) => chat.lesson_id === lesson.lesson_id
+                    (chat) => chat.lesson_slug === lesson.lesson_slug
                   );
                   return (
-                    <details key={lesson.lesson_id} className="border rounded">
+                    <details key={lesson.lesson_slug} className="border rounded">
                       <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50">
                         <div className="inline-flex justify-between items-center w-[calc(100%-1rem)]">
-                          <span className="font-medium">{lesson.lesson_id}</span>
+                          <span className="font-medium">{lesson.lesson_slug}</span>
                           <span className="text-sm text-gray-600">
                             {lesson.completed ? "Completed" : "In Progress"} |{" "}
                             {formatDuration(lesson.time_spent_seconds)}

@@ -9,14 +9,14 @@ import ContentPanel from "../unified-lesson/ContentPanel";
 import type { Stage, ArticleData } from "../../types/unified-lesson";
 
 type ContentPreviewModalProps = {
-  lessonId: string;
+  lessonSlug: string;
   stageIndex: number;
   sessionId: number | null;
   onClose: () => void;
 };
 
 export default function ContentPreviewModal({
-  lessonId,
+  lessonSlug,
   stageIndex,
   sessionId,
   onClose,
@@ -32,7 +32,7 @@ export default function ContentPreviewModal({
         setLoading(true);
 
         // Get lesson to find stage type
-        const lesson = await getLesson(lessonId);
+        const lesson = await getLesson(lessonSlug);
         const targetStage = lesson.stages[stageIndex];
 
         if (!targetStage || targetStage.type === "chat") {
@@ -46,7 +46,7 @@ export default function ContentPreviewModal({
         let sid = sessionId;
         if (!sid) {
           // Create temporary session to get content
-          sid = await createSession(lessonId);
+          sid = await createSession(lessonSlug);
         }
 
         const session = await getSession(sid, stageIndex);
@@ -58,7 +58,7 @@ export default function ContentPreviewModal({
       }
     }
     load();
-  }, [lessonId, stageIndex, sessionId]);
+  }, [lessonSlug, stageIndex, sessionId]);
 
   // Close on escape
   useEffect(() => {

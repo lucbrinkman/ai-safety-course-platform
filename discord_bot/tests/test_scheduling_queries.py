@@ -22,10 +22,9 @@ from core.queries.groups import (
     get_cohort_groups_for_realization,
 )
 from core.scheduling import schedule_cohort, CohortSchedulingResult
-from core.tables import courses, cohorts, users, courses_users, groups, groups_users
+from core.tables import cohorts, users, signups, groups, groups_users
 
 from .helpers import (
-    create_test_course,
     create_test_cohort,
     create_test_user,
     create_test_group,
@@ -38,9 +37,8 @@ class TestGetSchedulableCohorts:
     @pytest.mark.asyncio
     async def test_returns_cohorts_with_pending_users(self, db_conn):
         """Should return cohorts that have users awaiting grouping."""
-        # Setup: course -> cohort -> user awaiting grouping
-        course = await create_test_course(db_conn, "Test Course")
-        cohort = await create_test_cohort(db_conn, course["course_id"], "Test Cohort")
+        # Setup: cohort -> user awaiting grouping
+        cohort = await create_test_cohort(db_conn, name="Test Cohort")
         await create_test_user(db_conn, cohort["cohort_id"], "123456")
 
         # Execute
@@ -59,9 +57,8 @@ class TestGetSchedulableCohorts:
     @pytest.mark.asyncio
     async def test_returns_empty_when_no_pending_users(self, db_conn):
         """Should return empty list when no users are awaiting grouping."""
-        # Setup: course -> cohort with no users
-        course = await create_test_course(db_conn, "Empty Course")
-        await create_test_cohort(db_conn, course["course_id"], "Empty Cohort")
+        # Setup: cohort with no users
+        await create_test_cohort(db_conn, name="Empty Cohort")
 
         # Execute
         result = await get_schedulable_cohorts(db_conn)
@@ -77,9 +74,8 @@ class TestGetRealizableCohorts:
     @pytest.mark.asyncio
     async def test_returns_cohorts_with_unrealized_groups(self, db_conn):
         """Should return cohorts with groups that have no Discord channels."""
-        # Setup: course -> cohort -> group without channel IDs
-        course = await create_test_course(db_conn, "Test Course")
-        cohort = await create_test_cohort(db_conn, course["course_id"], "Unrealized Cohort")
+        # Setup: cohort -> group without channel IDs
+        cohort = await create_test_cohort(db_conn, name="Unrealized Cohort")
         await create_test_group(db_conn, cohort["cohort_id"], "Group 1")
 
         # Execute
@@ -93,8 +89,7 @@ class TestGetRealizableCohorts:
     async def test_excludes_fully_realized_cohorts(self, db_conn):
         """Should not return cohorts where all groups have Discord channels."""
         # Setup: cohort with realized group
-        course = await create_test_course(db_conn, "Test Course")
-        cohort = await create_test_cohort(db_conn, course["course_id"], "Realized Cohort")
+        cohort = await create_test_cohort(db_conn, name="Realized Cohort")
         await create_test_group(
             db_conn,
             cohort["cohort_id"],
@@ -118,8 +113,7 @@ class TestCreateGroup:
     async def test_creates_group_with_correct_fields(self, db_conn):
         """Should create a group and return the record."""
         # Setup
-        course = await create_test_course(db_conn, "Test Course")
-        cohort = await create_test_cohort(db_conn, course["course_id"])
+        cohort = await create_test_cohort(db_conn)
 
         # Execute
         group = await create_group(
@@ -143,8 +137,7 @@ class TestAddUserToGroup:
     async def test_adds_user_with_correct_role(self, db_conn):
         """Should add user to group with specified role."""
         # Setup
-        course = await create_test_course(db_conn, "Test Course")
-        cohort = await create_test_cohort(db_conn, course["course_id"])
+        cohort = await create_test_cohort(db_conn)
         user = await create_test_user(db_conn, cohort["cohort_id"], "123")
         group = await create_test_group(db_conn, cohort["cohort_id"])
 
@@ -170,8 +163,7 @@ class TestGetCohortGroupsForRealization:
     async def test_returns_structured_data(self, db_conn):
         """Should return cohort with groups and members."""
         # Setup
-        course = await create_test_course(db_conn, "AI Safety")
-        cohort = await create_test_cohort(db_conn, course["course_id"], "Jan 2025", num_meetings=8)
+        cohort = await create_test_cohort(db_conn, course_slug="default", name="Jan 2025", num_meetings=8)
         user = await create_test_user(db_conn, cohort["cohort_id"], "123")
         group = await create_test_group(db_conn, cohort["cohort_id"], "Group 1")
         await add_user_to_group(db_conn, group["group_id"], user["user_id"], "participant")
@@ -182,7 +174,7 @@ class TestGetCohortGroupsForRealization:
         # Assert structure
         assert result["cohort_id"] == cohort["cohort_id"]
         assert result["cohort_name"] == "Jan 2025"
-        assert result["course_name"] == "AI Safety"
+        assert result["course_slug"] == "default"
         assert result["number_of_group_meetings"] == 8
         assert len(result["groups"]) == 1
         assert result["groups"][0]["group_name"] == "Group 1"
@@ -207,7 +199,7 @@ class TestScheduleCohort:
 
         Usage:
             async def test_something(self, committed_db_conn):
-                conn, course_ids, user_ids, commit = committed_db_conn
+                conn, user_ids, cohort_ids, commit = committed_db_conn
                 # ... create data ...
                 await commit()  # Commit before calling schedule_cohort
                 result = await schedule_cohort(...)
@@ -219,7 +211,6 @@ class TestScheduleCohort:
         engine = get_engine()
 
         # Track IDs for cleanup
-        created_course_ids = []
         created_user_ids = []
         created_cohort_ids = []
 
@@ -233,7 +224,7 @@ class TestScheduleCohort:
             txn = await conn.begin()
 
         try:
-            yield conn, created_course_ids, created_user_ids, created_cohort_ids, commit
+            yield conn, created_user_ids, created_cohort_ids, commit
         finally:
             # Rollback any uncommitted changes
             if txn.is_active:
@@ -244,7 +235,7 @@ class TestScheduleCohort:
             async with engine.begin() as cleanup_conn:
                 for user_id in created_user_ids:
                     await cleanup_conn.execute(delete(groups_users).where(groups_users.c.user_id == user_id))
-                    await cleanup_conn.execute(delete(courses_users).where(courses_users.c.user_id == user_id))
+                    await cleanup_conn.execute(delete(signups).where(signups.c.user_id == user_id))
                     await cleanup_conn.execute(delete(users).where(users.c.user_id == user_id))
 
                 for cohort_id in created_cohort_ids:
@@ -258,22 +249,16 @@ class TestScheduleCohort:
                     await cleanup_conn.execute(delete(groups).where(groups.c.cohort_id == cohort_id))
                     await cleanup_conn.execute(delete(cohorts).where(cohorts.c.cohort_id == cohort_id))
 
-                for course_id in created_course_ids:
-                    await cleanup_conn.execute(delete(courses).where(courses.c.course_id == course_id))
-
             # Close engine so next test gets a fresh one in its event loop
             await close_engine()
 
     @pytest.mark.asyncio
     async def test_schedule_cohort_creates_groups(self, committed_db_conn):
         """Should create groups when cohort has 4+ users with overlapping availability."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        # Setup: course -> cohort -> 4 users with overlapping availability
-        course = await create_test_course(conn, "Schedule Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Schedule Test Cohort")
+        # Setup: cohort -> 4 users with overlapping availability
+        cohort = await create_test_cohort(conn, name="Schedule Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Create 4 users with overlapping availability (Monday 09:00-10:00)
@@ -307,13 +292,10 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_no_users(self, committed_db_conn):
         """Should return empty result when cohort has no users."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
         # Setup: cohort with no users
-        course = await create_test_course(conn, "Empty Schedule Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Empty Schedule Cohort")
+        cohort = await create_test_cohort(conn, name="Empty Schedule Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Commit so schedule_cohort can see the data
@@ -340,13 +322,10 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_assigns_facilitator_role(self, committed_db_conn):
         """Should preserve facilitator role when creating groups."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        # Setup: course -> cohort -> 1 facilitator + 3 participants
-        course = await create_test_course(conn, "Facilitator Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Facilitator Test Cohort")
+        # Setup: cohort -> 1 facilitator + 3 participants
+        cohort = await create_test_cohort(conn, name="Facilitator Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Create facilitator
@@ -355,7 +334,7 @@ class TestScheduleCohort:
             cohort["cohort_id"],
             discord_id="fac_test_facilitator",
             availability='{"Monday": ["09:00-09:30", "09:30-10:00"]}',
-            role_in_cohort="facilitator",
+            role="facilitator",
         )
         user_ids.append(facilitator["user_id"])
 
@@ -385,18 +364,15 @@ class TestScheduleCohort:
         assert result.users_ungroupable == 0
 
         # Verify facilitator role is preserved in groups_users
-        # (schedule_cohort checks role_in_cohort and sets role accordingly)
+        # (schedule_cohort checks role and sets role accordingly)
         assert len(result.groups) >= 1
 
     @pytest.mark.asyncio
     async def test_schedule_cohort_more_students_than_facilitator_capacity(self, committed_db_conn):
         """When students exceed facilitator capacity, excess are marked ungroupable."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        course = await create_test_course(conn, "Capacity Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Capacity Test Cohort")
+        cohort = await create_test_cohort(conn, name="Capacity Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Create 1 facilitator (can only lead 1 group of max 5)
@@ -405,7 +381,7 @@ class TestScheduleCohort:
             cohort["cohort_id"],
             discord_id="capacity_facilitator",
             availability='{"Monday": ["09:00-09:30", "09:30-10:00"]}',
-            role_in_cohort="facilitator",
+            role="facilitator",
         )
         user_ids.append(facilitator["user_id"])
 
@@ -437,12 +413,9 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_facilitator_no_overlap_with_students(self, committed_db_conn):
         """When facilitator availability doesn't overlap with students, no groups form."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        course = await create_test_course(conn, "No Overlap Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "No Overlap Test Cohort")
+        cohort = await create_test_cohort(conn, name="No Overlap Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Facilitator available Tuesday
@@ -451,7 +424,7 @@ class TestScheduleCohort:
             cohort["cohort_id"],
             discord_id="nooverlap_facilitator",
             availability='{"Tuesday": ["09:00-09:30", "09:30-10:00"]}',
-            role_in_cohort="facilitator",
+            role="facilitator",
         )
         user_ids.append(facilitator["user_id"])
 
@@ -482,12 +455,9 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_no_facilitators_creates_groups(self, committed_db_conn):
         """When no facilitators exist, groups form without facilitator constraint."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        course = await create_test_course(conn, "No Fac Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "No Fac Test Cohort")
+        cohort = await create_test_cohort(conn, name="No Fac Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Create 10 students, no facilitators (10 = 2 groups of 5)
@@ -497,7 +467,7 @@ class TestScheduleCohort:
                 cohort["cohort_id"],
                 discord_id=f"nofac_student_{i}",
                 availability='{"Monday": ["09:00-09:30", "09:30-10:00"]}',
-                role_in_cohort="participant",  # Explicitly participant
+                role="participant",  # Explicitly participant
             )
             user_ids.append(user["user_id"])
 
@@ -518,12 +488,9 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_verifies_facilitator_in_groups_users(self, committed_db_conn):
         """Verify groups_users table has correct role for facilitator."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        course = await create_test_course(conn, "Role Verify Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Role Verify Cohort")
+        cohort = await create_test_cohort(conn, name="Role Verify Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         facilitator = await create_test_user(
@@ -531,7 +498,7 @@ class TestScheduleCohort:
             cohort["cohort_id"],
             discord_id="role_verify_facilitator",
             availability='{"Monday": ["09:00-09:30", "09:30-10:00"]}',
-            role_in_cohort="facilitator",
+            role="facilitator",
         )
         user_ids.append(facilitator["user_id"])
 
@@ -576,12 +543,9 @@ class TestScheduleCohort:
     @pytest.mark.asyncio
     async def test_schedule_cohort_returns_ungroupable_details(self, committed_db_conn):
         """Ungroupable users should have diagnostic details explaining why."""
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
-        course = await create_test_course(conn, "Diagnostics Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "Diagnostics Test Cohort")
+        cohort = await create_test_cohort(conn, name="Diagnostics Test Cohort")
         cohort_ids.append(cohort["cohort_id"])
 
         # Facilitator available Tuesday
@@ -590,7 +554,7 @@ class TestScheduleCohort:
             cohort["cohort_id"],
             discord_id="diag_facilitator",
             availability='{"Tuesday": ["09:00-09:30", "09:30-10:00"]}',
-            role_in_cohort="facilitator",
+            role="facilitator",
         )
         user_ids.append(facilitator["user_id"])
 

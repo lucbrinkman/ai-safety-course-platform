@@ -22,7 +22,7 @@ export interface StageProgress {
 }
 
 export interface LessonProgress {
-  lesson_id: string;
+  lesson_slug: string;
   completed: boolean;
   time_spent_seconds: number;
   stages: StageProgress[];
@@ -41,7 +41,7 @@ export interface ChatMessage {
 
 export interface ChatSession {
   session_id: number;
-  lesson_id: string;
+  lesson_slug: string;
   messages: ChatMessage[];
   started_at: string | null;
   completed_at: string | null;

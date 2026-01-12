@@ -5,18 +5,16 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from ..enums import UserRole
-from ..tables import groups, groups_users, roles_users, users, cohorts
+from ..tables import groups, groups_users, users, cohorts
 
 
 async def is_admin(conn: AsyncConnection, user_id: int) -> bool:
     """Check if user has admin role."""
     result = await conn.execute(
-        select(roles_users.c.role_user_id).where(
-            (roles_users.c.user_id == user_id) & (roles_users.c.role == UserRole.admin)
-        )
+        select(users.c.is_admin).where(users.c.user_id == user_id)
     )
-    return result.first() is not None
+    row = result.first()
+    return row is not None and row.is_admin is True
 
 
 async def get_facilitator_group_ids(

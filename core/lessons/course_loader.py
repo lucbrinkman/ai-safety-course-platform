@@ -16,12 +16,12 @@ class CourseNotFoundError(Exception):
 COURSES_DIR = Path(__file__).parent.parent.parent / "educational_content" / "courses"
 
 
-def load_course(course_id: str) -> Course:
-    """Load a course by ID from the courses directory."""
-    course_path = COURSES_DIR / f"{course_id}.yaml"
+def load_course(course_slug: str) -> Course:
+    """Load a course by slug from the courses directory."""
+    course_path = COURSES_DIR / f"{course_slug}.yaml"
 
     if not course_path.exists():
-        raise CourseNotFoundError(f"Course not found: {course_id}")
+        raise CourseNotFoundError(f"Course not found: {course_slug}")
 
     with open(course_path) as f:
         data = yaml.safe_load(f)
@@ -37,40 +37,40 @@ def load_course(course_id: str) -> Course:
     ]
 
     return Course(
-        id=data["id"],
+        slug=data["slug"],
         title=data["title"],
         modules=modules,
     )
 
 
-def get_all_lesson_ids(course_id: str) -> list[str]:
-    """Get flat list of all lesson IDs in course order."""
-    course = load_course(course_id)
-    lesson_ids = []
+def get_all_lesson_slugs(course_slug: str) -> list[str]:
+    """Get flat list of all lesson slugs in course order."""
+    course = load_course(course_slug)
+    lesson_slugs = []
     for module in course.modules:
-        lesson_ids.extend(module.lessons)
-    return lesson_ids
+        lesson_slugs.extend(module.lessons)
+    return lesson_slugs
 
 
-def get_next_lesson(course_id: str, current_lesson_id: str) -> NextLesson | None:
+def get_next_lesson(course_slug: str, current_lesson_slug: str) -> NextLesson | None:
     """Get the next lesson after the current one."""
-    lesson_ids = get_all_lesson_ids(course_id)
+    lesson_slugs = get_all_lesson_slugs(course_slug)
 
     try:
-        current_index = lesson_ids.index(current_lesson_id)
+        current_index = lesson_slugs.index(current_lesson_slug)
     except ValueError:
         return None  # Lesson not in this course
 
     next_index = current_index + 1
-    if next_index >= len(lesson_ids):
+    if next_index >= len(lesson_slugs):
         return None  # End of course
 
-    next_lesson_id = lesson_ids[next_index]
+    next_lesson_slug = lesson_slugs[next_index]
 
     try:
-        next_lesson = load_lesson(next_lesson_id)
+        next_lesson = load_lesson(next_lesson_slug)
         return NextLesson(
-            lesson_id=next_lesson_id,
+            lesson_slug=next_lesson_slug,
             lesson_title=next_lesson.title,
         )
     except LessonNotFoundError:

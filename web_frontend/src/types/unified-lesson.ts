@@ -28,7 +28,7 @@ export type ChatStage = {
 export type Stage = ArticleStage | VideoStage | ChatStage;
 
 export type Lesson = {
-  id: string;
+  slug: string;
   title: string;
   stages: Stage[];
 };
@@ -68,7 +68,7 @@ export type ArticleData = {
 
 export type SessionState = {
   session_id: number;
-  lesson_id: string;
+  lesson_slug: string;
   lesson_title: string;
   current_stage_index: number;
   total_stages: number;

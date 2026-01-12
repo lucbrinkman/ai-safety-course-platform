@@ -12,7 +12,6 @@ from ..tables import (
     users,
     lesson_sessions,
     cohorts,
-    courses_users,
 )
 from ..enums import ContentEventType
 
@@ -119,17 +118,17 @@ async def get_user_progress_for_group(
     sessions_result = await conn.execute(
         select(
             lesson_sessions.c.session_id,
-            lesson_sessions.c.lesson_id,
+            lesson_sessions.c.lesson_slug,
             lesson_sessions.c.completed_at,
             lesson_sessions.c.started_at,
         ).where(lesson_sessions.c.user_id == user_id)
     )
-    sessions = {row.lesson_id: dict(row._mapping) for row in sessions_result}
+    sessions = {row.lesson_slug: dict(row._mapping) for row in sessions_result}
 
     # Get heartbeat counts per lesson/stage
     heartbeat_query = (
         select(
-            content_events.c.lesson_id,
+            content_events.c.lesson_slug,
             content_events.c.stage_index,
             content_events.c.stage_type,
             func.count(content_events.c.event_id).label("heartbeat_count"),
@@ -139,7 +138,7 @@ async def get_user_progress_for_group(
             & (content_events.c.event_type == ContentEventType.heartbeat)
         )
         .group_by(
-            content_events.c.lesson_id,
+            content_events.c.lesson_slug,
             content_events.c.stage_index,
             content_events.c.stage_type,
         )
@@ -151,21 +150,21 @@ async def get_user_progress_for_group(
     total_time = 0
 
     for row in heartbeat_result.mappings():
-        lesson_id = row["lesson_id"]
+        lesson_slug = row["lesson_slug"]
         stage_time = row["heartbeat_count"] * HEARTBEAT_INTERVAL_SECONDS
         total_time += stage_time
 
-        if lesson_id not in lessons_map:
-            session = sessions.get(lesson_id, {})
-            lessons_map[lesson_id] = {
-                "lesson_id": lesson_id,
+        if lesson_slug not in lessons_map:
+            session = sessions.get(lesson_slug, {})
+            lessons_map[lesson_slug] = {
+                "lesson_slug": lesson_slug,
                 "completed": session.get("completed_at") is not None,
                 "time_spent_seconds": 0,
                 "stages": [],
             }
 
-        lessons_map[lesson_id]["time_spent_seconds"] += stage_time
-        lessons_map[lesson_id]["stages"].append({
+        lessons_map[lesson_slug]["time_spent_seconds"] += stage_time
+        lessons_map[lesson_slug]["stages"].append({
             "stage_index": row["stage_index"],
             "stage_type": row["stage_type"].value if hasattr(row["stage_type"], "value") else row["stage_type"],
             "time_spent_seconds": stage_time,
@@ -201,7 +200,7 @@ async def get_user_chat_sessions(
     result = await conn.execute(
         select(
             lesson_sessions.c.session_id,
-            lesson_sessions.c.lesson_id,
+            lesson_sessions.c.lesson_slug,
             lesson_sessions.c.messages,
             lesson_sessions.c.started_at,
             lesson_sessions.c.completed_at,
@@ -225,7 +224,7 @@ async def get_user_chat_sessions(
 
         sessions.append({
             "session_id": row["session_id"],
-            "lesson_id": row["lesson_id"],
+            "lesson_slug": row["lesson_slug"],
             "messages": row["messages"] or [],
             "started_at": row["started_at"].isoformat() if row["started_at"] else None,
             "completed_at": row["completed_at"].isoformat() if row["completed_at"] else None,

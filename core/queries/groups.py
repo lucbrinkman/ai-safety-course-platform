@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from ..tables import cohorts, courses, groups, groups_users, users
+from ..tables import cohorts, groups, groups_users, users
 
 
 async def create_group(
@@ -69,7 +69,7 @@ async def get_cohort_groups_for_realization(
         {
             "cohort_id": 1,
             "cohort_name": "AI Safety - Jan 2025",
-            "course_name": "AI Safety Fundamentals",
+            "course_slug": "default",
             "cohort_start_date": date,
             "number_of_group_meetings": 8,
             "discord_category_id": None,  # or existing ID
@@ -91,8 +91,7 @@ async def get_cohort_groups_for_realization(
     """
     # Get cohort info
     cohort_query = (
-        select(cohorts, courses.c.course_name)
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
+        select(cohorts)
         .where(cohorts.c.cohort_id == cohort_id)
     )
     cohort_result = await conn.execute(cohort_query)
@@ -147,7 +146,7 @@ async def get_cohort_groups_for_realization(
     return {
         "cohort_id": cohort_row["cohort_id"],
         "cohort_name": cohort_row["cohort_name"],
-        "course_name": cohort_row["course_name"],
+        "course_slug": cohort_row["course_slug"],
         "cohort_start_date": cohort_row["cohort_start_date"],
         "number_of_group_meetings": cohort_row["number_of_group_meetings"],
         "discord_category_id": cohort_row["discord_category_id"],
@@ -232,7 +231,7 @@ async def get_group_welcome_data(
         {
             "group_name": "Group 1",
             "cohort_name": "AI Safety - Jan 2025",
-            "course_name": "AI Safety Fundamentals",
+            "course_slug": "default",
             "meeting_time_utc": "Wednesday 15:00",
             "cohort_start_date": date,
             "number_of_group_meetings": 8,
@@ -242,7 +241,7 @@ async def get_group_welcome_data(
             ]
         }
     """
-    # Get group with cohort and course info
+    # Get group with cohort info
     query = (
         select(
             groups.c.group_id,
@@ -251,10 +250,9 @@ async def get_group_welcome_data(
             cohorts.c.cohort_name,
             cohorts.c.cohort_start_date,
             cohorts.c.number_of_group_meetings,
-            courses.c.course_name,
+            cohorts.c.course_slug,
         )
         .join(cohorts, groups.c.cohort_id == cohorts.c.cohort_id)
-        .join(courses, cohorts.c.course_id == courses.c.course_id)
         .where(groups.c.group_id == group_id)
     )
     result = await conn.execute(query)
@@ -286,7 +284,7 @@ async def get_group_welcome_data(
     return {
         "group_name": row["group_name"],
         "cohort_name": row["cohort_name"],
-        "course_name": row["course_name"],
+        "course_slug": row["course_slug"],
         "meeting_time_utc": row["recurring_meeting_time_utc"],
         "cohort_start_date": row["cohort_start_date"],
         "number_of_group_meetings": row["number_of_group_meetings"],

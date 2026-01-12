@@ -12,7 +12,7 @@ export type StageInfo = {
 export type LessonStatus = "completed" | "in_progress" | "not_started";
 
 export type LessonInfo = {
-  id: string;
+  slug: string;
   title: string;
   stages: StageInfo[];
   status: LessonStatus;
@@ -28,7 +28,7 @@ export type ModuleInfo = {
 
 export type CourseProgress = {
   course: {
-    id: string;
+    slug: string;
     title: string;
   };
   modules: ModuleInfo[];

@@ -22,31 +22,31 @@ from core import get_or_create_user
 router = APIRouter(prefix="/api/courses", tags=["courses"])
 
 
-@router.get("/{course_id}/next-lesson")
+@router.get("/{course_slug}/next-lesson")
 async def get_next_lesson_endpoint(
-    course_id: str,
-    current: str = Query(..., description="Current lesson ID"),
+    course_slug: str,
+    current: str = Query(..., description="Current lesson slug"),
 ):
     """Get the next lesson after the current one.
 
     Returns 204 No Content if there is no next lesson (end of course).
     """
     try:
-        result = get_next_lesson(course_id, current)
+        result = get_next_lesson(course_slug, current)
     except CourseNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Course not found: {course_id}")
+        raise HTTPException(status_code=404, detail=f"Course not found: {course_slug}")
 
     if result is None:
         return Response(status_code=204)
 
     return {
-        "nextLessonId": result.lesson_id,
+        "nextLessonSlug": result.lesson_slug,
         "nextLessonTitle": result.lesson_title,
     }
 
 
-@router.get("/{course_id}/progress")
-async def get_course_progress(course_id: str, request: Request):
+@router.get("/{course_slug}/progress")
+async def get_course_progress(course_slug: str, request: Request):
     """Get course structure with user progress.
 
     Returns course modules, lessons, and stages with completion status.
@@ -61,9 +61,9 @@ async def get_course_progress(course_id: str, request: Request):
 
     # Load course structure
     try:
-        course = load_course(course_id)
+        course = load_course(course_slug)
     except CourseNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Course not found: {course_id}")
+        raise HTTPException(status_code=404, detail=f"Course not found: {course_slug}")
 
     # Get user's progress
     progress = await get_user_lesson_progress(user_id)
@@ -72,13 +72,13 @@ async def get_course_progress(course_id: str, request: Request):
     modules = []
     for module in course.modules:
         lessons = []
-        for lesson_id in module.lessons:
+        for lesson_slug in module.lessons:
             try:
-                lesson = load_lesson(lesson_id)
+                lesson = load_lesson(lesson_slug)
             except LessonNotFoundError:
                 continue
 
-            lesson_progress = progress.get(lesson_id, {
+            lesson_progress = progress.get(lesson_slug, {
                 "status": "not_started",
                 "current_stage_index": None,
                 "session_id": None,
@@ -95,7 +95,7 @@ async def get_course_progress(course_id: str, request: Request):
                 })
 
             lessons.append({
-                "id": lesson.id,
+                "slug": lesson.slug,
                 "title": lesson.title,
                 "stages": stages,
                 "status": lesson_progress["status"],
@@ -111,7 +111,7 @@ async def get_course_progress(course_id: str, request: Request):
 
     return {
         "course": {
-            "id": course.id,
+            "slug": course.slug,
             "title": course.title,
         },
         "modules": modules,

@@ -27,13 +27,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from discord_bot.cogs.groups_cog import GroupsCog
 from .fake_interaction import FakeInteraction
 from .helpers import (
-    create_test_course,
     create_test_cohort,
     create_test_user,
     create_test_group,
 )
 from core.queries.groups import add_user_to_group
-from core.tables import courses, cohorts, users, courses_users, groups, groups_users
+from core.tables import cohorts, users, signups, groups, groups_users
 
 
 # Load environment (.env first, then .env.local overrides)
@@ -155,7 +154,7 @@ async def committed_db_conn():
 
     Usage:
         async def test_something(self, committed_db_conn):
-            conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+            conn, user_ids, cohort_ids, commit = committed_db_conn
             # ... create data ...
             await commit()  # Commit before calling realize_groups
             # ... call cog method ...
@@ -166,7 +165,6 @@ async def committed_db_conn():
     engine = get_engine()
 
     # Track IDs for cleanup
-    created_course_ids = []
     created_user_ids = []
     created_cohort_ids = []
 
@@ -180,7 +178,7 @@ async def committed_db_conn():
         txn = await conn.begin()
 
     try:
-        yield conn, created_course_ids, created_user_ids, created_cohort_ids, commit
+        yield conn, created_user_ids, created_cohort_ids, commit
     finally:
         # Rollback any uncommitted changes
         if txn.is_active:
@@ -191,7 +189,7 @@ async def committed_db_conn():
         async with engine.begin() as cleanup_conn:
             for user_id in created_user_ids:
                 await cleanup_conn.execute(delete(groups_users).where(groups_users.c.user_id == user_id))
-                await cleanup_conn.execute(delete(courses_users).where(courses_users.c.user_id == user_id))
+                await cleanup_conn.execute(delete(signups).where(signups.c.user_id == user_id))
                 await cleanup_conn.execute(delete(users).where(users.c.user_id == user_id))
 
             for cohort_id in created_cohort_ids:
@@ -204,9 +202,6 @@ async def committed_db_conn():
                     await cleanup_conn.execute(delete(groups_users).where(groups_users.c.group_id == group_id))
                 await cleanup_conn.execute(delete(groups).where(groups.c.cohort_id == cohort_id))
                 await cleanup_conn.execute(delete(cohorts).where(cohorts.c.cohort_id == cohort_id))
-
-            for course_id in created_course_ids:
-                await cleanup_conn.execute(delete(courses).where(courses.c.course_id == course_id))
 
         # Close engine so next test gets a fresh one in its event loop
         await close_engine()
@@ -232,13 +227,10 @@ class TestRealizeGroupsE2E:
         2. Permissions are set correctly (@everyone can't see)
         3. Channel IDs are saved back to database
         """
-        conn, course_ids, user_ids, cohort_ids, commit = committed_db_conn
+        conn, user_ids, cohort_ids, commit = committed_db_conn
 
         # === SETUP ===
-        course = await create_test_course(conn, "E2E Test Course")
-        course_ids.append(course["course_id"])
-
-        cohort = await create_test_cohort(conn, course["course_id"], "E2E Test Cohort", num_meetings=2)
+        cohort = await create_test_cohort(conn, name="E2E Test Cohort", num_meetings=2)
         cohort_ids.append(cohort["cohort_id"])
 
         group = await create_test_group(conn, cohort["cohort_id"], "Test Group")

@@ -143,7 +143,7 @@ export default function SignupWizard() {
           timezone: formData.timezone,
           availability_local: JSON.stringify(formData.availability),
           cohort_id: formData.selectedCohortId,
-          role_in_cohort: formData.selectedRole,
+          role: formData.selectedRole,
         }),
       });
 

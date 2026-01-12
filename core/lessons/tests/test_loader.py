@@ -9,9 +9,9 @@ from core.lessons.loader import load_lesson, get_available_lessons, LessonNotFou
 
 
 def test_load_existing_lesson():
-    """Should load a lesson from JSON file."""
+    """Should load a lesson from YAML file."""
     lesson = load_lesson("intro-to-ai-safety")
-    assert lesson.id == "intro-to-ai-safety"
+    assert lesson.slug == "intro-to-ai-safety"
     assert lesson.title == "Introduction to AI Safety"
     assert len(lesson.stages) > 0
 
@@ -23,7 +23,7 @@ def test_load_nonexistent_lesson():
 
 
 def test_get_available_lessons():
-    """Should return list of available lesson IDs."""
+    """Should return list of available lesson slugs."""
     lessons = get_available_lessons()
     assert isinstance(lessons, list)
     assert "intro-to-ai-safety" in lessons
@@ -32,7 +32,7 @@ def test_get_available_lessons():
 def test_lessons_only_use_allowed_fields():
     """Lessons should only contain allowed fields - prevents external URLs and unknown fields."""
     # Allowlist of valid fields at each level
-    ALLOWED_TOP_LEVEL = {"id", "title", "stages", "optionalResources"}
+    ALLOWED_TOP_LEVEL = {"slug", "title", "stages", "optionalResources"}
 
     ALLOWED_STAGE_BY_TYPE = {
         "article": {"type", "source", "from", "to", "optional"},
@@ -85,7 +85,7 @@ def test_parse_optional_stages(tmp_path, monkeypatch):
     """Should parse optional field on article and video stages."""
     # Create a test lesson with optional stages
     test_lesson = {
-        "id": "test-optional",
+        "slug": "test-optional",
         "title": "Test Optional",
         "stages": [
             {"type": "article", "source": "articles/test.md"},

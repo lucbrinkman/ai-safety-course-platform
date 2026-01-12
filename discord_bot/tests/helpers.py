@@ -11,26 +11,13 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.tables import courses, cohorts, users, courses_users, groups, groups_users
-from core.enums import CohortRole, GroupingStatus, GroupUserRole, GroupUserStatus
-
-
-async def create_test_course(
-    conn: AsyncConnection,
-    name: str = "Test Course",
-) -> dict:
-    """Create a course for testing."""
-    result = await conn.execute(
-        insert(courses)
-        .values(course_name=name)
-        .returning(courses)
-    )
-    return dict(result.mappings().first())
+from core.tables import cohorts, users, signups, groups, groups_users
+from core.enums import CohortRole, GroupUserRole, GroupUserStatus
 
 
 async def create_test_cohort(
     conn: AsyncConnection,
-    course_id: int,
+    course_slug: str = "default",
     name: str = "Test Cohort",
     num_meetings: int = 8,
     start_date: date = None,
@@ -43,7 +30,7 @@ async def create_test_cohort(
         insert(cohorts)
         .values(
             cohort_name=name,
-            course_id=course_id,
+            course_slug=course_slug,
             cohort_start_date=start_date,
             duration_days=56,
             number_of_group_meetings=num_meetings,
@@ -58,25 +45,21 @@ async def create_test_user(
     cohort_id: int,
     discord_id: str,
     availability: str = '{"Monday": ["09:00-09:30", "09:30-10:00"]}',
-    role_in_cohort: str = "participant",
-    course_id: int = None,
+    role: str = "participant",
 ) -> dict:
     """
-    Create a user enrolled in a cohort for testing.
+    Create a user with a signup for a cohort for testing.
 
     Args:
         conn: Database connection
-        cohort_id: Cohort to enroll user in
+        cohort_id: Cohort to sign up for
         discord_id: Discord ID (should be unique per test)
         availability: Availability JSON string (e.g., '{"Monday": ["09:00-09:30"]}')
-        role_in_cohort: "participant" or "facilitator"
-        course_id: Course ID (required for courses_users, will be fetched from cohort if not provided)
+        role: "participant" or "facilitator"
 
     Returns:
         The created user record as a dict
     """
-    from sqlalchemy import select
-
     # Create user
     user_result = await conn.execute(
         insert(users)
@@ -90,25 +73,16 @@ async def create_test_user(
     )
     user = dict(user_result.mappings().first())
 
-    # Get course_id from cohort if not provided
-    if course_id is None:
-        cohort_result = await conn.execute(
-            select(cohorts.c.course_id).where(cohorts.c.cohort_id == cohort_id)
-        )
-        course_id = cohort_result.scalar_one()
-
     # Map string role to enum
-    role_enum = CohortRole.facilitator if role_in_cohort == "facilitator" else CohortRole.participant
+    role_enum = CohortRole.facilitator if role == "facilitator" else CohortRole.participant
 
-    # Enroll in cohort (courses_users requires course_id)
+    # Create signup for cohort
     await conn.execute(
-        insert(courses_users)
+        insert(signups)
         .values(
             user_id=user["user_id"],
-            course_id=course_id,
             cohort_id=cohort_id,
-            grouping_status=GroupingStatus.awaiting_grouping,
-            role_in_cohort=role_enum,
+            role=role_enum,
         )
     )
 

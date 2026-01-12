@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.tables import courses, cohorts, courses_users, users
+from core.tables import cohorts, signups, users
 from core.queries.cohorts import get_available_cohorts
-from core.enums import CohortRole, GroupingStatus
+from core.enums import CohortRole
 
 
 class TestGetAvailableCohorts:
@@ -20,18 +20,12 @@ class TestGetAvailableCohorts:
     @pytest.mark.asyncio
     async def test_returns_future_cohorts(self, db_conn):
         """Should return cohorts with start_date > today."""
-        # Create course
-        course_result = await db_conn.execute(
-            insert(courses).values(course_name="Test Course").returning(courses)
-        )
-        course = dict(course_result.mappings().first())
-
         # Create future cohort
         future_date = date.today() + timedelta(days=30)
         cohort_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Future Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=future_date,
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -44,7 +38,7 @@ class TestGetAvailableCohorts:
         await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Past Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=past_date,
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -71,12 +65,7 @@ class TestGetAvailableCohorts:
     @pytest.mark.asyncio
     async def test_shows_enrolled_cohorts_separately(self, db_conn):
         """Should separate enrolled cohorts from available ones."""
-        # Create course and user
-        course_result = await db_conn.execute(
-            insert(courses).values(course_name="Test Course").returning(courses)
-        )
-        course = dict(course_result.mappings().first())
-
+        # Create user
         user_result = await db_conn.execute(
             insert(users).values(
                 discord_id="test_user_123",
@@ -90,7 +79,7 @@ class TestGetAvailableCohorts:
         cohort1_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Enrolled Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=future_date,
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -101,7 +90,7 @@ class TestGetAvailableCohorts:
         cohort2_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Available Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=future_date + timedelta(days=30),
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -109,14 +98,12 @@ class TestGetAvailableCohorts:
         )
         cohort2 = dict(cohort2_result.mappings().first())
 
-        # Enroll user in first cohort
+        # Sign up user for first cohort
         await db_conn.execute(
-            insert(courses_users).values(
+            insert(signups).values(
                 user_id=user["user_id"],
-                course_id=course["course_id"],
                 cohort_id=cohort1["cohort_id"],
-                role_in_cohort=CohortRole.participant,
-                grouping_status=GroupingStatus.awaiting_grouping,
+                role=CohortRole.participant,
             )
         )
 
@@ -244,17 +231,12 @@ class TestEnrollInCohort:
 
     @pytest.mark.asyncio
     async def test_creates_enrollment_record(self, db_conn):
-        """Should create courses_users record."""
+        """Should create signup record."""
         # Setup
-        course_result = await db_conn.execute(
-            insert(courses).values(course_name="Test Course").returning(courses)
-        )
-        course = dict(course_result.mappings().first())
-
         cohort_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Test Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=date.today() + timedelta(days=30),
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -276,22 +258,16 @@ class TestEnrollInCohort:
         # Assert
         assert result is not None
         assert result["cohort_id"] == cohort["cohort_id"]
-        assert result["role_in_cohort"] == "participant"
-        assert result["grouping_status"] == "awaiting_grouping"
+        assert result["role"] == "participant"
 
     @pytest.mark.asyncio
     async def test_enrolls_as_facilitator(self, db_conn):
         """Should create enrollment record with facilitator role."""
         # Setup
-        course_result = await db_conn.execute(
-            insert(courses).values(course_name="Facilitator Course").returning(courses)
-        )
-        course = dict(course_result.mappings().first())
-
         cohort_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="Facilitator Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=date.today() + timedelta(days=30),
                 duration_days=56,
                 number_of_group_meetings=8,
@@ -312,7 +288,7 @@ class TestEnrollInCohort:
 
         # Assert
         assert result is not None
-        assert result["role_in_cohort"] == "facilitator"
+        assert result["role"] == "facilitator"
 
     @pytest.mark.asyncio
     async def test_returns_none_for_invalid_cohort(self, db_conn):
@@ -333,15 +309,10 @@ class TestEnrollInCohort:
     async def test_returns_none_for_invalid_user(self, db_conn):
         """Should return None if user doesn't exist."""
         # Setup - create a cohort but no user
-        course_result = await db_conn.execute(
-            insert(courses).values(course_name="No User Course").returning(courses)
-        )
-        course = dict(course_result.mappings().first())
-
         cohort_result = await db_conn.execute(
             insert(cohorts).values(
                 cohort_name="No User Cohort",
-                course_id=course["course_id"],
+                course_slug="default",
                 cohort_start_date=date.today() + timedelta(days=30),
                 duration_days=56,
                 number_of_group_meetings=8,

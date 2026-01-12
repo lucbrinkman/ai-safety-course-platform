@@ -23,16 +23,11 @@ from .enums import (
     StageType,
     cohort_role_enum,
     cohort_status_enum,
-    delivery_method_enum,
-    delivery_status_enum,
-    dropout_reason_enum,
     group_status_enum,
     group_user_role_enum,
     group_user_status_enum,
-    grouping_status_enum,
     rsvp_status_enum,
     ungroupable_reason_enum,
-    user_role_enum,
 )
 
 # Naming convention for constraints (helps Alembic generate better names)
@@ -64,17 +59,10 @@ users = Table(
     Column("availability_local", Text),
     Column("if_needed_availability_local", Text),
     Column("availability_last_updated_at", TIMESTAMP(timezone=True)),
-    Column("reminder_preferences", JSONB),
-    Column("reminder_timing", Text),
     Column("email_notifications_enabled", Boolean, server_default="true"),
     Column("dm_notifications_enabled", Boolean, server_default="true"),
-    Column("data_sharing_consent", Boolean, server_default="false"),
-    Column("analytics_opt_in", Boolean, server_default="false"),
-    Column("public_profile_visible", Boolean, server_default="false"),
-    Column("show_in_alumni_directory", Boolean, server_default="false"),
+    Column("is_admin", Boolean, server_default="false"),
     Column("tos_accepted_at", TIMESTAMP(timezone=True)),
-    Column("notes", Text),
-    Column("source", Text),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("deleted_at", TIMESTAMP(timezone=True)),
@@ -97,8 +85,6 @@ facilitators = Table(
         nullable=False,
     ),
     Column("max_active_groups", Integer, server_default="2"),
-    Column("average_rating", Float),
-    Column("rating_count", Integer, server_default="0"),
     Column("certified_at", TIMESTAMP(timezone=True)),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
@@ -107,67 +93,15 @@ facilitators = Table(
 
 
 # =====================================================
-# 3. ROLES_USERS
+# 3. COHORTS
 # =====================================================
-roles_users = Table(
-    "roles_users",
-    metadata,
-    Column("role_user_id", Integer, primary_key=True, autoincrement=True),
-    Column(
-        "user_id",
-        Integer,
-        ForeignKey("users.user_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
-    Column("role", user_role_enum),
-    Column("granted_at", TIMESTAMP(timezone=True)),
-    Column(
-        "granted_by_user_id",
-        Integer,
-        ForeignKey("users.user_id", ondelete="SET NULL"),
-    ),
-    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Index("idx_roles_users_user_id", "user_id"),
-)
-
-
-# =====================================================
-# 4. COURSES
-# =====================================================
-courses = Table(
-    "courses",
-    metadata,
-    Column("course_id", Integer, primary_key=True, autoincrement=True),
-    Column("course_name", Text, nullable=False),
-    Column("description", Text),
-    Column("duration_days_options", ARRAY(Integer)),
-    Column("is_public", Boolean, server_default="true"),
-    Column("last_updated_at", TIMESTAMP(timezone=True)),
-    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Column(
-        "created_by_user_id",
-        Integer,
-        ForeignKey("users.user_id", ondelete="SET NULL"),
-    ),
-)
-
-
-# =====================================================
-# 5. COHORTS
-# =====================================================
+# Course content loaded from YAML by slug - no courses table needed
 cohorts = Table(
     "cohorts",
     metadata,
     Column("cohort_id", Integer, primary_key=True, autoincrement=True),
     Column("cohort_name", Text),
-    Column(
-        "course_id",
-        Integer,
-        ForeignKey("courses.course_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
+    Column("course_slug", Text, nullable=False),  # references YAML course slug
     Column("cohort_start_date", Date, nullable=False),
     Column("duration_days", Integer, nullable=False),
     Column("number_of_group_meetings", Integer, nullable=False),
@@ -175,13 +109,13 @@ cohorts = Table(
     Column("status", cohort_status_enum, server_default="active"),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Index("idx_cohorts_course_id", "course_id"),
+    Index("idx_cohorts_course_slug", "course_slug"),
     Index("idx_cohorts_start_date", "cohort_start_date"),
 )
 
 
 # =====================================================
-# 6. GROUPS
+# 4. GROUPS
 # =====================================================
 groups = Table(
     "groups",
@@ -194,40 +128,24 @@ groups = Table(
         ForeignKey("cohorts.cohort_id", ondelete="CASCADE"),
         nullable=False,
     ),
+    Column("course_slug_override", Text),  # NULL = use cohort's course_slug, set = A/B test variant
+    Column("discord_category_id", Text),
     Column("discord_text_channel_id", Text),
     Column("discord_voice_channel_id", Text),
     Column("recurring_meeting_time_utc", Text),
-    Column("recurrence_pattern", Text),
     Column("status", group_status_enum, server_default="forming"),
     Column("start_date", Date),
     Column("expected_end_date", Date),
     Column("actual_end_date", Date),
     Column("discord_channel_archived_at", TIMESTAMP(timezone=True)),
-    Column("total_messages_in_channel", Integer),
-    Column("last_message_at", TIMESTAMP(timezone=True)),
-    Column("merged_from_groups", ARRAY(Integer)),
-    Column(
-        "merged_into_group_id",
-        Integer,
-        ForeignKey("groups.group_id", ondelete="SET NULL"),
-    ),
-    Column("max_capacity", Integer, server_default="8"),
-    Column("min_size_threshold", Integer, server_default="3"),
-    Column("notes", Text),
-    Column("flags", JSONB),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Column(
-        "created_by_user_id",
-        Integer,
-        ForeignKey("users.user_id", ondelete="SET NULL"),
-    ),
     Index("idx_groups_cohort_id", "cohort_id"),
 )
 
 
 # =====================================================
-# 7. GROUPS_USERS
+# 5. GROUPS_USERS
 # =====================================================
 groups_users = Table(
     "groups_users",
@@ -249,8 +167,8 @@ groups_users = Table(
     Column("status", group_user_status_enum, server_default="active"),
     Column("joined_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("left_at", TIMESTAMP(timezone=True)),
-    Column("dropout_reason", dropout_reason_enum),
-    Column("dropout_details", Text),
+    Column("completed_at", TIMESTAMP(timezone=True)),
+    Column("reason_for_leaving", Text),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Index("idx_groups_users_user_id", "user_id"),
@@ -259,12 +177,12 @@ groups_users = Table(
 
 
 # =====================================================
-# 8. COURSES_USERS
+# 6. SIGNUPS
 # =====================================================
-courses_users = Table(
-    "courses_users",
+signups = Table(
+    "signups",
     metadata,
-    Column("course_user_id", Integer, primary_key=True, autoincrement=True),
+    Column("signup_id", Integer, primary_key=True, autoincrement=True),
     Column(
         "user_id",
         Integer,
@@ -272,32 +190,22 @@ courses_users = Table(
         nullable=False,
     ),
     Column(
-        "course_id",
-        Integer,
-        ForeignKey("courses.course_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
-    Column(
         "cohort_id",
         Integer,
-        ForeignKey("cohorts.cohort_id", ondelete="SET NULL"),
+        ForeignKey("cohorts.cohort_id", ondelete="CASCADE"),
+        nullable=False,
     ),
-    Column("role_in_cohort", cohort_role_enum, nullable=False),
-    Column("grouping_status", grouping_status_enum, server_default="awaiting_grouping"),
-    Column("ungroupable_reason", ungroupable_reason_enum),  # Why user couldn't be grouped (if ungroupable)
-    Column("grouping_attempt_count", Integer, server_default="0"),
-    Column("last_grouping_attempt_at", TIMESTAMP(timezone=True)),
-    Column("is_course_committee_member", Boolean, server_default="false"),
-    Column("completed_at", TIMESTAMP(timezone=True)),
+    Column("role", cohort_role_enum, nullable=False),
+    Column("ungroupable_reason", ungroupable_reason_enum),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
-    Index("idx_courses_users_user_id", "user_id"),
-    Index("idx_courses_users_course_id", "course_id"),
+    Index("idx_signups_user_id", "user_id"),
+    Index("idx_signups_cohort_id", "cohort_id"),
 )
 
 
 # =====================================================
-# 9. MEETINGS
+# 7. MEETINGS
 # =====================================================
 meetings = Table(
     "meetings",
@@ -313,26 +221,19 @@ meetings = Table(
         Integer,
         ForeignKey("cohorts.cohort_id", ondelete="CASCADE"),
     ),
-    Column(
-        "course_id",
-        Integer,
-        ForeignKey("courses.course_id", ondelete="CASCADE"),
-    ),
-    Column("scheduled_time_utc", TIMESTAMP(timezone=True), nullable=False),
-    Column("was_rescheduled", Boolean, server_default="false"),
-    Column("reschedule_reason", Text),
+    Column("scheduled_at", TIMESTAMP(timezone=True), nullable=False),
     Column("discord_event_id", Text),
     Column("discord_voice_channel_id", Text),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("updated_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Index("idx_meetings_group_id", "group_id"),
     Index("idx_meetings_cohort_id", "cohort_id"),
-    Index("idx_meetings_scheduled_time", "scheduled_time_utc"),
+    Index("idx_meetings_scheduled_at", "scheduled_at"),
 )
 
 
 # =====================================================
-# 10. ATTENDANCES
+# 8. ATTENDANCES
 # =====================================================
 attendances = Table(
     "attendances",
@@ -360,51 +261,30 @@ attendances = Table(
 
 
 # =====================================================
-# 11. REMINDERS_LOG
+# 9. NOTIFICATION_LOG
 # =====================================================
-reminders_log = Table(
-    "reminders_log",
+notification_log = Table(
+    "notification_log",
     metadata,
-    Column("reminder_id", Integer, primary_key=True, autoincrement=True),
-    Column("message", Text, nullable=False),
-    Column("reminder_type", Text, nullable=False),
-    Column("sent_at", TIMESTAMP(timezone=True), nullable=False),
-    Column("delivery_method", delivery_method_enum, nullable=False),
-    Column("delivery_status", delivery_status_enum, server_default="pending"),
-    Column("delivery_error", Text),
-    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
-)
-
-
-# =====================================================
-# 12. REMINDER_RECIPIENTS_LOG
-# =====================================================
-reminder_recipients_log = Table(
-    "reminder_recipients_log",
-    metadata,
-    Column("reminder_user_id", Integer, primary_key=True, autoincrement=True),
-    Column(
-        "reminder_id",
-        Integer,
-        ForeignKey("reminders_log.reminder_id", ondelete="CASCADE"),
-        nullable=False,
-    ),
+    Column("log_id", Integer, primary_key=True, autoincrement=True),
     Column(
         "user_id",
         Integer,
         ForeignKey("users.user_id", ondelete="SET NULL"),
     ),
-    Column(
-        "group_id",
-        Integer,
-        ForeignKey("groups.group_id", ondelete="SET NULL"),
-    ),
-    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
+    Column("channel_id", Text),  # Discord channel ID (for channel messages)
+    Column("message_type", Text, nullable=False),  # e.g., "welcome", "meeting_reminder_24h"
+    Column("channel", Text, nullable=False),  # "email", "discord_dm", "discord_channel"
+    Column("status", Text, nullable=False),  # "sent", "failed"
+    Column("error_message", Text),  # Why it failed (if applicable)
+    Column("sent_at", TIMESTAMP(timezone=True), server_default=func.now()),
+    Index("idx_notification_log_user_id", "user_id"),
+    Index("idx_notification_log_sent_at", "sent_at"),
 )
 
 
 # =====================================================
-# 13. AUTH_CODES
+# 10. AUTH_CODES
 # =====================================================
 auth_codes = Table(
     "auth_codes",
@@ -427,7 +307,7 @@ auth_codes = Table(
 
 
 # =====================================================
-# 14. LESSON_SESSIONS
+# 11. LESSON_SESSIONS
 # =====================================================
 lesson_sessions = Table(
     "lesson_sessions",
@@ -439,19 +319,19 @@ lesson_sessions = Table(
         ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=True,
     ),
-    Column("lesson_id", Text, nullable=False),
+    Column("lesson_slug", Text, nullable=False),
     Column("current_stage_index", Integer, server_default="0"),
     Column("messages", JSONB, server_default="[]"),
     Column("started_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("last_active_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("completed_at", TIMESTAMP(timezone=True)),
     Index("idx_lesson_sessions_user_id", "user_id"),
-    Index("idx_lesson_sessions_lesson_id", "lesson_id"),
+    Index("idx_lesson_sessions_lesson_slug", "lesson_slug"),
 )
 
 
 # =====================================================
-# 15. CONTENT_EVENTS
+# 12. CONTENT_EVENTS
 # =====================================================
 content_events = Table(
     "content_events",
@@ -469,7 +349,7 @@ content_events = Table(
         ForeignKey("lesson_sessions.session_id", ondelete="CASCADE"),
         nullable=False,
     ),
-    Column("lesson_id", Text, nullable=False),
+    Column("lesson_slug", Text, nullable=False),
     Column("stage_index", Integer, nullable=False),
     Column(
         "stage_type",
@@ -485,6 +365,6 @@ content_events = Table(
     Column("metadata", JSONB, nullable=True),  # scroll_depth, video_time, etc.
     Index("idx_content_events_user_id", "user_id"),
     Index("idx_content_events_session_id", "session_id"),
-    Index("idx_content_events_lesson_id", "lesson_id"),
+    Index("idx_content_events_lesson_slug", "lesson_slug"),
     Index("idx_content_events_timestamp", "timestamp"),
 )

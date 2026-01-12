@@ -21,7 +21,7 @@ export default function CourseOverview() {
   const [selectedLesson, setSelectedLesson] = useState<LessonInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [previewStage, setPreviewStage] = useState<{ lessonId: string; stageIndex: number; sessionId: number | null } | null>(null);
+  const [previewStage, setPreviewStage] = useState<{ lessonSlug: string; stageIndex: number; sessionId: number | null } | null>(null);
 
   // Load course progress
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function CourseOverview() {
 
   const handleStartLesson = () => {
     if (!selectedLesson) return;
-    navigate(`/course/${courseId}/lesson/${selectedLesson.id}`);
+    navigate(`/course/${courseId}/lesson/${selectedLesson.slug}`);
   };
 
   const handleStageClick = (index: number) => {
@@ -69,7 +69,7 @@ export default function CourseOverview() {
     const stage = selectedLesson.stages[index];
     if (stage.type === "chat") return; // Can't preview chat
     setPreviewStage({
-      lessonId: selectedLesson.id,
+      lessonSlug: selectedLesson.slug,
       stageIndex: index,
       sessionId: selectedLesson.sessionId,
     });
@@ -77,7 +77,7 @@ export default function CourseOverview() {
 
   // Find module for breadcrumb
   const selectedModule = courseProgress?.modules.find((m) =>
-    m.lessons.some((l) => l.id === selectedLesson?.id)
+    m.lessons.some((l) => l.slug === selectedLesson?.slug)
   );
 
   if (loading) {
@@ -149,7 +149,7 @@ export default function CourseOverview() {
           <ModuleSidebar
             courseTitle={courseProgress.course.title}
             modules={courseProgress.modules}
-            selectedLessonId={selectedLesson?.id ?? null}
+            selectedLessonSlug={selectedLesson?.slug ?? null}
             onLessonSelect={setSelectedLesson}
           />
         </div>
@@ -174,7 +174,7 @@ export default function CourseOverview() {
       {/* Content preview modal */}
       {previewStage && (
         <ContentPreviewModal
-          lessonId={previewStage.lessonId}
+          lessonSlug={previewStage.lessonSlug}
           stageIndex={previewStage.stageIndex}
           sessionId={previewStage.sessionId}
           onClose={() => setPreviewStage(null)}

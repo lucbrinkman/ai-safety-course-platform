@@ -3,7 +3,7 @@ Lesson API routes.
 
 Endpoints:
 - GET /api/lessons - List available lessons
-- GET /api/lessons/{id} - Get lesson definition
+- GET /api/lessons/{slug} - Get lesson definition
 - POST /api/lesson-sessions - Start a new session
 - GET /api/lesson-sessions/{id} - Get session state
 - POST /api/lesson-sessions/{id}/message - Send message (SSE streaming)
@@ -129,12 +129,12 @@ router = APIRouter(prefix="/api", tags=["lessons"])
 @router.get("/lessons")
 async def list_lessons():
     """List available lessons."""
-    lesson_ids = get_available_lessons()
+    lesson_slugs = get_available_lessons()
     lessons = []
-    for lid in lesson_ids:
+    for slug in lesson_slugs:
         try:
-            lesson = load_lesson(lid)
-            lessons.append({"id": lesson.id, "title": lesson.title})
+            lesson = load_lesson(slug)
+            lessons.append({"slug": lesson.slug, "title": lesson.title})
         except LessonNotFoundError:
             pass
     return {"lessons": lessons}
@@ -153,13 +153,13 @@ def serialize_video_stage(s: VideoStage) -> dict:
     }
 
 
-@router.get("/lessons/{lesson_id}")
-async def get_lesson(lesson_id: str):
+@router.get("/lessons/{lesson_slug}")
+async def get_lesson(lesson_slug: str):
     """Get a lesson definition."""
     try:
-        lesson = load_lesson(lesson_id)
+        lesson = load_lesson(lesson_slug)
         return {
-            "id": lesson.id,
+            "slug": lesson.slug,
             "title": lesson.title,
             "stages": [
                 {
@@ -196,7 +196,7 @@ async def get_lesson(lesson_id: str):
 
 
 class CreateSessionRequest(BaseModel):
-    lesson_id: str
+    lesson_slug: str
 
 
 class HeartbeatRequest(BaseModel):
@@ -222,11 +222,11 @@ async def start_session(
         user_id = None  # Anonymous session
 
     try:
-        lesson = load_lesson(request_body.lesson_id)
+        lesson = load_lesson(request_body.lesson_slug)
     except LessonNotFoundError:
         raise HTTPException(status_code=404, detail="Lesson not found")
 
-    session = await create_session(user_id, request_body.lesson_id)
+    session = await create_session(user_id, request_body.lesson_slug)
 
     # Add "Started" system message if stage 0 is article/video
     if lesson.stages:
@@ -241,7 +241,7 @@ async def start_session(
             schedule_trial_nudge(
                 session_id=session["session_id"],
                 user_id=user_id,
-                lesson_url=build_lesson_url(request_body.lesson_id),
+                lesson_url=build_lesson_url(request_body.lesson_slug),
             )
         except Exception as e:
             print(f"[Notifications] Failed to schedule trial nudge for session {session['session_id']}: {e}")
@@ -266,7 +266,7 @@ async def get_session_state(
     check_session_access(session, user_id)
 
     # Load lesson to include stage info
-    lesson = load_lesson(session["lesson_id"])
+    lesson = load_lesson(session["lesson_slug"])
 
     # Determine which stage to get content for
     content_stage_index = view_stage if view_stage is not None else session["current_stage_index"]
@@ -322,7 +322,7 @@ async def get_session_state(
 
     return {
         "session_id": session["session_id"],
-        "lesson_id": session["lesson_id"],
+        "lesson_slug": session["lesson_slug"],
         "lesson_title": lesson.title,
         "current_stage_index": session["current_stage_index"],
         "total_stages": len(lesson.stages),
@@ -406,7 +406,7 @@ async def send_message_endpoint(
     check_session_access(session, user_id)
 
     # Load lesson and current stage
-    lesson = load_lesson(session["lesson_id"])
+    lesson = load_lesson(session["lesson_slug"])
     stage_index = session["current_stage_index"]
     current_stage = lesson.stages[stage_index]
     previous_stage = lesson.stages[stage_index - 1] if stage_index > 0 else None
@@ -476,7 +476,7 @@ async def advance_session(session_id: int, request: Request):
 
     check_session_access(session, user_id)
 
-    lesson = load_lesson(session["lesson_id"])
+    lesson = load_lesson(session["lesson_slug"])
     current_stage_index = session["current_stage_index"]
     current_stage = lesson.stages[current_stage_index]
 
@@ -570,7 +570,7 @@ async def record_heartbeat(
             insert(content_events).values(
                 user_id=user_id,
                 session_id=session_id,
-                lesson_id=session["lesson_id"],
+                lesson_slug=session["lesson_slug"],
                 stage_index=request_body.stage_index,
                 stage_type=request_body.stage_type,
                 event_type=ContentEventType.heartbeat,

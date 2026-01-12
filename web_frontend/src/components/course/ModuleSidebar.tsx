@@ -9,7 +9,7 @@ import { ChevronDown, ChevronRight, Check, Circle } from "lucide-react";
 type ModuleSidebarProps = {
   courseTitle: string;
   modules: ModuleInfo[];
-  selectedLessonId: string | null;
+  selectedLessonSlug: string | null;
   onLessonSelect: (lesson: LessonInfo) => void;
 };
 
@@ -26,7 +26,7 @@ function LessonStatusIcon({ status }: { status: LessonInfo["status"] }) {
 export default function ModuleSidebar({
   courseTitle,
   modules,
-  selectedLessonId,
+  selectedLessonSlug,
   onLessonSelect,
 }: ModuleSidebarProps) {
   // Track which modules are expanded
@@ -34,15 +34,15 @@ export default function ModuleSidebar({
 
   // Auto-expand module containing selected lesson on mount
   useEffect(() => {
-    if (selectedLessonId) {
+    if (selectedLessonSlug) {
       for (const module of modules) {
-        if (module.lessons.some((l) => l.id === selectedLessonId)) {
+        if (module.lessons.some((l) => l.slug === selectedLessonSlug)) {
           setExpandedModules((prev) => new Set(prev).add(module.id));
           break;
         }
       }
     }
-  }, [selectedLessonId, modules]);
+  }, [selectedLessonSlug, modules]);
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) => {
@@ -93,11 +93,11 @@ export default function ModuleSidebar({
               {isExpanded && (
                 <div className="pb-2">
                   {module.lessons.map((lesson) => {
-                    const isSelected = lesson.id === selectedLessonId;
+                    const isSelected = lesson.slug === selectedLessonSlug;
 
                     return (
                       <button
-                        key={lesson.id}
+                        key={lesson.slug}
                         onClick={() => onLessonSelect(lesson)}
                         className={`w-full flex items-center gap-3 px-4 py-2 pl-10 text-left transition-colors ${
                           isSelected

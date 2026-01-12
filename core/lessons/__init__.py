@@ -41,7 +41,7 @@ from .chat import send_message as send_lesson_message, get_stage_content
 from .course_loader import (
     load_course,
     get_next_lesson,
-    get_all_lesson_ids,
+    get_all_lesson_slugs,
     CourseNotFoundError,
 )
 
@@ -79,6 +79,6 @@ __all__ = [
     "get_stage_content",
     "load_course",
     "get_next_lesson",
-    "get_all_lesson_ids",
+    "get_all_lesson_slugs",
     "CourseNotFoundError",
 ]

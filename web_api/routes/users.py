@@ -34,7 +34,7 @@ class UserProfileUpdate(BaseModel):
     timezone: str | None = None
     availability_local: str | None = None
     cohort_id: int | None = None
-    role_in_cohort: str | None = None
+    role: str | None = None  # "participant" or "facilitator" for cohort enrollment
 
 
 @router.patch("/me")
@@ -47,7 +47,7 @@ async def update_my_profile(
 
     Only allows updating specific fields: nickname, email, timezone, availability_local.
     If email is changed, clears email_verified_at (handled in core).
-    Optionally enroll in a cohort if cohort_id and role_in_cohort provided.
+    Optionally enroll in a cohort if cohort_id and role provided.
     """
     discord_id = user["sub"]
 
@@ -67,13 +67,13 @@ async def update_my_profile(
     if updates.nickname is not None:
         await update_nickname_in_discord(discord_id, updates.nickname)
 
-    # Enroll in cohort if both cohort_id and role_in_cohort are provided
+    # Enroll in cohort if both cohort_id and role are provided
     enrollment = None
-    if updates.cohort_id is not None and updates.role_in_cohort is not None:
+    if updates.cohort_id is not None and updates.role is not None:
         enrollment = await enroll_in_cohort(
             discord_id,
             updates.cohort_id,
-            updates.role_in_cohort,
+            updates.role,
         )
 
     return {"status": "updated", "user": updated_user, "enrollment": enrollment}
