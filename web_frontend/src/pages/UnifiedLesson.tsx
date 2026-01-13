@@ -455,49 +455,95 @@ export default function UnifiedLesson() {
   return (
     <div className="h-screen flex flex-col bg-stone-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-4 relative z-40">
-        {/* Home + Title - left aligned */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
-          <a href="/" className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-            Lens Academy
-          </a>
-          <span className="text-slate-300">|</span>
-          <h1 className="text-lg font-semibold text-gray-900">
-            {session.lesson_title}
-          </h1>
+      <header className="bg-white border-b border-gray-200 px-4 py-3 z-40">
+        {/* Mobile layout (< md): two rows */}
+        <div className="md:hidden flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 truncate mr-4">
+              <a href="/" className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+                Lens
+              </a>
+              <span className="text-slate-300 shrink-0">|</span>
+              <h1 className="text-lg font-semibold text-gray-900 truncate">
+                {session.lesson_title}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4 shrink-0">
+              {isViewingOther ? (
+                <button
+                  onClick={handleReturnToCurrent}
+                  className="text-emerald-600 hover:text-emerald-700 text-sm font-medium whitespace-nowrap"
+                >
+                  Return to current →
+                </button>
+              ) : (
+                <button
+                  onClick={handleAdvanceStage}
+                  className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer whitespace-nowrap"
+                >
+                  Skip section
+                </button>
+              )}
+              <LessonDrawerToggle onClick={() => setDrawerOpen(true)} />
+              <HeaderAuthStatus onLoginClick={handleLoginClick} />
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <StageProgressBar
+              stages={session.stages}
+              currentStageIndex={session.current_stage_index}
+              viewingStageIndex={viewingStageIndex}
+              onStageClick={handleStageClick}
+              onPrevious={handleGoBack}
+              onNext={handleGoForward}
+              canGoPrevious={canGoBack}
+              canGoNext={canGoForward}
+            />
+          </div>
         </div>
-        {/* Progress bar - centered */}
-        <div className="flex items-center justify-center">
-          <StageProgressBar
-            stages={session.stages}
-            currentStageIndex={session.current_stage_index}
-            viewingStageIndex={viewingStageIndex}
-            onStageClick={handleStageClick}
-            onPrevious={handleGoBack}
-            onNext={handleGoForward}
-            canGoPrevious={canGoBack}
-            canGoNext={canGoForward}
-          />
-        </div>
-        {/* Right side: Skip button + Drawer toggle + Auth status */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
-          {isViewingOther ? (
-            <button
-              onClick={handleReturnToCurrent}
-              className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
-            >
-              Return to current section →
-            </button>
-          ) : (
-            <button
-              onClick={handleAdvanceStage}
-              className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
-            >
-              Skip section
-            </button>
-          )}
-          <LessonDrawerToggle onClick={() => setDrawerOpen(true)} />
-          <HeaderAuthStatus onLoginClick={handleLoginClick} />
+
+        {/* Desktop layout (>= md): absolute positioning for perfect centering */}
+        <div className="hidden md:block relative">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
+            <a href="/" className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+              Lens Academy
+            </a>
+            <span className="text-slate-300">|</span>
+            <h1 className="text-lg font-semibold text-gray-900">
+              {session.lesson_title}
+            </h1>
+          </div>
+          <div className="flex items-center justify-center py-0.5">
+            <StageProgressBar
+              stages={session.stages}
+              currentStageIndex={session.current_stage_index}
+              viewingStageIndex={viewingStageIndex}
+              onStageClick={handleStageClick}
+              onPrevious={handleGoBack}
+              onNext={handleGoForward}
+              canGoPrevious={canGoBack}
+              canGoNext={canGoForward}
+            />
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
+            {isViewingOther ? (
+              <button
+                onClick={handleReturnToCurrent}
+                className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+              >
+                Return to current section →
+              </button>
+            ) : (
+              <button
+                onClick={handleAdvanceStage}
+                className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
+              >
+                Skip section
+              </button>
+            )}
+            <LessonDrawerToggle onClick={() => setDrawerOpen(true)} />
+            <HeaderAuthStatus onLoginClick={handleLoginClick} />
+          </div>
         </div>
       </header>
 
