@@ -1,6 +1,6 @@
 /**
  * Course overview page with two-panel layout.
- * Sidebar shows modules/lessons, main panel shows selected lesson details.
+ * Sidebar shows units/lessons, main panel shows selected lesson details.
  */
 
 import { useState, useEffect } from "react";
@@ -8,7 +8,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { getCourseProgress } from "../api/lessons";
 import type { CourseProgress, LessonInfo } from "../types/course";
-import ModuleSidebar from "../components/course/ModuleSidebar";
+import CourseSidebar from "../components/course/CourseSidebar";
 import LessonOverview from "../components/course/LessonOverview";
 import ContentPreviewModal from "../components/course/ContentPreviewModal";
 import { DISCORD_INVITE_URL } from "../config";
@@ -33,8 +33,8 @@ export default function CourseOverview() {
 
         // Auto-select current lesson (first in-progress, or first not-started)
         let currentLesson: LessonInfo | null = null;
-        for (const module of data.modules) {
-          for (const lesson of module.lessons) {
+        for (const unit of data.units) {
+          for (const lesson of unit.lessons) {
             if (lesson.status === "in_progress") {
               currentLesson = lesson;
               break;
@@ -47,8 +47,8 @@ export default function CourseOverview() {
         }
         if (currentLesson) {
           setSelectedLesson(currentLesson);
-        } else if (data.modules[0]?.lessons[0]) {
-          setSelectedLesson(data.modules[0].lessons[0]);
+        } else if (data.units[0]?.lessons[0]) {
+          setSelectedLesson(data.units[0].lessons[0]);
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load course");
@@ -75,10 +75,15 @@ export default function CourseOverview() {
     });
   };
 
-  // Find module for breadcrumb
-  const selectedModule = courseProgress?.modules.find((m) =>
-    m.lessons.some((l) => l.slug === selectedLesson?.slug)
+  // Find unit for breadcrumb
+  const selectedUnit = courseProgress?.units.find((u) =>
+    u.lessons.some((l) => l.slug === selectedLesson?.slug)
   );
+  const selectedUnitLabel = selectedUnit
+    ? selectedUnit.meetingNumber !== null
+      ? `Unit ${selectedUnit.meetingNumber}`
+      : "Additional Content"
+    : null;
 
   if (loading) {
     return (
@@ -128,10 +133,10 @@ export default function CourseOverview() {
         </a>
         <ChevronRight className="w-4 h-4 text-slate-400" />
         <span className="text-slate-700 font-medium">{courseProgress.course.title}</span>
-        {selectedModule && (
+        {selectedUnitLabel && (
           <>
             <ChevronRight className="w-4 h-4 text-slate-400" />
-            <span className="text-slate-500">{selectedModule.title}</span>
+            <span className="text-slate-500">{selectedUnitLabel}</span>
           </>
         )}
         {selectedLesson && (
@@ -146,9 +151,9 @@ export default function CourseOverview() {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <div className="w-72 flex-shrink-0">
-          <ModuleSidebar
+          <CourseSidebar
             courseTitle={courseProgress.course.title}
-            modules={courseProgress.modules}
+            units={courseProgress.units}
             selectedLessonSlug={selectedLesson?.slug ?? null}
             onLessonSelect={setSelectedLesson}
           />

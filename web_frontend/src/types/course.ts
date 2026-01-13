@@ -18,6 +18,7 @@ export type LessonInfo = {
   status: LessonStatus;
   currentStageIndex: number | null;
   sessionId: number | null;
+  optional: boolean;
 };
 
 export type ModuleInfo = {
@@ -26,10 +27,15 @@ export type ModuleInfo = {
   lessons: LessonInfo[];
 };
 
+export type UnitInfo = {
+  meetingNumber: number | null;
+  lessons: LessonInfo[];
+};
+
 export type CourseProgress = {
   course: {
     slug: string;
     title: string;
   };
-  modules: ModuleInfo[];
+  units: UnitInfo[];
 };
