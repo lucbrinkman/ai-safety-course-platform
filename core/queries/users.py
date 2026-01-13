@@ -127,6 +127,8 @@ async def save_user_profile(
 
     Creates user if they don't exist, otherwise updates.
     Supported fields: nickname, timezone, availability_local, if_needed_availability_local
+
+    Automatically sets availability_last_updated_at when availability or timezone fields change.
     """
     existing = await get_user_by_discord_id(conn, discord_id)
 
@@ -139,6 +141,10 @@ async def save_user_profile(
                 "if_needed_availability_local", "email", "discord_username"
             )
         }
+        # Set availability_last_updated_at if availability or timezone fields are being updated
+        # (timezone changes affect when user is available in absolute terms)
+        if any(k in valid_fields for k in ("availability_local", "if_needed_availability_local", "timezone")):
+            valid_fields["availability_last_updated_at"] = datetime.now(timezone.utc)
         if valid_fields:
             return await update_user(conn, discord_id, **valid_fields)
         return existing

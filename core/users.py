@@ -73,6 +73,7 @@ async def update_user_profile(
     Update a user's profile with email verification handling.
 
     If email changes, clears email_verified_at.
+    If availability or timezone changes, sets availability_last_updated_at.
 
     Args:
         discord_id: Discord user ID
@@ -90,8 +91,11 @@ async def update_user_profile(
         update_data["nickname"] = nickname
     if timezone_str is not None:
         update_data["timezone"] = timezone_str
+        # Timezone changes affect when user is available in absolute terms
+        update_data["availability_last_updated_at"] = datetime.now(timezone.utc)
     if availability_local is not None:
         update_data["availability_local"] = availability_local
+        update_data["availability_last_updated_at"] = datetime.now(timezone.utc)
 
     async with get_transaction() as conn:
         # If email is being updated, check if it changed and clear verification

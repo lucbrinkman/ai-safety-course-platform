@@ -13,6 +13,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.tables import users
 from core.availability import availability_json_to_intervals
+from core.queries.users import save_user_profile
+from core import update_user_profile
 
 
 class TestAvailabilityIntegration:
@@ -240,3 +242,108 @@ class TestAvailabilityIntegration:
         # Monday 10:00-10:30 = 600-630
         # Monday 14:00-14:30 = 840-870
         assert sorted(intervals) == [(600, 630), (840, 870)]
+
+
+class TestAvailabilityLastUpdatedAt:
+    """Tests for availability_last_updated_at timestamp tracking."""
+
+    @pytest.mark.asyncio
+    async def test_save_user_profile_sets_timestamp_on_availability_update(self, db_conn):
+        """save_user_profile should set availability_last_updated_at when availability changes."""
+        # Create user first
+        await db_conn.execute(
+            insert(users).values(
+                discord_id="test_timestamp_user1",
+                discord_username="test_user",
+            )
+        )
+
+        # Update availability
+        result = await save_user_profile(
+            db_conn,
+            discord_id="test_timestamp_user1",
+            availability_local='{"Monday": ["09:00-09:30"]}',
+        )
+
+        assert result["availability_last_updated_at"] is not None
+
+    @pytest.mark.asyncio
+    async def test_save_user_profile_sets_timestamp_on_if_needed_update(self, db_conn):
+        """save_user_profile should set availability_last_updated_at when if_needed changes."""
+        # Create user first
+        await db_conn.execute(
+            insert(users).values(
+                discord_id="test_timestamp_user2",
+                discord_username="test_user",
+            )
+        )
+
+        # Update if_needed availability
+        result = await save_user_profile(
+            db_conn,
+            discord_id="test_timestamp_user2",
+            if_needed_availability_local='{"Tuesday": ["14:00-14:30"]}',
+        )
+
+        assert result["availability_last_updated_at"] is not None
+
+    @pytest.mark.asyncio
+    async def test_save_user_profile_sets_timestamp_on_timezone_update(self, db_conn):
+        """save_user_profile should set availability_last_updated_at when timezone changes."""
+        # Create user first
+        await db_conn.execute(
+            insert(users).values(
+                discord_id="test_timestamp_user3",
+                discord_username="test_user",
+            )
+        )
+
+        # Update timezone (affects availability in absolute terms)
+        result = await save_user_profile(
+            db_conn,
+            discord_id="test_timestamp_user3",
+            timezone="America/New_York",
+        )
+
+        assert result["availability_last_updated_at"] is not None
+
+    @pytest.mark.asyncio
+    async def test_save_user_profile_no_timestamp_on_other_fields(self, db_conn):
+        """save_user_profile should NOT set availability_last_updated_at for non-availability fields."""
+        # Create user first
+        await db_conn.execute(
+            insert(users).values(
+                discord_id="test_timestamp_user3b",
+                discord_username="test_user",
+            )
+        )
+
+        # Update only nickname (not availability or timezone)
+        result = await save_user_profile(
+            db_conn,
+            discord_id="test_timestamp_user3b",
+            nickname="New Nickname",
+        )
+
+        assert result["availability_last_updated_at"] is None
+
+    @pytest.mark.asyncio
+    async def test_update_user_profile_sets_timestamp(self, db_conn):
+        """update_user_profile should set availability_last_updated_at when availability changes."""
+        # Create user first
+        await db_conn.execute(
+            insert(users).values(
+                discord_id="test_timestamp_user4",
+                discord_username="test_user",
+            )
+        )
+        await db_conn.commit()
+
+        # Update via update_user_profile (uses its own transaction)
+        result = await update_user_profile(
+            discord_id="test_timestamp_user4",
+            availability_local='{"Wednesday": ["10:00-10:30"]}',
+        )
+
+        assert result is not None
+        assert result["availability_last_updated_at"] is not None
