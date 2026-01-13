@@ -19,8 +19,7 @@ def test_load_existing_course():
     course = load_course("default")
     assert course.slug == "default"
     assert course.title == "AI Safety Fundamentals"
-    assert len(course.modules) > 0
-    assert len(course.modules[0].lessons) > 0
+    assert len(course.progression) > 0
 
 
 def test_load_nonexistent_course():
@@ -84,12 +83,11 @@ def test_course_manifest_references_existing_lessons():
     course = load_course("default")
     available = set(get_available_lessons())
 
-    for module in course.modules:
-        for lesson_slug in module.lessons:
-            if lesson_slug not in available:
+    for item in course.progression:
+        if isinstance(item, LessonRef):
+            if item.slug not in available:
                 pytest.fail(
-                    f"Course 'default' references non-existent lesson: '{lesson_slug}' "
-                    f"in module '{module.id}'"
+                    f"Course 'default' references non-existent lesson: '{item.slug}'"
                 )
 
 
@@ -178,3 +176,30 @@ def test_get_due_by_meeting_unknown_lesson():
         ]
     )
     assert get_due_by_meeting(course, "nonexistent-lesson") is None
+
+
+# --- Tests for course loader with progression format (Task 3) ---
+
+
+def test_load_course_with_progression():
+    """load_course should parse the new progression format from YAML."""
+    course = load_course("default")
+
+    # Basic course properties
+    assert course.slug == "default"
+    assert course.title == "AI Safety Fundamentals"
+
+    # Should have progression list (not modules)
+    assert len(course.progression) >= 3
+
+    # First item should be a LessonRef
+    assert isinstance(course.progression[0], LessonRef)
+    assert course.progression[0].slug == "intro-to-ai-safety"
+
+    # Second item should be a LessonRef
+    assert isinstance(course.progression[1], LessonRef)
+    assert course.progression[1].slug == "intelligence-feedback-loop"
+
+    # Third item should be a Meeting
+    assert isinstance(course.progression[2], Meeting)
+    assert course.progression[2].number == 1

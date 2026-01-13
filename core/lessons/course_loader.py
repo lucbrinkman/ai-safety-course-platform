@@ -26,30 +26,28 @@ def load_course(course_slug: str) -> Course:
     with open(course_path) as f:
         data = yaml.safe_load(f)
 
-    modules = [
-        Module(
-            id=m["id"],
-            title=m["title"],
-            lessons=m["lessons"],
-            due_by_meeting=m.get("due_by_meeting"),
-        )
-        for m in data["modules"]
-    ]
+    # Parse progression items from YAML
+    progression: list[LessonRef | Meeting] = []
+    for item in data["progression"]:
+        if "lesson" in item:
+            progression.append(LessonRef(
+                slug=item["lesson"],
+                optional=item.get("optional", False),
+            ))
+        elif "meeting" in item:
+            progression.append(Meeting(number=item["meeting"]))
 
     return Course(
         slug=data["slug"],
         title=data["title"],
-        modules=modules,
+        progression=progression,
     )
 
 
 def get_all_lesson_slugs(course_slug: str) -> list[str]:
     """Get flat list of all lesson slugs in course order."""
     course = load_course(course_slug)
-    lesson_slugs = []
-    for module in course.modules:
-        lesson_slugs.extend(module.lessons)
-    return lesson_slugs
+    return [item.slug for item in course.progression if isinstance(item, LessonRef)]
 
 
 def get_next_lesson(course_slug: str, current_lesson_slug: str) -> NextLesson | None:
