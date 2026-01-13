@@ -82,6 +82,14 @@ from .notifications import (
     cancel_meeting_reminders,
 )
 
+# Meetings
+from .meetings import (
+    create_meetings_for_group,
+    send_calendar_invites_for_group,
+    schedule_reminders_for_group,
+    reschedule_meeting,
+)
+
 __all__ = [
     # Database (SQLAlchemy)
     'get_connection', 'get_transaction', 'get_engine', 'close_engine', 'is_configured',
@@ -122,4 +130,7 @@ __all__ = [
     # Notifications
     'notify_welcome', 'notify_group_assigned',
     'schedule_meeting_reminders', 'cancel_meeting_reminders',
+    # Meetings
+    'create_meetings_for_group', 'send_calendar_invites_for_group',
+    'schedule_reminders_for_group', 'reschedule_meeting',
 ]

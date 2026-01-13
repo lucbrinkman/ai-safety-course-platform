@@ -26,6 +26,15 @@ from .progress import (
     get_user_progress_for_group,
     get_user_chat_sessions,
 )
+from .meetings import (
+    create_meeting,
+    update_meeting_calendar_id,
+    get_meetings_for_group,
+    get_meeting,
+    reschedule_meeting,
+    get_group_member_emails,
+    get_group_member_user_ids,
+)
 
 __all__ = [
     # Users
@@ -56,4 +65,12 @@ __all__ = [
     "get_group_members_summary",
     "get_user_progress_for_group",
     "get_user_chat_sessions",
+    # Meetings
+    "create_meeting",
+    "update_meeting_calendar_id",
+    "get_meetings_for_group",
+    "get_meeting",
+    "reschedule_meeting",
+    "get_group_member_emails",
+    "get_group_member_user_ids",
 ]
