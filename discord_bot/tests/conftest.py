@@ -2,9 +2,9 @@
 Pytest fixtures for scheduler tests.
 """
 
-import pytest
 import pytest_asyncio
 from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 @pytest_asyncio.fixture
@@ -14,12 +14,22 @@ async def db_conn():
 
     All changes made during the test are visible within the test,
     but rolled back afterward so DB stays clean.
+
+    Creates a fresh engine per test to avoid event loop issues.
     """
     load_dotenv(".env.local")
 
-    from core.database import get_engine, close_engine
+    import os
 
-    engine = get_engine()
+    database_url = os.environ.get("DATABASE_URL", "")
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    # Create fresh engine for this test (avoids event loop mismatch)
+    engine = create_async_engine(
+        database_url,
+        connect_args={"statement_cache_size": 0},
+    )
 
     async with engine.connect() as conn:
         txn = await conn.begin()
@@ -28,5 +38,4 @@ async def db_conn():
         finally:
             await txn.rollback()
 
-    # Dispose engine to ensure clean state for next test
-    await close_engine()
+    await engine.dispose()

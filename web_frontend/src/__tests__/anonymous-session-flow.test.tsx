@@ -198,9 +198,9 @@ describe("Anonymous Session Flow", () => {
       expect(screen.getByTestId("done-reading-button")).toBeInTheDocument();
     });
 
-    // Find and click the skip/done button (the header has "Skip section" button)
-    const skipButton = screen.getByText(/skip section/i);
-    fireEvent.click(skipButton);
+    // Find and click the skip/done button (there are two - mobile and desktop)
+    const skipButtons = screen.getAllByText(/skip section/i);
+    fireEvent.click(skipButtons[0]);
 
     // Auth prompt should appear (check for the heading specifically)
     await waitFor(() => {
