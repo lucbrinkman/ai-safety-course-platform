@@ -651,9 +651,10 @@ export default function UnifiedLesson() {
             <div className="flex items-center gap-2 truncate mr-4">
               <a
                 href="/"
-                className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0"
+                className="flex items-center gap-1.5 shrink-0"
               >
-                Lens
+                <img src="/assets/Logo only.png" alt="Lens Academy" className="h-6" />
+                <span className="text-lg font-semibold text-slate-800">Lens Academy</span>
               </a>
               <span className="text-slate-300 shrink-0">|</span>
               <h1 className="text-lg font-semibold text-gray-900 truncate">
@@ -697,12 +698,13 @@ export default function UnifiedLesson() {
         {/* Desktop layout (>= md): absolute positioning for perfect centering */}
         <div className="hidden md:block relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-4">
-            <a href="/" className="flex items-center">
+            <a href="/" className="flex items-center gap-2">
               <img
-                src="/assets/Logo plus name.png"
+                src="/assets/Logo only.png"
                 alt="Lens Academy"
-                className="h-7"
+                className="h-6"
               />
+              <span className="text-lg font-semibold text-slate-800">Lens Academy</span>
             </a>
             <span className="text-slate-300">|</span>
             <h1 className="text-lg font-semibold text-gray-900">

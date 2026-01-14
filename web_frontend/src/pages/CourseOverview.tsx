@@ -115,12 +115,13 @@ export default function CourseOverview() {
       {/* Nav Header */}
       <nav className="border-b border-slate-200/50 bg-stone-50">
         <div className="px-6 flex items-center justify-between h-14">
-          <a href="/" className="flex items-center">
+          <a href="/" className="flex items-center gap-2">
             <img
-              src="/assets/Logo plus name.png"
+              src="/assets/Logo only.png"
               alt="Lens Academy"
-              className="h-8"
+              className="h-7"
             />
+            <span className="text-lg font-semibold text-slate-800">Lens Academy</span>
           </a>
           <div className="flex items-center gap-4">
             <Link
