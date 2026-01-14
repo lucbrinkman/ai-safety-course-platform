@@ -6,6 +6,9 @@ from core.config import get_frontend_url
 
 
 DISCORD_SERVER_ID = os.environ.get("DISCORD_SERVER_ID", "")
+# NOTE: Also defined in:
+#   - web_frontend/src/config.ts (React frontend)
+#   - web_frontend/static/landing.html (static landing page)
 DISCORD_INVITE_URL = "https://discord.gg/9UERVTXs"
 
 

@@ -1,6 +1,7 @@
 ---
 title: "Intelligence Explosion: Evidence and Import"
-author: Luke Muehlhauser, Anna Salamon
+author: Luke Muehlhauser and Anna Salamon
+date: 2012-01-01
 source_url: https://intelligence.org/files/IE-EI.pdf
 ---
 
@@ -14,25 +15,25 @@ Machine Intelligence Research Institute
 Abstract
 In this chapter we review the evidence for and against three claims: that (1) there is a
 substantial chance we will create human-level AI before 2100, that (2) if human-level AI
-is created, there is a good chance vastly superhuman AI will follow via an “intelligence
-explosion,” and that (3) an uncontrolled intelligence explosion could destroy everything
+is created, there is a good chance vastly superhuman AI will follow via an "intelligence
+explosion," and that (3) an uncontrolled intelligence explosion could destroy everything
 we value, but a controlled intelligence explosion would benefit humanity enormously
 if we can achieve it. We conclude with recommendations for increasing the odds of a
 controlled intelligence explosion relative to an uncontrolled intelligence explosion.
-Muehlhauser, Luke, and Anna Salamon. 2012. “Intelligence Explosion: Evidence and Import.”
+Muehlhauser, Luke, and Anna Salamon. 2012. "Intelligence Explosion: Evidence and Import."
 In Singularity Hypotheses: A Scientific and Philosophical Assessment, edited by Amnon Eden, Johnny
 Søraker, James H. Moor, and Eric Steinhart. Berlin: Springer.
 This version contains changes.
 
 ---
 
-The best answer to the question, “Will computers ever be as smart as
-humans?” is probably “Yes, but only briefly.”
-—Vernor Vinge
+The best answer to the question, "Will computers ever be as smart as
+humans?" is probably "Yes, but only briefly."
+-Vernor Vinge
 1.
 Introduction
 Humans may create human-level1 artificial intelligence (AI) this century. Shortly there-
-after, we may see an “intelligence explosion” or “technological singularity”—a chain of
+after, we may see an "intelligence explosion" or "technological singularity"-a chain of
 events by which human-level AI leads, fairly rapidly, to intelligent systems whose capa-
 bilities far surpass those of biological humanity as a whole.
 How likely is this, and what will the consequences be? Others have discussed these
@@ -50,53 +51,53 @@ follow via an intelligence explosion;
 3. An uncontrolled intelligence explosion could destroy everything we value, but a
 controlled intelligence explosion would benefit humanity enormously if we can
 achieve it.
-Because the term “singularity” is popularly associated with several claims and approaches
+Because the term "singularity" is popularly associated with several claims and approaches
 we will not defend (Sandberg 2010), we will first explain what we are not claiming.
 First, we will not tell detailed stories about the future. Each step of a story may be
 probable, but if there are many such steps, the whole story itself becomes improbable
 (Nordmann 2007; Tversky and Kahneman 1983). We will not assume the continu-
-ation of Moore’s law, nor that hardware trajectories determine software progress, nor
-that faster computer speeds necessarily imply faster “thought” (Proudfoot and Copeland
-2012), nor that technological trends will be exponential (Kurzweil 2005) rather than “S-
-curved” or otherwise (Modis 2012), nor indeed that AI progress will accelerate rather
-1. We will define “human-level AI” more precisely later in the chapter.
+ation of Moore's law, nor that hardware trajectories determine software progress, nor
+that faster computer speeds necessarily imply faster "thought" (Proudfoot and Copeland
+2012), nor that technological trends will be exponential (Kurzweil 2005) rather than "S-
+curved" or otherwise (Modis 2012), nor indeed that AI progress will accelerate rather
+1. We will define "human-level AI" more precisely later in the chapter.
 
 ---
 
 than decelerate (Plebe and Perconti 2012). Instead, we will examine convergent out-
-comes that—like the evolution of eyes or the emergence of markets—can come about
+comes that-like the evolution of eyes or the emergence of markets-can come about
 through any of several diﬀerent paths and can gather momentum once they begin. Hu-
 mans tend to underestimate the likelihood of outcomes that can come about through
 many diﬀerent paths (Tversky and Kahneman 1974), and we believe an intelligence ex-
 plosion is one such outcome.
 Second, we will not assume that human-level intelligence can be realized by a classical
 Von Neumann computing architecture, nor that intelligent machines will have internal
-mental properties such as consciousness or human-like “intentionality,” nor that early
-AIs will be geographically local or easily “disembodied.” These properties are not re-
+mental properties such as consciousness or human-like "intentionality," nor that early
+AIs will be geographically local or easily "disembodied." These properties are not re-
 quired to build AI, so objections to these claims (Lucas 1961; Dreyfus 1972; Searle
 1980; Block 1981; Penrose 1994; van Gelder and Port 1995) are not objections to AI
 (Chalmers 1996, chap. 9; Nilsson 2009, chap. 24; McCorduck 2004, chap. 8 and 9;
 Legg 2008; Heylighen 2012) or to the possibility of intelligence explosion (Chalmers
 2012).2 For example: a machine need not be conscious to intelligently reshape the world
-according to its preferences, as demonstrated by goal-directed “narrow AI” programs
+according to its preferences, as demonstrated by goal-directed "narrow AI" programs
 such as the leading chess-playing programs.
-We must also be clear on what we mean by “intelligence” and by “AI.” Concern-
-ing “intelligence,” Legg and Hutter (2007) found that definitions of intelligence used
-throughout the cognitive sciences converge toward the idea that “Intelligence measures
-an agent’s ability to achieve goals in a wide range of environments.” We might call this
-the “optimization power” concept of intelligence, for it measures an agent’s power to
+We must also be clear on what we mean by "intelligence" and by "AI." Concern-
+ing "intelligence," Legg and Hutter (2007) found that definitions of intelligence used
+throughout the cognitive sciences converge toward the idea that "Intelligence measures
+an agent's ability to achieve goals in a wide range of environments." We might call this
+the "optimization power" concept of intelligence, for it measures an agent's power to
 optimize the world according to its preferences across many domains. But consider two
 agents which have equal ability to optimize the world according to their preferences,
 one of which requires much more computational time and resources to do so. They
 2. Chalmers (2010) suggested that AI will lead to intelligence explosion if an AI is produced by an
-“extendible method,” where an extendible method is “a method that can easily be improved, yielding
-more intelligent systems.” McDermott (2012a, 2012b) replies that if P̸=NP (see Goldreich [2010] for an
-explanation) then there is no extendible method. But McDermott’s notion of an extendible method is not
-the one essential to the possibility of intelligence explosion. McDermott’s formalization of an “extendible
-method” requires that the program generated by each step of improvement under the method be able
-to solve in polynomial time all problems in a particular class—the class of solvable problems of a given
+"extendible method," where an extendible method is "a method that can easily be improved, yielding
+more intelligent systems." McDermott (2012a, 2012b) replies that if P̸=NP (see Goldreich [2010] for an
+explanation) then there is no extendible method. But McDermott's notion of an extendible method is not
+the one essential to the possibility of intelligence explosion. McDermott's formalization of an "extendible
+method" requires that the program generated by each step of improvement under the method be able
+to solve in polynomial time all problems in a particular class-the class of solvable problems of a given
 (polynomially step-dependent) size in an NP-complete class of problems. But this is not required for an
-intelligence explosion in Chalmers’ sense (and in our sense). What intelligence explosion (in our sense)
+intelligence explosion in Chalmers' sense (and in our sense). What intelligence explosion (in our sense)
 would require is merely that a program self-improve to vastly outperform humans, and we argue for the
 plausibility of this in section 3 of our chapter. Thus while we agree with McDermott that it is probably
 true that P̸=NP, we do not agree that this weighs against the plausibility of intelligence explosion. (Note
@@ -108,18 +109,18 @@ at http://cs-www.cs.yale.edu/homes/dvm/papers/chalmers-singularity-response.pdf.
 
 have the same optimization power, but one seems to be optimizing more intelligently.
 For this reason, we adopt a description of intelligence as optimization power divided
-by resources used (Yudkowsky 2008b).3 For our purposes, “intelligence” measures an
-agent’s capacity for eﬃcient cross-domain optimization of the world according to the
-agent’s preferences. Using this definition, we can avoid common objections to the use
+by resources used (Yudkowsky 2008b).3 For our purposes, "intelligence" measures an
+agent's capacity for eﬃcient cross-domain optimization of the world according to the
+agent's preferences. Using this definition, we can avoid common objections to the use
 of human-centric notions of intelligence in discussions of the technological singularity
 (Greenfield 2012), and hopefully we can avoid common anthropomorphisms that often
 arise when discussing intelligence (Muehlhauser and Helm 2012).
-By “AI,” we refer to general AI rather than narrow AI. That is, we refer to “systems
-which match or exceed the [intelligence] of humans in virtually all domains of interest”
-(Shulman and Bostrom 2012). By this definition, IBM’s Jeopardy!-playing computer
-Watson is not an “AI” (in our sense) but merely a narrow AI, because it can only solve
+By "AI," we refer to general AI rather than narrow AI. That is, we refer to "systems
+which match or exceed the [intelligence] of humans in virtually all domains of interest"
+(Shulman and Bostrom 2012). By this definition, IBM's Jeopardy!-playing computer
+Watson is not an "AI" (in our sense) but merely a narrow AI, because it can only solve
 a narrow set of problems. Drop Watson in a pond or ask it to do original science, and it
-would be helpless even if given a month’s warning to prepare. Imagine instead a machine
+would be helpless even if given a month's warning to prepare. Imagine instead a machine
 that could invent new technologies, manipulate humans with acquired social skills, and
 otherwise learn to navigate many new social and physical environments as needed to
 achieve its goals.
@@ -127,7 +128,7 @@ Which kinds of machines might accomplish such feats? There are many possible
 types. A whole brain emulation (WBE) would be a computer emulation of brain struc-
 tures suﬃcient to functionally reproduce human cognition. We need not understand
 the mechanisms of general intelligence to use the human intelligence software already
-invented by evolution (Sandberg and Bostrom 2008). In contrast, “de novo AI” requires
+invented by evolution (Sandberg and Bostrom 2008). In contrast, "de novo AI" requires
 inventing intelligence software anew. There is a vast space of possible mind designs for
 de novo AI (Dennett 1996; Yudkowsky 2008a). De novo AI approaches include the sym-
 bolic, probabilistic, connectionist, evolutionary, embedded, and other research programs
@@ -140,7 +141,7 @@ ful professional gamblers, nearly all of us give inaccurate probability estimate
 particular we are overconfident of our predictions (Lichtenstein, Fischhoﬀ, and Phillips
 3. This definition is a useful starting point, but it could be improved. Future work could produce
 a definition of intelligence as optimization power over a canonical distribution of environments, with a
-penalty for resource use—e.g. the “speed prior” described by Schmidhuber (2002). Also see Goertzel
+penalty for resource use-e.g. the "speed prior" described by Schmidhuber (2002). Also see Goertzel
 (2006, 48; 2010) and Hibbard (2011).
 
 ---
@@ -149,7 +150,7 @@ penalty for resource use—e.g. the “speed prior” described by Schmidhuber (
 sional forecasters, too (Tetlock 2005), and we have little reason to think AI forecasters
 have fared any better.4 So if you have a gut feeling about when AI will be created, it is
 probably wrong.
-But uncertainty is not a “get out of prediction free” card (Bostrom 2007). We still
+But uncertainty is not a "get out of prediction free" card (Bostrom 2007). We still
 need to decide whether or not to encourage WBE development, whether or not to help
 fund AI safety research, etc. Deciding either way already implies some sort of prediction.
 Choosing not to fund AI safety research suggests that we do not think AI is near, while
@@ -159,7 +160,7 @@ Predicting AI
 How, then, might we predict when AI will be created? We consider several strategies
 below.
 By gathering the wisdom of experts or crowds. Many experts and groups have tried
-to predict the creation of AI. Unfortunately, experts’ predictions are often little better
+to predict the creation of AI. Unfortunately, experts' predictions are often little better
 than those of laypeople (Tetlock 2005), expert elicitation methods have in general not
 proven useful for long-term forecasting,5 and prediction markets (ostensibly drawing
 on the opinions of those who believe themselves to possess some expertise) have not yet
@@ -172,14 +173,14 @@ the insuﬃciency of this reasoning: even if we acquire hardware suﬃcient for 
 not have the software problem solved.7
 Hardware extrapolation may be a more useful method in a context where the intelli-
 gence software is already written: whole brain emulation. Because WBE seems to rely
-4. To take one of many examples, Simon (1965, 96) predicted that “machines will be capable, within
-twenty years, of doing any work a man can do.” Also see Crevier (1993).
+4. To take one of many examples, Simon (1965, 96) predicted that "machines will be capable, within
+twenty years, of doing any work a man can do." Also see Crevier (1993).
 5. Armstrong (1985), Woudenberg (1991), and Rowe and Wright (2001). But, see Parente and
 Anderson-Parente (2011).
 6. Bostrom (2003), Bainbridge and Roco (2006), Legg (2008), Baum, Goertzel, and Goertzel (2011),
 Sandberg and Bostrom (2011), and Nielsen (2011).
 7. A software bottleneck may delay AI but create greater risk. If there is a software bottleneck on AI,
-then when AI is created there may be a “computing overhang”: large amounts of inexpensive computing
+then when AI is created there may be a "computing overhang": large amounts of inexpensive computing
 power which could be used to run thousands of AIs or give a few AIs vast computational resources. This
 may not be the case if early AIs require quantum computing hardware, which is less likely to be plentiful
 and inexpensive than classical computing hardware at any given time.
@@ -187,14 +188,14 @@ and inexpensive than classical computing hardware at any given time.
 ---
 
 mostly on scaling up existing technologies like microscopy and large-scale cortical sim-
-ulation, WBE may be largely an “engineering” problem, and thus the time of its arrival
+ulation, WBE may be largely an "engineering" problem, and thus the time of its arrival
 may be more predictable than is the case for other kinds of AI.
 Several authors have discussed the diﬃculty of WBE in detail (Kurzweil 2005; Sand-
 berg and Bostrom 2008; de Garis et al. 2010; Modha et al. 2011; Cattell and Parker
 2012). In short: The diﬃculty of WBE depends on many factors, and in particular
 on the resolution of emulation required for successful WBE. For example, proteome-
 resolution emulation would require more resources and technological development than
-emulation at the resolution of the brain’s neural network. In perhaps the most likely
+emulation at the resolution of the brain's neural network. In perhaps the most likely
 scenario,
 WBE on the neuronal/synaptic level requires relatively modest increases in
 microscopy resolution, a less trivial development of automation for scanning
@@ -204,36 +205,36 @@ ment of computational neuroscience models and computer hardware. (Sand-
 berg and Bostrom 2008, 83)
 By considering the time since Dartmouth. We have now seen more than 50 years of work
 toward machine intelligence since the seminal Dartmouth conference on AI, but AI
-has not yet arrived. This seems, intuitively, like strong evidence that AI won’t arrive in
-the next minute, good evidence it won’t arrive in the next year, and significant but far
-from airtight evidence that it won’t arrive in the next few decades. Such intuitions can
+has not yet arrived. This seems, intuitively, like strong evidence that AI won't arrive in
+the next minute, good evidence it won't arrive in the next year, and significant but far
+from airtight evidence that it won't arrive in the next few decades. Such intuitions can
 be formalized into models that, while simplistic, can form a useful starting point for
 estimating the time to machine intelligence.8
 8. We can make a simple formal model of this evidence by assuming (with much simplification) that
 every year a coin is tossed to determine whether we will get AI that year, and that we are initially unsure
-of the weighting on that coin. We have observed more than 50 years of “no AI” since the first time
-serious scientists believed AI might be around the corner. This “56 years of no AI” observation would
-be highly unlikely under models where the coin comes up “AI” on 90% of years (the probability of our
-observations would be 10−56), or even models where it comes up “AI” in 10% of all years (probability
-0.3%), whereas it’s the expected case if the coin comes up “AI” in, say, 1% of all years, or for that matter
-in 0.0001% of all years. Thus, in this toy model, our “no AI for 56 years” observation should update
+of the weighting on that coin. We have observed more than 50 years of "no AI" since the first time
+serious scientists believed AI might be around the corner. This "56 years of no AI" observation would
+be highly unlikely under models where the coin comes up "AI" on 90% of years (the probability of our
+observations would be 10−56), or even models where it comes up "AI" in 10% of all years (probability
+0.3%), whereas it's the expected case if the coin comes up "AI" in, say, 1% of all years, or for that matter
+in 0.0001% of all years. Thus, in this toy model, our "no AI for 56 years" observation should update
 us strongly against coin weightings in which AI would be likely in the next minute, or even year, while
-leaving the relative probabilities of “AI expected in 200 years” and “AI expected in 2 million years” more
+leaving the relative probabilities of "AI expected in 200 years" and "AI expected in 2 million years" more
 or less untouched. (These updated probabilities are robust to choice of the time interval between coin
 flips; it matters little whether the coin is tossed once per decade, or once per millisecond, or whether
 one takes a limit as the time interval goes to zero.) Of course, one gets a diﬀerent result if a diﬀerent
-“starting point” is chosen, e.g. Alan Turing’s seminal paper on machine intelligence (Turing 1950), or the
+"starting point" is chosen, e.g. Alan Turing's seminal paper on machine intelligence (Turing 1950), or the
 inaugural conference on artificial general intelligence (Wang, Goertzel, and Franklin 2008). For more
-on this approach and Laplace’s rule of succession, see Jaynes (2003, chap. 18). We suggest this approach
+on this approach and Laplace's rule of succession, see Jaynes (2003, chap. 18). We suggest this approach
 
 ---
 
 By tracking progress in machine intelligence. Some people intuitively estimate the time
-until AI by asking what proportion of human abilities today’s software can match, and
+until AI by asking what proportion of human abilities today's software can match, and
 how quickly machines are catching up.9 However, it is not clear how to divide up the
-space of “human abilities,” nor how much each one matters. We also don’t know if
+space of "human abilities," nor how much each one matters. We also don't know if
 progress in machine intelligence will be linear, exponential, or otherwise. Watching an
-infant’s progress in learning calculus might lead one to infer the child will not learn it
+infant's progress in learning calculus might lead one to infer the child will not learn it
 until the year 3000, until suddenly the child learns it in a spurt at age 17. Still, it may be
 worth asking whether a measure can be found for which both: (a) progress is predictable
 enough to extrapolate; and (b) when performance rises to a certain level, we can expect
@@ -258,7 +259,7 @@ accelerators on the path to AI.
 2.2.
 Speed Bumps
 Several factors may decelerate our progress toward the first creation of AI. For example:
-An end to Moore’s law. Though several information technologies have progressed at
+An end to Moore's law. Though several information technologies have progressed at
 an exponential or superexponential rate for many decades (Nagy et al. 2011), this trend
 may not hold for much longer (Mack 2011).
 only as a way of generating a prior probability distribution over AI timelines, from which one can then
@@ -278,7 +279,7 @@ lead to a societal collapse during which scientific progress would not continue 
 2004; Bostrom and Ćirković 2008).
 Disinclination. Chalmers (2010) and Hutter (2012) think the most likely speed bump
 in our progress toward AI will be disinclination, including active prevention. Perhaps
-humans will not want to create their own successors. New technologies like “Nanny AI”
+humans will not want to create their own successors. New technologies like "Nanny AI"
 (Goertzel 2012), or new political alliances like a stable global totalitarianism (Caplan
 2008), may empower humans to delay or prevent scientific progress that could lead to
 the creation of AI.
@@ -286,18 +287,18 @@ the creation of AI.
 Accelerators
 Other factors, however, may accelerate progress toward AI:
 More hardware. For at least four decades, computing power10 has increased exponen-
-tially, roughly in accordance with Moore’s law.11 Experts disagree on how much longer
-Moore’s law will hold (Mack 2011; Lundstrom 2003), but even if hardware advances
+tially, roughly in accordance with Moore's law.11 Experts disagree on how much longer
+Moore's law will hold (Mack 2011; Lundstrom 2003), but even if hardware advances
 more slowly than exponentially, we can expect hardware to be far more powerful in a few
-decades than it is now.12 More hardware doesn’t by itself give us machine intelligence,
+decades than it is now.12 More hardware doesn't by itself give us machine intelligence,
 but it contributes to the development of machine intelligence in several ways:
 Powerful hardware may improve performance simply by allowing existing
-“brute force” solutions to run faster (Moravec 1976). Where such solutions
+"brute force" solutions to run faster (Moravec 1976). Where such solutions
 do not yet exist, researchers might be incentivized to quickly develop them
 given abundant hardware to exploit. Cheap computing may enable much
 more extensive experimentation in algorithm design, tweaking parameters or
 using methods such as genetic algorithms. Indirectly, computing may enable
-10. The technical measure predicted by Moore’s law is the density of components on an integrated
+10. The technical measure predicted by Moore's law is the density of components on an integrated
 circuit, but this is closely tied to the price-performance of computing power.
 11. For important qualifications, see Nagy et al. (2010) and Mack (2011).
 12. Quantum computing may also emerge during this period. Early worries that quantum computing
@@ -314,7 +315,7 @@ information technology industry and the quantity of researchers in the field.
 (Shulman and Sandberg 2010)
 Better algorithms. Often, mathematical insights can reduce the computation time of
 a program by many orders of magnitude without additional hardware. For example,
-IBM’s Deep Blue played chess at the level of world champion Garry Kasparov in 1997
+IBM's Deep Blue played chess at the level of world champion Garry Kasparov in 1997
 using about 1.5 trillion instructions per second (TIPS), but a program called Deep Junior
 did it in 2003 using only 0.015 TIPS. Thus, the computational eﬃciency of the chess
 algorithms increased by a factor of 100 in only six years (Richards and Shaw 2004).
@@ -322,11 +323,11 @@ Massive datasets. The greatest leaps forward in speech recognition and translati
 software have come not from faster hardware or smarter hand-coded algorithms, but
 from access to massive data sets of human-transcribed and human-translated words
 (Halevy, Norvig, and Pereira 2009). Datasets are expected to increase greatly in size
-in the coming decades, and several technologies promise to actually outpace “Kryder’s
-law” (Kryder and Kim 2009), which states that magnetic disk storage density doubles
+in the coming decades, and several technologies promise to actually outpace "Kryder's
+law" (Kryder and Kim 2009), which states that magnetic disk storage density doubles
 approximately every 18 months (Walter 2005).
 Progress in psychology and neuroscience. Cognitive scientists have uncovered many of
-the brain’s algorithms that contribute to human intelligence (Trappenberg 2009; Ashby
+the brain's algorithms that contribute to human intelligence (Trappenberg 2009; Ashby
 and Helie 2011). Methods like neural networks (imported from neuroscience) and re-
 inforcement learning (inspired by behaviorist psychology) have already resulted in sig-
 nificant AI progress, and experts expect this insight-transfer from neuroscience to AI to
@@ -334,7 +335,7 @@ continue and perhaps accelerate (Van der Velde 2010; Schierwagen 2011; Floreano 
 Mattiussi 2008; de Garis et al. 2010; Krichmar and Wagatsuma 2011).
 Accelerated science. A growing First World will mean that more researchers at well-
 funded universities will be conducting research relevant to machine intelligence. The
-world’s scientific output (in publications) grew by one third from 2002 to 2007 alone,
+world's scientific output (in publications) grew by one third from 2002 to 2007 alone,
 much of this driven by the rapid growth of scientific output in developing nations like
 China and India (Royal Society 2011).13 Moreover, new tools can accelerate particu-
 lar fields, just as fMRI accelerated neuroscience in the 1990s, and the eﬀectiveness of
@@ -348,34 +349,34 @@ bias may currently be higher in China and India than in the developed world.
 
 and Google Scholar are already yielding results such as the Polymath Project, which is
 rapidly and collaboratively solving open problems in mathematics (Nielsen 2011).14
-Economic incentive. As the capacities of “narrow AI” programs approach the capacities
+Economic incentive. As the capacities of "narrow AI" programs approach the capacities
 of humans in more domains (Koza 2010), there will be increasing demand to replace
 human workers with cheaper, more reliable machine workers (Hanson 2008, 1998; Kaas
 et al. 2010; Brynjolfsson and McAfee 2011).
 First-mover incentives. Once AI looks to be within reach, political and private actors
 will see substantial advantages in building AI first. AI could make a small group more
-powerful than the traditional superpowers—a case of “bringing a gun to a knife fight.”
-The race to AI may even be a “winner take all” scenario. Thus, political and private actors
+powerful than the traditional superpowers-a case of "bringing a gun to a knife fight."
+The race to AI may even be a "winner take all" scenario. Thus, political and private actors
 who realize that AI is within reach may devote substantial resources to developing AI
 as quickly as possible, provoking an AI arms race (Gubrud 1997).
 2.4.
 How Long, Then, Before AI?
 So, when will we create AI? Any predictions on the matter must have wide error bars.
-Given the history of confident false predictions about AI (Crevier 1993), and AI’s po-
+Given the history of confident false predictions about AI (Crevier 1993), and AI's po-
 tential speed bumps, it seems misguided to be 90% confident that AI will succeed in the
 coming century. But 90% confidence that AI will not arrive before the end of the century
 also seems wrong, given that: (a) many diﬃcult AI breakthroughs have now been made,
 (b) several factors, such as automated science and first-mover incentives, may well accel-
 erate progress toward AI, and (c) whole brain emulation seems to be possible and have
 a more predictable development than de novo AI. Thus, we think there is a significant
-probability that AI will be created this century. This claim is not scientific—the field of
-technological forecasting is not yet advanced enough for that—but we believe our claim
+probability that AI will be created this century. This claim is not scientific-the field of
+technological forecasting is not yet advanced enough for that-but we believe our claim
 is reasonable.
 The creation of human-level AI would have serious repercussions, such as the dis-
 placement of most or all human workers (Brynjolfsson and McAfee 2011). But if AI is
 likely to lead to machine superintelligence, as we argue next, the implications could be
 even greater.
-14. Also, a process called “iterated embryo selection” (Uncertain Future 2012), could be used to produce
+14. Also, a process called "iterated embryo selection" (Uncertain Future 2012), could be used to produce
 an entire generation of scientists with the cognitive capabilities of Albert Einstein or John von Neumann,
 thus accelerating scientific progress and giving a competitive advantage to nations which choose to make
 use of this possibility.
@@ -394,12 +395,12 @@ If artificial intelligences can be created at all, there is little reason to bel
 that initial successes could not lead swiftly to the construction of artificial su-
 perintelligences able to explore significant mathematical, scientific, or engi-
 neering alternatives at a rate far exceeding human ability, or to generate plans
-and take action on them with equally overwhelming speed. Since man’s near-
+and take action on them with equally overwhelming speed. Since man's near-
 monopoly of all higher forms of intelligence has been one of the most basic
 facts of human existence throughout the past history of this planet, such de-
 velopments would clearly create a new economics, a new sociology, and a new
 history.
-Why might AI “lead swiftly” to machine superintelligence? Below we consider some
+Why might AI "lead swiftly" to machine superintelligence? Below we consider some
 reasons.
 3.1.
 AI Advantages
@@ -408,17 +409,17 @@ intelligent than any human, but also more intelligent than all of biological hum
 (Sotala 2012; Legg 2008). Many of these are unique to machine intelligence, and that
 is why we focus on intelligence explosion from AI rather than from biological cognitive
 enhancement (Sandberg 2011).
-Increased computational resources. The human brain uses 85–100 billion neurons. This
+Increased computational resources. The human brain uses 85-100 billion neurons. This
 limit is imposed by evolution-produced constraints on brain volume and metabolism.
 In contrast, a machine intelligence could use scalable computational resources (imagine
-a “brain” the size of a warehouse). While algorithms would need to be changed in order
+a "brain" the size of a warehouse). While algorithms would need to be changed in order
 to be usefully scaled up, one can perhaps get a rough feel for the potential impact here by
 noting that humans have about 3.5 times the brain size of chimps (Schoenemann 1997),
 and that brain size and IQ correlate positively in humans, with a correlation coeﬃcient
 of about 0.35 (McDaniel 2005). One study suggested a similar correlation between
 brain size and cognitive ability in rats and mice (Anderson 1993).15
 15. Note that given the definition of intelligence we are using, greater computational resources would
-not give a machine more “intelligence” but instead more “optimization power.”
+not give a machine more "intelligence" but instead more "optimization power."
 
 ---
 
@@ -427,29 +428,29 @@ del, Schwartz, and Jessell 2000). That speed is a fixed consequence of our physi
 In contrast, software minds could be ported to faster hardware, and could therefore pro-
 cess information more rapidly. (Of course, this also depends on the eﬃciency of the
 algorithms in use; faster hardware compensates for less eﬃcient software.)
-Increased serial depth. Due to neurons’ slow firing speed, the human brain relies on
+Increased serial depth. Due to neurons' slow firing speed, the human brain relies on
 massive parallelization and is incapable of rapidly performing any computation that re-
 quires more than about 100 sequential operations (Feldman and Ballard 1982). Perhaps
 there are cognitive tasks that could be performed more eﬃciently and precisely if the
-brain’s ability to support parallelizable pattern-matching algorithms were supplemented
+brain's ability to support parallelizable pattern-matching algorithms were supplemented
 by support for longer sequential processes. In fact, there are many known algorithms
 for which the best parallel version uses far more computational resources than the best
 serial algorithm, due to the overhead of parallelization.16
-Duplicability. Our research colleague Steve Rayhawk likes to describe AI as “instant
-intelligence; just add hardware!” What Rayhawk means is that, while it will require ex-
+Duplicability. Our research colleague Steve Rayhawk likes to describe AI as "instant
+intelligence; just add hardware!" What Rayhawk means is that, while it will require ex-
 tensive research to design the first AI, creating additional AIs is just a matter of copying
 software. The population of digital minds can thus expand to fill the available hardware
 base, perhaps rapidly surpassing the population of biological minds.
 Duplicability also allows the AI population to rapidly become dominated by newly
-built AIs, with new skills. Since an AI’s skills are stored digitally, its exact current state
-can be copied,17 including memories and acquired skills—similar to how a “system state”
+built AIs, with new skills. Since an AI's skills are stored digitally, its exact current state
+can be copied,17 including memories and acquired skills-similar to how a "system state"
 can be copied by hardware emulation programs or system backup programs. A human
 who undergoes education increases only his or her own performance, but an AI that
 becomes 10% better at earning money (per dollar of rentable hardware) than other AIs
-can be used to replace the others across the hardware base—making each copy 10% more
+can be used to replace the others across the hardware base-making each copy 10% more
 eﬃcient.18
 Editability. Digitality opens up more parameters for controlled variation than is pos-
-sible with humans. We can put humans through job-training programs, but we can’t
+sible with humans. We can put humans through job-training programs, but we can't
 perform precise, replicable neurosurgeries on them. Digital workers would be more
 editable than human workers are. Consider first the possibilities from whole brain em-
 ulation. We know that transcranial magnetic stimulation (TMS) applied to one part of
@@ -464,15 +465,15 @@ macy chain CVS improves its prescription-ordering system, it can copy these impr
 
 the prefrontal cortex can improve working memory (Fregni et al. 2005). Since TMS
 works by temporarily decreasing or increasing the excitability of populations of neurons,
-it seems plausible that decreasing or increasing the “excitability” parameter of certain
+it seems plausible that decreasing or increasing the "excitability" parameter of certain
 populations of (virtual) neurons in a digital mind would improve performance. We
 could also experimentally modify dozens of other whole brain emulation parameters,
 such as simulated glucose levels, undiﬀerentiated (virtual) stem cells grafted onto par-
 ticular brain modules such as the motor cortex, and rapid connections across diﬀerent
 parts of the brain.19 Secondly, a modular, transparent AI could be even more directly
-editable than a whole brain emulation—possibly via its source code. (Of course, such
+editable than a whole brain emulation-possibly via its source code. (Of course, such
 possibilities raise ethical concerns.)
-Goal coordination. Let us call a set of AI copies or near-copies a “copy clan.” Given
+Goal coordination. Let us call a set of AI copies or near-copies a "copy clan." Given
 shared goals, a copy clan would not face certain goal coordination problems that limit
 human eﬀectiveness (J. W. Friedman 1994). A human cannot use a hundredfold salary
 increase to purchase a hundredfold increase in productive hours per day. But a copy clan,
@@ -494,7 +495,7 @@ ability theory and expected utility theory) is a mature paradigm in current AI d
 These AI advantages suggest that AIs will be capable of far surpassing the cognitive
 abilities and optimization power of humanity as a whole, but will they be motivated to
 do so? Though it is diﬃcult to predict the specific motivations of advanced AIs, we can
-make some predictions about convergent instrumental goals—instrumental goals useful
+make some predictions about convergent instrumental goals-instrumental goals useful
 for the satisfaction of almost any final goals.
 19. Many suspect that the slowness of cross-brain connections has been a major factor limiting the
 usefulness of large brains (Fox 2011).
@@ -507,7 +508,7 @@ Omohundro (2007, 2008, 2012) and Bostrom (forthcoming) argue that there are seve
 instrumental goals that will be pursued by almost any advanced intelligence because
 those goals are useful intermediaries to the achievement of almost any set of final goals.
 For example:
-1. An AI will want to preserve itself because if it is destroyed it won’t be able to act
+1. An AI will want to preserve itself because if it is destroyed it won't be able to act
 in the future to maximize the satisfaction of its present final goals.
 2. An AI will want to preserve the content of its current final goals because if the
 content of its final goals is changed it will be less likely to act in the future to
@@ -515,7 +516,7 @@ maximize the satisfaction of its present final goals.20
 3. An AI will want to improve its own rationality and intelligence because this will
 improve its decision-making, and thereby increase its capacity to achieve its goals.
 4. An AI will want to acquire as many resources as possible, so that these resources
-can be transformed and put to work for the satisfaction of the AI’s final and in-
+can be transformed and put to work for the satisfaction of the AI's final and in-
 strumental goals.
 Later we shall see why these convergent instrumental goals suggest that the default out-
 come from advanced AI is human extinction. For now, let us examine the mechanics of
@@ -542,24 +543,24 @@ of tasks done at slow human speeds.
 
 a rapid transition to machine superintelligence. Chalmers (2010) discusses this process
 in some detail, so here we make only a few additional points.
-The term “self,” in phrases like “recursive self-improvement” or “when the machine
-intelligence improves itself,” is something of a misnomer. The machine intelligence
+The term "self," in phrases like "recursive self-improvement" or "when the machine
+intelligence improves itself," is something of a misnomer. The machine intelligence
 could conceivably edit its own code while it is running (Schmidhuber 2007; Schaul
 and Schmidhuber 2010), but it could also create new intelligences that run indepen-
 dently. Alternatively, several AIs (perhaps including WBEs) could work together to
 design the next generation of AIs. Intelligence explosion could come about through
-“self”-improvement or through other-AI improvement.
+"self"-improvement or through other-AI improvement.
 Once sustainable machine self-improvement begins, AI development need not pro-
 ceed at the normal pace of human technological innovation. There is, however, sig-
-nificant debate over how fast or local this “takeoﬀ” would be (Hanson and Yudkowsky
+nificant debate over how fast or local this "takeoﬀ" would be (Hanson and Yudkowsky
 2008; Loosemore and Goertzel 2011; Bostrom, forthcoming), and also about whether
 intelligence explosion would result in a stable equilibrium of multiple machine superin-
-telligences or instead a machine “singleton” (Bostrom 2006). We will not discuss these
+telligences or instead a machine "singleton" (Bostrom 2006). We will not discuss these
 complex issues here.
 4.
 Consequences of Machine Superintelligence
-If machines greatly surpass human levels of intelligence—that is, surpass humanity’s
-capacity for eﬃcient cross-domain optimization—we may find ourselves in a position
+If machines greatly surpass human levels of intelligence-that is, surpass humanity's
+capacity for eﬃcient cross-domain optimization-we may find ourselves in a position
 analogous to that of the apes who watched as humans invented fire, farming, writing,
 science, guns and planes and then took over the planet. (One salient diﬀerence would be
 that no single ape witnessed the entire saga, while we might witness a shift to machine
@@ -569,7 +570,7 @@ action, among other capacities. We would not be in a position to negotiate with 
 just as neither chimpanzees nor dolphins are in a position to negotiate with humans.
 Moreover, intelligence can be applied in the pursuit of any goal. As Bostrom (2012)
 argues, making AIs more intelligent will not make them want to change their goal
-systems—indeed, AIs will be motivated to preserve their initial goals. Making AIs more
+systems-indeed, AIs will be motivated to preserve their initial goals. Making AIs more
 intelligent will only make them more capable of achieving their original final goals,
 whatever those are.22
 This brings us to the central feature of AI risk: Unless an AI is specifically pro-
@@ -579,38 +580,38 @@ converge upon being optimizing agents, which exhibit a strict division between g
 
 ---
 
-cluding humans) incidentally. As Yudkowsky (2008a) puts it, “the AI does not love you,
-nor does it hate you, but you are made of atoms it can use for something else.”
+cluding humans) incidentally. As Yudkowsky (2008a) puts it, "the AI does not love you,
+nor does it hate you, but you are made of atoms it can use for something else."
 4.1.
 Achieving a Controlled Intelligence Explosion
 How, then, can we give AIs desirable goals before they self-improve beyond our ability to
 control them or negotiate with them?23 WBEs and other brain-inspired AIs running on
-human-derived “spaghetti code” may not have a clear “slot” in which to specify desirable
-goals (Marcus 2008). The same may also be true of other “opaque” AI designs, such as
-those produced by evolutionary algorithms—or even of more transparent AI designs.
+human-derived "spaghetti code" may not have a clear "slot" in which to specify desirable
+goals (Marcus 2008). The same may also be true of other "opaque" AI designs, such as
+those produced by evolutionary algorithms-or even of more transparent AI designs.
 Even if an AI had a transparent design with a clearly definable utility function,24 would
 we know how to give it desirable goals? Unfortunately, specifying what humans value
 may be extraordinarily diﬃcult, given the complexity and fragility of human preferences
 (Yudkowsky 2011; Muehlhauser and Helm 2012), and allowing an AI to learn desirable
 goals from reward and punishment may be no easier (Yudkowsky 2008a). If this is
 correct, then the creation of self-improving AI may be detrimental by default unless we
-first solve the problem of how to build an AI with a stable, desirable utility function—a
-“Friendly AI” (Yudkowsky 2001).25
+first solve the problem of how to build an AI with a stable, desirable utility function-a
+"Friendly AI" (Yudkowsky 2001).25
 But suppose it is possible to build a Friendly AI (FAI) capable of radical self-
 improvement. Normal projections of economic growth allow for great discoveries rel-
-evant to human welfare to be made eventually—but a Friendly AI could make those
+evant to human welfare to be made eventually-but a Friendly AI could make those
 discoveries much sooner. A benevolent machine superintelligence could, as Bostrom
-(2003) writes, “create opportunities for us to vastly increase our own intellectual and
+(2003) writes, "create opportunities for us to vastly increase our own intellectual and
 emotional capabilities, and it could assist us in creating a highly appealing experiential
 world in which we could live lives devoted [to] joyful game-playing, relating to each
-other, experiencing, personal growth, and to living closer to our ideals.”
-23. Hanson (2012) reframes the problem, saying that “we should expect that a simple continuation of
-historical trends will eventually end up [producing] an ‘intelligence explosion’ scenario. So there is little
-need to consider [Chalmers’] more specific arguments for such a scenario. And the inter-generational
+other, experiencing, personal growth, and to living closer to our ideals."
+23. Hanson (2012) reframes the problem, saying that "we should expect that a simple continuation of
+historical trends will eventually end up [producing] an 'intelligence explosion' scenario. So there is little
+need to consider [Chalmers'] more specific arguments for such a scenario. And the inter-generational
 conflicts that concern Chalmers in this scenario are generic conflicts that arise in a wide range of past,
 present, and future scenarios. Yes, these are conflicts worth pondering, but Chalmers oﬀers no reasons
-why they are interestingly diﬀerent in a ‘singularity’ context.” We briefly oﬀer just one reason why the
-“inter-generational conflicts” arising from a transition of power from humans to superintelligent machines
+why they are interestingly diﬀerent in a 'singularity' context." We briefly oﬀer just one reason why the
+"inter-generational conflicts" arising from a transition of power from humans to superintelligent machines
 are interestingly diﬀerent from previous the inter-generational conflicts: as Bostrom (2002) notes, the
 singularity may cause the extinction not just of people groups but of the entire human species. For a
 further reply to Hanson, see Chalmers (2012).
@@ -621,24 +622,24 @@ Friendly AI before they cause much damage.
 
 ---
 
-Thinking that FAI may be too diﬃcult, Goertzel (2012) proposes a global “Nanny
-AI” that would “forestall a full-on Singularity for a while, . . . giving us time to figure out
-what kind of Singularity we really want to build and how.” Goertzel and others working
+Thinking that FAI may be too diﬃcult, Goertzel (2012) proposes a global "Nanny
+AI" that would "forestall a full-on Singularity for a while, . . . giving us time to figure out
+what kind of Singularity we really want to build and how." Goertzel and others working
 on AI safety theory would very much appreciate the extra time to solve the problems
 of AI safety before the first self-improving AI is created, but your authors suspect that
-Nanny AI is “FAI-complete,” or nearly so. That is, in order to build Nanny AI, you may
+Nanny AI is "FAI-complete," or nearly so. That is, in order to build Nanny AI, you may
 need to solve all the problems required to build full-blown Friendly AI, for example the
 problem of specifying precise goals (Yudkowsky 2011; Muehlhauser and Helm 2012),
 and the problem of maintaining a stable utility function under radical self-modification,
-including updates to the AI’s internal ontology (de Blanc 2011).
+including updates to the AI's internal ontology (de Blanc 2011).
 The approaches to controlled intelligence explosion we have surveyed so far attempt
-to constrain an AI’s goals, but others have suggested a variety of “external” constraints
+to constrain an AI's goals, but others have suggested a variety of "external" constraints
 for goal-directed AIs: physical and software confinement (Chalmers 2010; Yampolskiy
 2012), deterrence mechanisms, and tripwires that shut down an AI if it engages in dan-
 gerous behavior. Unfortunately, these solutions would pit human intelligence against
-superhuman intelligence, and we shouldn’t be confident the former would prevail.
-Perhaps we could build an AI of limited cognitive ability—say, a machine that only
-answers questions: an “Oracle AI.” But this approach is not without its own dangers
+superhuman intelligence, and we shouldn't be confident the former would prevail.
+Perhaps we could build an AI of limited cognitive ability-say, a machine that only
+answers questions: an "Oracle AI." But this approach is not without its own dangers
 (Armstrong, Sandberg, and Bostrom 2012).
 Unfortunately, even if these latter approaches worked, they might merely delay AI
 risk without eliminating it. If one AI development team has successfully built either
@@ -649,10 +650,10 @@ nently prevent the creation of unsafe AIs.
 4.2.
 What Can We Do About AI Risk?
 Because superhuman AI and other powerful technologies may pose some risk of hu-
-man extinction (“existential risk”), Bostrom (2002) recommends a program of diﬀeren-
-tial technological development in which we would attempt “to retard the implementation
+man extinction ("existential risk"), Bostrom (2002) recommends a program of diﬀeren-
+tial technological development in which we would attempt "to retard the implementation
 of dangerous technologies and accelerate implementation of beneficial technologies, es-
-pecially those that ameliorate the hazards posed by other technologies.”
+pecially those that ameliorate the hazards posed by other technologies."
 But good outcomes from intelligence explosion appear to depend not only on diﬀer-
 ential technological development but also, for example, on solving certain kinds of prob-
 lems in decision theory and value theory before the first creation of AI (Muehlhauser
@@ -668,13 +669,13 @@ scientific, philosophical, and technological problems of AI safety outpace our p
 on the problems of AI capability such that we develop safe superhuman AIs before we
 develop (arbitrary) superhuman AIs. Our first superhuman AI must be a safe super-
 human AI, for we may not get a second chance (Yudkowsky 2008a). With AI as with
-other technologies, we may become victims of “the tendency of technological advance
-to outpace the social control of technology” (Posner 2004).
+other technologies, we may become victims of "the tendency of technological advance
+to outpace the social control of technology" (Posner 2004).
 5.
 Conclusion
 We have argued that AI poses an existential threat to humanity. On the other hand, with
 more intelligence we can hope for quicker, better solutions to many of our problems. We
-don’t usually associate cancer cures or economic stability with artificial intelligence, but
+don't usually associate cancer cures or economic stability with artificial intelligence, but
 curing cancer is ultimately a problem of being smart enough to figure out how to cure
 it, and achieving economic stability is ultimately a problem of being smart enough to
 figure out how to achieve it. To whatever extent we have goals, we have goals that
@@ -689,52 +690,52 @@ for their helpful comments.
 ---
 
 References
-Anderson, Britt. 1993. “Evidence from the Rat for a General Factor That Underlies Cognitive Perfor-
-mance and That Relates to Brain Size: Intelligence?” Neuroscience Letters 153 (1): 98–102. doi:10.
+Anderson, Britt. 1993. "Evidence from the Rat for a General Factor That Underlies Cognitive Perfor-
+mance and That Relates to Brain Size: Intelligence?" Neuroscience Letters 153 (1): 98-102. doi:10.
 1016/0304-3940(93)90086-Z.
-Arbesman, Samuel. 2011. “Quantifying the Ease of Scientific Discovery.” Scientometrics 86 (2): 245–250.
+Arbesman, Samuel. 2011. "Quantifying the Ease of Scientific Discovery." Scientometrics 86 (2): 245-250.
 doi:10.1007/s11192-010-0232-6.
 Armstrong, Jon Scott. 1985. Long-Range Forecasting: From Crystal Ball to Computer. 2nd ed. New York:
 Wiley.
-Armstrong, Stuart, Anders Sandberg, and Nick Bostrom. 2012. “Thinking Inside the Box: Controlling
-and Using an Oracle AI.” Minds and Machines 22 (4): 299–324. doi:10.1007/s11023-012-9282-
+Armstrong, Stuart, Anders Sandberg, and Nick Bostrom. 2012. "Thinking Inside the Box: Controlling
+and Using an Oracle AI." Minds and Machines 22 (4): 299-324. doi:10.1007/s11023-012-9282-
 2.
-Ashby, F. Gregory, and Sebastien Helie. 2011. “A Tutorial on Computational Cognitive Neuroscience:
-Modeling the Neurodynamics of Cognition.” Journal of Mathematical Psychology 55 (4): 273–289.
+Ashby, F. Gregory, and Sebastien Helie. 2011. "A Tutorial on Computational Cognitive Neuroscience:
+Modeling the Neurodynamics of Cognition." Journal of Mathematical Psychology 55 (4): 273-289.
 doi:10.1016/j.jmp.2011.04.003.
 Bainbridge, William Sims, and Mihail C. Roco, eds. 2006. Managing Nano-Bio-Info-Cogno Innovations:
 Converging Technologies in Society. Dordrecht, The Netherlands: Springer.
-Baum, Seth D., Ben Goertzel, and Ted G. Goertzel. 2011. “How Long Until Human-Level AI? Results
-from an Expert Assessment.” Technological Forecasting and Social Change 78 (1): 185–195. doi:10.
+Baum, Seth D., Ben Goertzel, and Ted G. Goertzel. 2011. "How Long Until Human-Level AI? Results
+from an Expert Assessment." Technological Forecasting and Social Change 78 (1): 185-195. doi:10.
 1016/j.techfore.2010.09.006.
-Block, Ned. 1981. “Psychologism and Behaviorism.” Philosophical Review 90 (1): 5–43. doi:10.2307/
+Block, Ned. 1981. "Psychologism and Behaviorism." Philosophical Review 90 (1): 5-43. doi:10.2307/
 2184371.
 Bostrom, Nick. Forthcoming. Superintelligence: A Strategic Analysis of the Coming Machine Intelligence Rev-
 olution. Manuscript, in preparation.
-. 2002. “Existential Risks: Analyzing Human Extinction Scenarios and Related Hazards.” Journal
+. 2002. "Existential Risks: Analyzing Human Extinction Scenarios and Related Hazards." Journal
 of Evolution and Technology 9. http://www.jetpress.org/volume9/risks.html.
-. 2003. “Ethical Issues in Advanced Artificial Intelligence.” In Cognitive, Emotive and Ethical
+. 2003. "Ethical Issues in Advanced Artificial Intelligence." In Cognitive, Emotive and Ethical
 Aspects of Decision Making in Humans and in Artificial Intelligence, edited by Iva Smit and George E.
-Lasker, 2:12–17. Windsor, ON: International Institute for Advanced Studies in Systems Research /
+Lasker, 2:12-17. Windsor, ON: International Institute for Advanced Studies in Systems Research /
 Cybernetics.
-. 2006. “What is a Singleton?” Linguistic and Philosophical Investigations 5 (2): 48–54.
-. 2007. “Technological Revolutions: Ethics and Policy in the Dark.” In Nanoscale: Issues and Per-
-spectives for the Nano Century, edited by Nigel M. de S. Cameron and M. Ellen Mitchell, 129–152.
+. 2006. "What is a Singleton?" Linguistic and Philosophical Investigations 5 (2): 48-54.
+. 2007. "Technological Revolutions: Ethics and Policy in the Dark." In Nanoscale: Issues and Per-
+spectives for the Nano Century, edited by Nigel M. de S. Cameron and M. Ellen Mitchell, 129-152.
 Hoboken, NJ: John Wiley & Sons. doi:10.1002/9780470165874.ch10.
-. 2012. “The Superintelligent Will: Motivation and Instrumental Rationality in Advanced Arti-
-ficial Agents.” In “Theory and Philosophy of AI,” edited by Vincent C. Müller, special issue, Minds
-and Machines 22 (2): 71–85. doi:10.1007/s11023-012-9281-3.
+. 2012. "The Superintelligent Will: Motivation and Instrumental Rationality in Advanced Arti-
+ficial Agents." In "Theory and Philosophy of AI," edited by Vincent C. Müller, special issue, Minds
+and Machines 22 (2): 71-85. doi:10.1007/s11023-012-9281-3.
 Bostrom, Nick, and Milan M. Ćirković, eds. 2008. Global Catastrophic Risks. New York: Oxford University
 Press.
-Bostrom, Nick, and Anders Sandberg. 2009. “Cognitive Enhancement: Methods, Ethics, Regulatory
-Challenges.” Science and Engineering Ethics 15 (3): 311–341. doi:10.1007/s11948-009-9142-5.
+Bostrom, Nick, and Anders Sandberg. 2009. "Cognitive Enhancement: Methods, Ethics, Regulatory
+Challenges." Science and Engineering Ethics 15 (3): 311-341. doi:10.1007/s11948-009-9142-5.
 
 ---
 
 Brynjolfsson, Erik, and Andrew McAfee. 2011. Race Against The Machine: How the Digital Revolution
 is Accelerating Innovation, Driving Productivity, and Irreversibly Transforming Employment and the
 Economy. Lexington, MA: Digital Frontier. Kindle edition.
-Caplan, Bryan. 2008. “The Totalitarian Threat.” In Bostrom and Ćirković 2008, 504–519.
+Caplan, Bryan. 2008. "The Totalitarian Threat." In Bostrom and Ćirković 2008, 504-519.
 Cartwright, Edward. 2011. Behavioral Economics. Routledge Advanced Texts in Economics and Finance.
 New York: Routledge.
 Cattell, Rick, and Alice Parker. 2012. Challenges for Brain Emulation: Why is Building a Brain so Diﬃcult?
@@ -742,49 +743,49 @@ Synaptic Link, February 5. http://synapticlink.org/Brain%20Emulation%20Challenge
 pdf.
 Chalmers, David John. 1996. The Conscious Mind: In Search of a Fundamental Theory. Philosophy of Mind
 Series. New York: Oxford University Press.
-. 2010. “The Singularity: A Philosophical Analysis.” Journal of Consciousness Studies 17 (9–10): 7–
+. 2010. "The Singularity: A Philosophical Analysis." Journal of Consciousness Studies 17 (9-10): 7-
 65. http://www.ingentaconnect.com/content/imp/jcs/2010/00000017/f0020009/
 art00001.
-. 2012. “The Singularity: A Reply to Commentators.” Journal of Consciousness Studies 19 (7-8):
-141–167. http://ingentaconnect.com/content/imp/jcs/2012/00000019/F0020007/
+. 2012. "The Singularity: A Reply to Commentators." Journal of Consciousness Studies 19 (7-8):
+141-167. http://ingentaconnect.com/content/imp/jcs/2012/00000019/F0020007/
 art00014.
 Crevier, Daniel. 1993. AI: The Tumultuous History of the Search for Artificial Intelligence. New York: Basic
 Books.
-De Blanc, Peter. 2011. Ontological Crises in Artificial Agents’ Value Systems. The Singularity Institute, San
+De Blanc, Peter. 2011. Ontological Crises in Artificial Agents' Value Systems. The Singularity Institute, San
 Francisco, CA, May 19. http://arxiv.org/abs/1105.3821.
-De Garis, Hugo, Chen Shuo, Ben Goertzel, and Lian Ruiting. 2010. “A World Survey of Artificial Brain
-Projects, Part I: Large-Scale Brain Simulations.” Neurocomputing 74 (1–3): 3–29. doi:10.1016/j.
+De Garis, Hugo, Chen Shuo, Ben Goertzel, and Lian Ruiting. 2010. "A World Survey of Artificial Brain
+Projects, Part I: Large-Scale Brain Simulations." Neurocomputing 74 (1-3): 3-29. doi:10.1016/j.
 neucom.2010.08.004.
 Dennett, Daniel C. 1996. Kinds of Minds: Toward an Understanding of Consciousness. Science Master. New
 York: Basic Books.
-Dreyfus, Hubert L. 1972. What Computers Can’t Do: A Critique of Artificial Reason. New York: Harper &
+Dreyfus, Hubert L. 1972. What Computers Can't Do: A Critique of Artificial Reason. New York: Harper &
 Row.
 Eden, Amnon, Johnny Søraker, James H. Moor, and Eric Steinhart, eds. 2012. Singularity Hypotheses: A
 Scientific and Philosophical Assessment. The Frontiers Collection. Berlin: Springer.
-Feldman, J. A., and Dana H. Ballard. 1982. “Connectionist Models and Their Properties.” Cognitive
-Science 6 (3): 205–254. doi:10.1207/s15516709cog0603_1.
+Feldman, J. A., and Dana H. Ballard. 1982. "Connectionist Models and Their Properties." Cognitive
+Science 6 (3): 205-254. doi:10.1207/s15516709cog0603_1.
 Floreano, Dario, and Claudio Mattiussi. 2008. Bio-Inspired Artificial Intelligence: Theories, Methods, and
 Technologies. Intelligent Robotics and Autonomous Agents. Cambridge, MA: MIT Press.
-Fox, Douglas. 2011. “The Limits of Intelligence.” Scientific American, July, 36–43.
+Fox, Douglas. 2011. "The Limits of Intelligence." Scientific American, July, 36-43.
 Fregni, Felipe, Paulo S. Boggio, Michael Nitsche, Felix Bermpohl, Andrea Antal, Eva Feredoes, Marco
-A. Marcolin, et al. 2005. “Anodal Transcranial Direct Current Stimulation of Prefrontal Cortex
-Enhances Working Memory.” Experimental Brain Research 166 (1): 23–30. doi:10.1007/s00221-
+A. Marcolin, et al. 2005. "Anodal Transcranial Direct Current Stimulation of Prefrontal Cortex
+Enhances Working Memory." Experimental Brain Research 166 (1): 23-30. doi:10.1007/s00221-
 005-2334-6.
 Friedman, James W., ed. 1994. Problems of Coordination in Economic Activity. Recent Economic
 Thought 35. Boston: Kluwer Academic.
 
 ---
 
-Friedman, Milton. 1953. “The Methodology of Positive Economics.” In Essays in Positive Economics, 3–
+Friedman, Milton. 1953. "The Methodology of Positive Economics." In Essays in Positive Economics, 3-
 43. Chicago: University of Chicago Press.
 Goertzel, Ben. 2006. The Hidden Pattern: A Patternist Philosophy of Mind. Boca Raton, FL: BrownWalker.
-. 2010. “Toward a Formal Characterization of Real-World General Intelligence.” In Artificial Gen-
+. 2010. "Toward a Formal Characterization of Real-World General Intelligence." In Artificial Gen-
 eral Intelligence: Proceedings of the Third Conference on Artificial General Intelligence, AGI 2010, Lugano,
-Switzerland, March 5–8, 2010, edited by Eric B. Baum, Marcus Hutter, and Emanuel Kitzelmann,
-19–24. Advances in Intelligent Systems Research 10. Amsterdam: Atlantis. doi:10.2991/agi.
+Switzerland, March 5-8, 2010, edited by Eric B. Baum, Marcus Hutter, and Emanuel Kitzelmann,
+19-24. Advances in Intelligent Systems Research 10. Amsterdam: Atlantis. doi:10.2991/agi.
 2010.17.
-. 2012. “Should Humanity Build a Global AI Nanny to Delay the Singularity Until It’s Better
-Understood?” Journal of Consciousness Studies 19 (1–2): 96–111. http://ingentaconnect.com/
+. 2012. "Should Humanity Build a Global AI Nanny to Delay the Singularity Until It's Better
+Understood?" Journal of Consciousness Studies 19 (1-2): 96-111. http://ingentaconnect.com/
 content/imp/jcs/2012/00000019/F0020001/art00006.
 Goertzel, Ben, and Cassio Pennachin, eds. 2007. Artificial General Intelligence. Cognitive Technologies.
 Berlin: Springer. doi:10.1007/978-3-540-68677-4.
@@ -793,172 +794,172 @@ Cambridge University Press.
 Good, Irving John. 1959. Speculations on Perceptrons and Other Automata. Research Lecture, RC-115.
 IBM, Yorktown Heights, New York, June 2. http://domino.research.ibm.com/library/
 cyberdig.nsf/papers/58DC4EA36A143C218525785E00502E30/$File/rc115.pdf.
-. 1965. “Speculations Concerning the First Ultraintelligent Machine.” In Advances in Computers,
-edited by Franz L. Alt and Morris Rubinoﬀ, 6:31–88. New York: Academic Press. doi:10.1016/
+. 1965. "Speculations Concerning the First Ultraintelligent Machine." In Advances in Computers,
+edited by Franz L. Alt and Morris Rubinoﬀ, 6:31-88. New York: Academic Press. doi:10.1016/
 S0065-2458(08)60418-0.
-. 1970. “Some Future Social Repercussions of Computers.” International Journal of Environmental
-Studies 1 (1–4): 67–79. doi:10.1080/00207237008709398.
-. 1982. “Ethical Machines.” In Intelligent Systems: Practice and Perspective, edited by J. E. Hayes,
-Donald Michie, and Y.-H. Pao, 555–560. Machine Intelligence 10. Chichester: Ellis Horwood.
-Greenfield, Susan. 2012. “The Singularity: Commentary on David Chalmers.” Journal of Consciousness
-Studies 19 (1–2): 112–118. http://www.ingentaconnect.com/content/imp/jcs/2012/
+. 1970. "Some Future Social Repercussions of Computers." International Journal of Environmental
+Studies 1 (1-4): 67-79. doi:10.1080/00207237008709398.
+. 1982. "Ethical Machines." In Intelligent Systems: Practice and Perspective, edited by J. E. Hayes,
+Donald Michie, and Y.-H. Pao, 555-560. Machine Intelligence 10. Chichester: Ellis Horwood.
+Greenfield, Susan. 2012. "The Singularity: Commentary on David Chalmers." Journal of Consciousness
+Studies 19 (1-2): 112-118. http://www.ingentaconnect.com/content/imp/jcs/2012/
 00000019/F0020001/art00007.
-Griﬃn, Dale, and Amos Tversky. 1992. “The Weighing of Evidence and the Determinants of Confi-
-dence.” Cognitive Psychology 24 (3): 411–435. doi:10.1016/0010-0285(92)90013-R.
-Groß, Dominik. 2009. “Blessing or Curse? Neurocognitive Enhancement by ‘Brain Engineering.”’
-Medicine Studies 1 (4): 379–391. doi:10.1007/s12376-009-0032-6.
-Gubrud, Mark Avrum. 1997. “Nanotechnology and International Security.” Paper presented at the Fifth
-Foresight Conference on Molecular Nanotechnology, Palo Alto, CA, November 5–8. http://www.
+Griﬃn, Dale, and Amos Tversky. 1992. "The Weighing of Evidence and the Determinants of Confi-
+dence." Cognitive Psychology 24 (3): 411-435. doi:10.1016/0010-0285(92)90013-R.
+Groß, Dominik. 2009. "Blessing or Curse? Neurocognitive Enhancement by 'Brain Engineering."'
+Medicine Studies 1 (4): 379-391. doi:10.1007/s12376-009-0032-6.
+Gubrud, Mark Avrum. 1997. "Nanotechnology and International Security." Paper presented at the Fifth
+Foresight Conference on Molecular Nanotechnology, Palo Alto, CA, November 5-8. http://www.
 foresight.org/Conferences/MNT05/Papers/Gubrud/.
-Halevy, Alon, Peter Norvig, and Fernando Pereira. 2009. “The Unreasonable Eﬀectiveness of Data.” IEEE
-Intelligent Systems 24 (2): 8–12. doi:10.1109/MIS.2009.36.
-Hanson, Robin. 1998. “Economic Growth Given Machine Intelligence.” Unpublished manuscript. Ac-
+Halevy, Alon, Peter Norvig, and Fernando Pereira. 2009. "The Unreasonable Eﬀectiveness of Data." IEEE
+Intelligent Systems 24 (2): 8-12. doi:10.1109/MIS.2009.36.
+Hanson, Robin. 1998. "Economic Growth Given Machine Intelligence." Unpublished manuscript. Ac-
 cessed May 15, 2013. http://hanson.gmu.edu/aigrow.pdf.
-. 2008. “Economics of the Singularity.” IEEE Spectrum 45 (6): 45–50. doi:10.1109/MSPEC.
+. 2008. "Economics of the Singularity." IEEE Spectrum 45 (6): 45-50. doi:10.1109/MSPEC.
 2008.4531461.
 
 ---
 
-. 2012. “Meet the New Conflict, Same as the Old Conflict.” Journal of Consciousness Studies 19
-(1–2): 119–125. http://www.ingentaconnect.com/content/imp/jcs/2012/00000019/
+. 2012. "Meet the New Conflict, Same as the Old Conflict." Journal of Consciousness Studies 19
+(1-2): 119-125. http://www.ingentaconnect.com/content/imp/jcs/2012/00000019/
 F0020001/art00008.
-Hanson, Robin, and Eliezer Yudkowsky. 2008. “The Hanson-Yudkowsky AI-Foom Debate.” Less Wrong
+Hanson, Robin, and Eliezer Yudkowsky. 2008. "The Hanson-Yudkowsky AI-Foom Debate." Less Wrong
 Wiki. Accessed March 13, 2012. http : / / wiki . lesswrong . com / wiki / The _ Hanson -
 Yudkowsky_AI-Foom_Debate.
-Heylighen, Francis. 2012. “Brain in a Vat Cannot Break Out.” Journal of Consciousness Studies 19 (1–2):
-126–142. http : / / www . ingentaconnect . com / content / imp / jcs / 2012 / 00000019 /
+Heylighen, Francis. 2012. "Brain in a Vat Cannot Break Out." Journal of Consciousness Studies 19 (1-2):
+126-142. http : / / www . ingentaconnect . com / content / imp / jcs / 2012 / 00000019 /
 F0020001/art00009.
-Hibbard, Bill. 2011. “Measuring Agent Intelligence via Hierarchies of Environments.” In Schmidhuber,
-Thórisson, and Looks 2011, 303–308.
+Hibbard, Bill. 2011. "Measuring Agent Intelligence via Hierarchies of Environments." In Schmidhuber,
+Thórisson, and Looks 2011, 303-308.
 Hutter, Marcus. 2005. Universal Artificial Intelligence: Sequential Decisions Based On Algorithmic Probabil-
 ity. Texts in Theoretical Computer Science. Berlin: Springer. doi:10.1007/b138233.
-. 2012. “Can Intelligence Explode?” Journal of Consciousness Studies 19 (1–2): 143–166. http:
+. 2012. "Can Intelligence Explode?" Journal of Consciousness Studies 19 (1-2): 143-166. http:
 //www.ingentaconnect.com/content/imp/jcs/2012/00000019/F0020001/art00010.
 Jaynes, E. T. 2003. Probability Theory: The Logic of Science. Edited by G. Larry Bretthorst. New York:
 Cambridge University Press. doi:10.2277/0521592712.
-Jones, Benjamin F. 2009. “The Burden of Knowledge and the ‘Death of the Renaissance Man’: Is In-
-novation Getting Harder?” Review of Economic Studies 76 (1): 283–317. doi:10.1111/j.1467-
+Jones, Benjamin F. 2009. "The Burden of Knowledge and the 'Death of the Renaissance Man': Is In-
+novation Getting Harder?" Review of Economic Studies 76 (1): 283-317. doi:10.1111/j.1467-
 937X.2008.00531.x.
 Kaas, Steven, Steve Rayhawk, Anna Salamon, and Peter Salamon. 2010. Economic Implications of Software
 Minds. The Singularity Institute, San Francisco, CA, August 10. http://intelligence.org/
 files/EconomicImplications.pdf.
 Kandel, Eric R., James H. Schwartz, and Thomas M. Jessell, eds. 2000. Principles of Neural Science. New
 York: McGraw-Hill.
-Koza, John R. 2010. “Human-Competitive Results Produced by Genetic Programming.” Genetic Pro-
-gramming and Evolvable Machines 11 (3–4): 251–284. doi:10.1007/s10710-010-9112-3.
+Koza, John R. 2010. "Human-Competitive Results Produced by Genetic Programming." Genetic Pro-
+gramming and Evolvable Machines 11 (3-4): 251-284. doi:10.1007/s10710-010-9112-3.
 Krichmar, Jeﬀrey L., and Hiroaki Wagatsuma, eds. 2011. Neuromorphic and Brain-Based Robots. New
 York: Cambridge University Press.
-Kryder, M. H., and Chang Soo Kim. 2009. “After Hard Drives—What Comes Next?” IEEE Transactions
-on Magnetics 2009 (10): 3406–3413. doi:10.1109/TMAG.2009.2024163.
+Kryder, M. H., and Chang Soo Kim. 2009. "After Hard Drives-What Comes Next?" IEEE Transactions
+on Magnetics 2009 (10): 3406-3413. doi:10.1109/TMAG.2009.2024163.
 Kurzweil, Ray. 2005. The Singularity Is Near: When Humans Transcend Biology. New York: Viking.
-Legg, Shane. 2008. “Machine Super Intelligence.” PhD diss., University of Lugano. http://www.
+Legg, Shane. 2008. "Machine Super Intelligence." PhD diss., University of Lugano. http://www.
 vetta.org/documents/Machine_Super_Intelligence.pdf.
-Legg, Shane, and Marcus Hutter. 2007. “A Collection of Definitions of Intelligence.” In Advances in
-Artificial General Intelligence: Concepts, Architectures and Algorithms—Proceedings of the AGI Workshop
-2006, edited by Ben Goertzel and Pei Wang, 17–24. Frontiers in Artificial Intelligence and Appli-
+Legg, Shane, and Marcus Hutter. 2007. "A Collection of Definitions of Intelligence." In Advances in
+Artificial General Intelligence: Concepts, Architectures and Algorithms-Proceedings of the AGI Workshop
+2006, edited by Ben Goertzel and Pei Wang, 17-24. Frontiers in Artificial Intelligence and Appli-
 cations 157. Amsterdam: IOS.
-Lichtenstein, Sarah, Baruch Fischhoﬀ, and Lawrence D. Phillips. 1982. “Calibration of Probabilities: The
-State of the Art to 1980.” In Judgement Under Uncertainty: Heuristics and Biases, edited by Daniel
-Kahneman, Paul Slovic, and Amos Tversky, 306–334. New York: Cambridge University Press.
+Lichtenstein, Sarah, Baruch Fischhoﬀ, and Lawrence D. Phillips. 1982. "Calibration of Probabilities: The
+State of the Art to 1980." In Judgement Under Uncertainty: Heuristics and Biases, edited by Daniel
+Kahneman, Paul Slovic, and Amos Tversky, 306-334. New York: Cambridge University Press.
 
 ---
 
-Loosemore, Richard, and Ben Goertzel. 2011. “Why an Intelligence Explosion is Probable.” H+ Mag-
+Loosemore, Richard, and Ben Goertzel. 2011. "Why an Intelligence Explosion is Probable." H+ Mag-
 azine, March 7. http : / / hplusmagazine . com / 2011 / 03 / 07 / why - an - intelligence -
 explosion-is-probable/.
-Lucas, J. R. 1961. “Minds, Machines and Gödel.” Philosophy 36 (137): 112–127. doi:10 . 1017 /
+Lucas, J. R. 1961. "Minds, Machines and Gödel." Philosophy 36 (137): 112-127. doi:10 . 1017 /
 S0031819100057983.
-Lundstrom, Mark. 2003. “Moore’s Law Forever?” Science 299 (5604): 210–211. doi:10.1126/science.
+Lundstrom, Mark. 2003. "Moore's Law Forever?" Science 299 (5604): 210-211. doi:10.1126/science.
 1079567.
-Mack, C. A. 2011. “Fifty Years of Moore’s Law.” IEEE Transactions on Semiconductor Manufacturing 24
-(2): 202–207. doi:10.1109/TSM.2010.2096437.
+Mack, C. A. 2011. "Fifty Years of Moore's Law." IEEE Transactions on Semiconductor Manufacturing 24
+(2): 202-207. doi:10.1109/TSM.2010.2096437.
 Marcus, Gary. 2008. Kluge: The Haphazard Evolution of the Human Mind. Boston: Houghton Miﬄin.
-McAfee, Andrew, and Erik Brynjolfsson. 2008. “Investing in the IT That Makes a Competitive Diﬀer-
-ence.” Harvard Business Review, July. http://hbr.org/2008/07/investing-in-the-it-
+McAfee, Andrew, and Erik Brynjolfsson. 2008. "Investing in the IT That Makes a Competitive Diﬀer-
+ence." Harvard Business Review, July. http://hbr.org/2008/07/investing-in-the-it-
 that-makes-a-competitive-difference.
 McCorduck, Pamela. 2004. Machines Who Think: A Personal Inquiry into the History and Prospects of Arti-
 ficial Intelligence. 2nd ed. Natick, MA: A K Peters.
-McDaniel, Michael A. 2005. “Big-Brained People are Smarter: A Meta-Analysis of the Relationship
-between In Vivo Brain Volume and Intelligence.” Intelligence 33 (4): 337–346. doi:10.1016/j.
+McDaniel, Michael A. 2005. "Big-Brained People are Smarter: A Meta-Analysis of the Relationship
+between In Vivo Brain Volume and Intelligence." Intelligence 33 (4): 337-346. doi:10.1016/j.
 intell.2004.11.005.
-McDermott, Drew. 2012a. “Response to ‘The Singularity’ by David Chalmers.” Journal of Consciousness
-Studies 19 (1–2): 167–172. http://www.ingentaconnect.com/content/imp/jcs/2012/
+McDermott, Drew. 2012a. "Response to 'The Singularity' by David Chalmers." Journal of Consciousness
+Studies 19 (1-2): 167-172. http://www.ingentaconnect.com/content/imp/jcs/2012/
 00000019/F0020001/art00011.
-. 2012b. “There Are No ‘Extendible Methods’ in David Chalmers’s Sense Unless P=NP.” Unpub-
+. 2012b. "There Are No 'Extendible Methods' in David Chalmers's Sense Unless P=NP." Unpub-
 lished manuscript. Accessed March 19, 2012. http://cs- www.cs.yale.edu/homes/dvm/
 papers/no-extendible-methods.pdf.
-Mehta, Ghanshyam B. 1998. “Preference and Utility.” In Handbook of Utility Theory, Volume I, edited by
-Salvador Barbera, Peter J. Hammond, and Christian Seidl, 1–47. Boston: Kluwer Academic.
-Minsky, Marvin. 1984. “Afterword to Vernor Vinge’s novel, ‘True Names.”’ Unpublished manuscript,
+Mehta, Ghanshyam B. 1998. "Preference and Utility." In Handbook of Utility Theory, Volume I, edited by
+Salvador Barbera, Peter J. Hammond, and Christian Seidl, 1-47. Boston: Kluwer Academic.
+Minsky, Marvin. 1984. "Afterword to Vernor Vinge's novel, 'True Names."' Unpublished manuscript,
 October 1. Accessed December 31, 2012. http://web.media.mit.edu/~minsky/papers/
 TrueNames.Afterword.html.
 Modha, Dharmendra S., Rajagopal Ananthanarayanan, Steven K. Esser, Anthony Ndirango, Anthony J.
-Sherbondy, and Raghavendra Singh. 2011. “Cognitive Computing.” Communications of the ACM 54
-(8): 62–71. doi:10.1145/1978542.1978559.
-Modis, Theodore. 2012. “There Will Be No Singularity.” In Eden, Søraker, Moor, and Steinhart 2012.
-Moravec, Hans P. 1976. “The Role of Raw Rower in Intelligence.” Unpublished manuscript, May 12.
+Sherbondy, and Raghavendra Singh. 2011. "Cognitive Computing." Communications of the ACM 54
+(8): 62-71. doi:10.1145/1978542.1978559.
+Modis, Theodore. 2012. "There Will Be No Singularity." In Eden, Søraker, Moor, and Steinhart 2012.
+Moravec, Hans P. 1976. "The Role of Raw Rower in Intelligence." Unpublished manuscript, May 12.
 Accessed August 12, 2012. http://www.frc.ri.cmu.edu/users/hpm/project.archive/
 general.articles/1975/Raw.Power.html.
-. 1998. “When Will Computer Hardware Match the Human Brain?” Journal of Evolution and
+. 1998. "When Will Computer Hardware Match the Human Brain?" Journal of Evolution and
 Technology 1. http://www.transhumanist.com/volume1/moravec.htm.
-. 1999. “Rise of the Robots.” Scientific American, December, 124–135.
-Muehlhauser, Luke. 2011. “So You Want to Save the World.” Last revised March 2, 2012. http://
+. 1999. "Rise of the Robots." Scientific American, December, 124-135.
+Muehlhauser, Luke. 2011. "So You Want to Save the World." Last revised March 2, 2012. http://
 lukeprog.com/SaveTheWorld.html.
 
 ---
 
-Muehlhauser, Luke, and Louie Helm. 2012. “The Singularity and Machine Ethics.” In Eden, Søraker,
+Muehlhauser, Luke, and Louie Helm. 2012. "The Singularity and Machine Ethics." In Eden, Søraker,
 Moor, and Steinhart 2012.
-Murphy, Allan H., and Robert L. Winkler. 1984. “Probability Forecasting in Meteorology.” Journal of the
-American Statistical Association 79 (387): 489–500.
+Murphy, Allan H., and Robert L. Winkler. 1984. "Probability Forecasting in Meteorology." Journal of the
+American Statistical Association 79 (387): 489-500.
 Nagy, Béla, J. Doyne Farmer, Jessika E. Trancik, and Quan Minh Bui. 2010. Testing Laws of Technological
 Progress. Santa Fe, NM: Santa Fe Institute, September 2. http://tuvalu.santafe.edu/~bn/
 workingpapers/NagyFarmerTrancikBui.pdf.
-Nagy, Béla, J. Doyne Farmer, Jessika E. Trancik, and John Paul Gonzales. 2011. “Superexponential Long-
-Term Trends in Information Technology.” Technological Forecasting and Social Change 78 (8): 1356–
+Nagy, Béla, J. Doyne Farmer, Jessika E. Trancik, and John Paul Gonzales. 2011. "Superexponential Long-
+Term Trends in Information Technology." Technological Forecasting and Social Change 78 (8): 1356-
 1364. doi:10.1016/j.techfore.2011.07.006.
-Nielsen, Michael. 2011. “What Should a Reasonable Person Believe about the Singularity?” Michael
+Nielsen, Michael. 2011. "What Should a Reasonable Person Believe about the Singularity?" Michael
 Nielsen (blog), January 12. http : / / michaelnielsen . org / blog / what - should - a -
 reasonable-person-believe-about-the-singularity/.
 Nilsson, Nils J. 2009. The Quest for Artificial Intelligence: A History of Ideas and Achievements. New York:
 Cambridge University Press.
-Nordmann, Alfred. 2007. “If and Then: A Critique of Speculative NanoEthics.” NanoEthics 1 (1): 31–46.
+Nordmann, Alfred. 2007. "If and Then: A Critique of Speculative NanoEthics." NanoEthics 1 (1): 31-46.
 doi:10.1007/s11569-007-0007-6.
-Omohundro, Stephen M. 1987. “Eﬃcient Algorithms with Neural Network Behavior.” Complex Systems
-1 (2): 273–347. http://www.complex-systems.com/abstracts/v01_i02_a04.html.
-. 2007. “The Nature of Self-Improving Artificial Intelligence.” Paper presented at Singularity
-Summit 2007, San Francisco, CA, September 8–9. http://selfawaresystems.com/2007/
+Omohundro, Stephen M. 1987. "Eﬃcient Algorithms with Neural Network Behavior." Complex Systems
+1 (2): 273-347. http://www.complex-systems.com/abstracts/v01_i02_a04.html.
+. 2007. "The Nature of Self-Improving Artificial Intelligence." Paper presented at Singularity
+Summit 2007, San Francisco, CA, September 8-9. http://selfawaresystems.com/2007/
 10/05/paper-on-the-nature-of-self-improving-artificial-intelligence/.
-. 2008. “The Basic AI Drives.” In Wang, Goertzel, and Franklin 2008, 483–492.
-. 2012. “Rational Artificial Intelligence for the Greater Good.” In Eden, Søraker, Moor, and Stein-
+. 2008. "The Basic AI Drives." In Wang, Goertzel, and Franklin 2008, 483-492.
+. 2012. "Rational Artificial Intelligence for the Greater Good." In Eden, Søraker, Moor, and Stein-
 hart 2012.
 Pan, Zhenglun, Thomas A. Trikalinos, Fotini K. Kavvoura, Joseph Lau, and John P. A. Ioannidis. 2005.
-“Local Literature Bias in Genetic Epidemiology: An Empirical Evaluation of the Chinese Litera-
-ture.” PLoS Medicine 2 (12): e334. doi:10.1371/journal.pmed.0020334.
-Parente, Rick, and Janet Anderson-Parente. 2011. “A Case Study of Long-Term Delphi Accuracy.” Tech-
-nological Forecasting and Social Change 78 (9): 1705–1711. doi:10.1016/j.techfore.2011.07.
+"Local Literature Bias in Genetic Epidemiology: An Empirical Evaluation of the Chinese Litera-
+ture." PLoS Medicine 2 (12): e334. doi:10.1371/journal.pmed.0020334.
+Parente, Rick, and Janet Anderson-Parente. 2011. "A Case Study of Long-Term Delphi Accuracy." Tech-
+nological Forecasting and Social Change 78 (9): 1705-1711. doi:10.1016/j.techfore.2011.07.
 005.
-Pennachin, Cassio, and Ben Goertzel. 2007. “Contemporary Approaches to Artificial General Intelli-
-gence.” In Goertzel and Pennachin 2007, 1–30.
+Pennachin, Cassio, and Ben Goertzel. 2007. "Contemporary Approaches to Artificial General Intelli-
+gence." In Goertzel and Pennachin 2007, 1-30.
 Penrose, Roger. 1994. Shadows of the Mind: A Search for the Missing Science of Consciousness. New York:
 Oxford University Press.
-Plebe, Alessio, and Pietro Perconti. 2012. “The Slowdown Hypothesis.” In Eden, Søraker, Moor, and
+Plebe, Alessio, and Pietro Perconti. 2012. "The Slowdown Hypothesis." In Eden, Søraker, Moor, and
 Steinhart 2012.
 Posner, Richard A. 2004. Catastrophe: Risk and Response. New York: Oxford University Press.
-Proudfoot, Diane, and B. Jack Copeland. 2012. “Artificial Intelligence.” In The Oxford Handbook of Phi-
+Proudfoot, Diane, and B. Jack Copeland. 2012. "Artificial Intelligence." In The Oxford Handbook of Phi-
 losophy of Cognitive Science, edited by Eric Margolis, Richard Samuels, and Stephen P. Stich. New
 York: Oxford University Press.
 
 ---
 
-Richards, Mark A., and Gary A. Shaw. 2004. “Chips, Architectures and Algorithms: Reflections on the
-Exponential Growth of Digital Signal Processing Capability.” Unpublished manuscript, January 28.
+Richards, Mark A., and Gary A. Shaw. 2004. "Chips, Architectures and Algorithms: Reflections on the
+Exponential Growth of Digital Signal Processing Capability." Unpublished manuscript, January 28.
 Accessed March 20, 2012. http://users.ece.gatech.edu/~mrichard/Richards&Shaw_
 Algorithms01204.pdf.
 Rieﬀel, Eleanor, and Wolfgang Polak. 2011. Quantum Computing: A Gentle Introduction. Scientific and
 Engineering Computation. Cambridge, MA: MIT Press.
-Rowe, Gene, and George Wright. 2001. “Expert Opinions in Forecasting: The Role of the Delphi Tech-
-nique.” In Principles of Forecasting: A Handbook for Researchers and Practitioners, edited by Jon Scott
+Rowe, Gene, and George Wright. 2001. "Expert Opinions in Forecasting: The Role of the Delphi Tech-
+nique." In Principles of Forecasting: A Handbook for Researchers and Practitioners, edited by Jon Scott
 Armstrong. International Series in Operations Research & Management Science 30. Boston: Kluwer
 Academic.
 The Royal Society. 2011. Knowledge, Networks and Nations: Global Scientific Collaboration in the 21st
@@ -966,109 +967,109 @@ Century. RS Policy document, 03/11. Royal Society, London. http : / / royalsocie
 uploadedFiles/Royal_Society_Content/policy/publications/2011/4294976134.pdf.
 Russell, Stuart J., and Peter Norvig. 2010. Artificial Intelligence: A Modern Approach. 3rd ed. Upper Saddle
 River, NJ: Prentice-Hall.
-Sandberg, Anders. 2010. “An Overview of Models of Technological Singularity.” Paper presented at the
+Sandberg, Anders. 2010. "An Overview of Models of Technological Singularity." Paper presented at the
 Roadmaps to AGI and the Future of AGI Workshop, Lugano, Switzerland, March 8. http://agi-
 conf.org/2010/wp-content/uploads/2009/06/agi10singmodels2.pdf.
-. 2011. “Cognition Enhancement: Upgrading the Brain.” In Enhancing Human Capacities, edited
-by Julian Savulescu, Ruud ter Meulen, and Guy Kahane, 71–91. Malden, MA: Wiley-Blackwell.
+. 2011. "Cognition Enhancement: Upgrading the Brain." In Enhancing Human Capacities, edited
+by Julian Savulescu, Ruud ter Meulen, and Guy Kahane, 71-91. Malden, MA: Wiley-Blackwell.
 Sandberg, Anders, and Nick Bostrom. 2008. Whole Brain Emulation: A Roadmap. Technical Report,
 2008-3. Future of Humanity Institute, University of Oxford. http://www.fhi.ox.ac.uk/wp-
 content/uploads/brain-emulation-roadmap-report1.pdf.
 . 2011. Machine Intelligence Survey. Technical Report, 2011-1. Future of Humanity Institute, Uni-
 versity of Oxford. www.fhi.ox.ac.uk/reports/2011-1.pdf.
-Schaul, Tom, and Jürgen Schmidhuber. 2010. “Metalearning.” Scholarpedia 5 (6): 4650. doi:10.4249/
+Schaul, Tom, and Jürgen Schmidhuber. 2010. "Metalearning." Scholarpedia 5 (6): 4650. doi:10.4249/
 scholarpedia.4650.
-Schierwagen, Andreas. 2011. “Reverse Engineering for Biologically Inspired Cognitive Architectures: A
-Critical Analysis.” In From Brains to Systems: Brain-Inspired Cognitive Systems 2010, edited by Carlos
+Schierwagen, Andreas. 2011. "Reverse Engineering for Biologically Inspired Cognitive Architectures: A
+Critical Analysis." In From Brains to Systems: Brain-Inspired Cognitive Systems 2010, edited by Carlos
 Hernández, Ricardo Sanz, Jaime Gómez-Ramirez, Leslie S. Smith, Amir Hussain, Antonio Chella,
-and Igor Aleksander, 111–121. Advances in Experimental Medicine and Biology 718. New York:
+and Igor Aleksander, 111-121. Advances in Experimental Medicine and Biology 718. New York:
 Springer. doi:10.1007/978-1-4614-0164-3_10.
-Schmidhuber, Jürgen. 2002. “The Speed Prior: A New Simplicity Measure Yielding Near-Optimal Com-
-putable Predictions.” In Computational Learning Theory: 5th Annual Conference on Computational
-Learning Theory, COLT 2002 Sydney, Australia, July 8–10, 2002 Proceedings, edited by Jyrki Kivi-
-nen and Robert H. Sloan, 123–127. Lecture Notes in Computer Science 2375. Berlin: Springer.
+Schmidhuber, Jürgen. 2002. "The Speed Prior: A New Simplicity Measure Yielding Near-Optimal Com-
+putable Predictions." In Computational Learning Theory: 5th Annual Conference on Computational
+Learning Theory, COLT 2002 Sydney, Australia, July 8-10, 2002 Proceedings, edited by Jyrki Kivi-
+nen and Robert H. Sloan, 123-127. Lecture Notes in Computer Science 2375. Berlin: Springer.
 doi:10.1007/3-540-45435-7_15.
-. 2007. “Gödel Machines: Fully Self-Referential Optimal Universal Self-Improvers.” In Goertzel
-and Pennachin 2007, 199–226.
+. 2007. "Gödel Machines: Fully Self-Referential Optimal Universal Self-Improvers." In Goertzel
+and Pennachin 2007, 199-226.
 Schmidhuber, Jürgen, Kristinn R. Thórisson, and Moshe Looks, eds. 2011. Artificial General Intelligence:
-4th International Conference, AGI 2011, Mountain View, CA, USA, August 3–6, 2011. Proceedings.
+4th International Conference, AGI 2011, Mountain View, CA, USA, August 3-6, 2011. Proceedings.
 Lecture Notes in Computer Science 6830. Berlin: Springer. doi:10.1007/978-3-642-22887-2.
 
 ---
 
-Schneider, Stefan. 2010. Homo Economicus—or More like Homer Simpson? Current Issues. Deutsche Bank
+Schneider, Stefan. 2010. Homo Economicus-or More like Homer Simpson? Current Issues. Deutsche Bank
 Research, Frankfurt, June 29. http://www.dbresearch.com/PROD/DBR_INTERNET_EN-
 PROD/PROD0000000000259291.PDF.
-Schoenemann, Paul Thomas. 1997. “An MRI Study of the Relationship Between Human Neuroanatomy
-and Behavioral Ability.” PhD diss., University of California, Berkeley. http://mypage.iu.edu/
+Schoenemann, Paul Thomas. 1997. "An MRI Study of the Relationship Between Human Neuroanatomy
+and Behavioral Ability." PhD diss., University of California, Berkeley. http://mypage.iu.edu/
 ~toms/papers/dissertation/Dissertation_title.htm.
-Schwartz, Jacob T. 1987. “Limits of Artificial Intelligence.” In Encyclopedia of Artificial Intelligence, edited
-by Stuart C. Shapiro and David Eckroth, 1:488–503. New York: John Wiley & Sons.
-Searle, John R. 1980. “Minds, Brains, and Programs.” Behavioral and Brain Sciences 3 (03): 417–424.
+Schwartz, Jacob T. 1987. "Limits of Artificial Intelligence." In Encyclopedia of Artificial Intelligence, edited
+by Stuart C. Shapiro and David Eckroth, 1:488-503. New York: John Wiley & Sons.
+Searle, John R. 1980. "Minds, Brains, and Programs." Behavioral and Brain Sciences 3 (03): 417-424.
 doi:10.1017/S0140525X00005756.
-Shulman, Carl, and Nick Bostrom. 2012. “How Hard is Artificial Intelligence? Evolutionary Ar-
-guments and Selection Eﬀects.” Journal of Consciousness Studies 19 (7–8): 103–130. http : / /
+Shulman, Carl, and Nick Bostrom. 2012. "How Hard is Artificial Intelligence? Evolutionary Ar-
+guments and Selection Eﬀects." Journal of Consciousness Studies 19 (7-8): 103-130. http : / /
 ingentaconnect.com/content/imp/jcs/2012/00000019/F0020007/art00011.
-Shulman, Carl, and Anders Sandberg. 2010. “Implications of a Software-Limited Singularity.” In
+Shulman, Carl, and Anders Sandberg. 2010. "Implications of a Software-Limited Singularity." In
 ECAP10: VIII European Conference on Computing and Philosophy, edited by Klaus Mainzer. Munich:
 Dr. Hut.
 Simon, Herbert Alexander. 1965. The Shape of Automation for Men and Management. New York: Harper
 & Row.
-Solomonoﬀ, Ray J. 1985. “The Time Scale of Artificial Intelligence: Reflections on Social Eﬀects.” Human
-Systems Management 5:149–153.
-Sotala, Kaj. 2012. “Advantages of Artificial Intelligences, Uploads, and Digital Minds.” International
-Journal of Machine Consciousness 4 (1): 275–291. doi:10.1142/S1793843012400161.
+Solomonoﬀ, Ray J. 1985. "The Time Scale of Artificial Intelligence: Reflections on Social Eﬀects." Human
+Systems Management 5:149-153.
+Sotala, Kaj. 2012. "Advantages of Artificial Intelligences, Uploads, and Digital Minds." International
+Journal of Machine Consciousness 4 (1): 275-291. doi:10.1142/S1793843012400161.
 Tetlock, Philip E. 2005. Expert Political Judgment: How Good is it? How Can We Know? Princeton, NJ:
 Princeton University Press.
 Trappenberg, Thomas P. 2009. Fundamentals of Computational Neuroscience. 2nd ed. New York: Oxford
 University Press.
-Turing, A. M. 1950. “Computing Machinery and Intelligence.” Mind 59 (236): 433–460. doi:10.1093/
+Turing, A. M. 1950. "Computing Machinery and Intelligence." Mind 59 (236): 433-460. doi:10.1093/
 mind/LIX.236.433.
-. 1951. “Intelligent Machinery, A Heretical Theory.” A lecture given to ’51 Society’ at Manchester.
-Tversky, Amos, and Daniel Kahneman. 1974. “Judgment Under Uncertainty: Heuristics and Biases.”
-Science 185 (4157): 1124–1131. doi:10.1126/science.185.4157.1124.
-. 1983. “Extensional Versus Intuitive Reasoning: The Conjunction Fallacy in Probability Judg-
-ment.” Psychological Review 90 (4): 293–315. doi:10.1037/0033-295X.90.4.293.
-The Uncertain Future. 2012. “What is Multi-generational In Vitro Embryo Selection?” The Uncertain
+. 1951. "Intelligent Machinery, A Heretical Theory." A lecture given to '51 Society' at Manchester.
+Tversky, Amos, and Daniel Kahneman. 1974. "Judgment Under Uncertainty: Heuristics and Biases."
+Science 185 (4157): 1124-1131. doi:10.1126/science.185.4157.1124.
+. 1983. "Extensional Versus Intuitive Reasoning: The Conjunction Fallacy in Probability Judg-
+ment." Psychological Review 90 (4): 293-315. doi:10.1037/0033-295X.90.4.293.
+The Uncertain Future. 2012. "What is Multi-generational In Vitro Embryo Selection?" The Uncertain
 Future. Accessed March 25, 2012. http://www.theuncertainfuture.com/faq.html#7.
-Van der Velde, Frank. 2010. “Where Artificial Intelligence and Neuroscience Meet: The Search for
-Grounded Architectures of Cognition.” Advances in Artificial Intelligence, no. 5. doi:10.1155/2010/
+Van der Velde, Frank. 2010. "Where Artificial Intelligence and Neuroscience Meet: The Search for
+Grounded Architectures of Cognition." Advances in Artificial Intelligence, no. 5. doi:10.1155/2010/
 918062.
-Van Gelder, Timothy, and Robert F. Port. 1995. “It’s About Time: An Overview of the Dynamical Ap-
-proach to Cognition.” In Mind as Motion: Explorations in the Dynamics of Cognition, edited by Robert
+Van Gelder, Timothy, and Robert F. Port. 1995. "It's About Time: An Overview of the Dynamical Ap-
+proach to Cognition." In Mind as Motion: Explorations in the Dynamics of Cognition, edited by Robert
 F. Port and Timothy van Gelder. Bradford Books. Cambridge, MA: MIT Press.
 
 ---
 
-Vinge, Vernor. 1993. “The Coming Technological Singularity: How to Survive in the Post-Human Era.”
-In Vision-21: Interdisciplinary Science and Engineering in the Era of Cyberspace, 11–22. NASA Con-
+Vinge, Vernor. 1993. "The Coming Technological Singularity: How to Survive in the Post-Human Era."
+In Vision-21: Interdisciplinary Science and Engineering in the Era of Cyberspace, 11-22. NASA Con-
 ference Publication 10129. NASA Lewis Research Center. http://ntrs.nasa.gov/archive/
 nasa/casi.ntrs.nasa.gov/19940022855_1994022855.pdf.
 Von Neumann, John. 1966. Theory of Self-Replicating Automata. Edited by Arthur Walter Burks. Urbana:
 University of Illinois Press.
-Walter, Chip. 2005. “Kryder’s Law.” Scientific American, July 25. http://www.scientificamerican.
+Walter, Chip. 2005. "Kryder's Law." Scientific American, July 25. http://www.scientificamerican.
 com/article.cfm?id=kryders-law.
 Wang, Pei, Ben Goertzel, and Stan Franklin, eds. 2008. Artificial General Intelligence 2008: Proceedings of
 the First AGI Conference. Frontiers in Artificial Intelligence and Applications 171. Amsterdam: IOS.
 Williams, Leighton Vaughan, ed. 2011. Prediction Markets: Theory and Applications. Routledge Interna-
 tional Studies in Money and Banking 66. New York: Routledge.
-Wootters, W. K., and W. H. Zurek. 1982. “A Single Quantum Cannot Be Cloned.” Nature 299 (5886):
-802–803. doi:10.1038/299802a0.
-Woudenberg, Fred. 1991. “An Evaluation of Delphi.” Technological Forecasting and Social Change 40 (2):
-131–150. doi:10.1016/0040-1625(91)90002-W.
-Yampolskiy, Roman V. 2012. “Leakproofing the Singularity: Artificial Intelligence Confinement Prob-
-lem.” Journal of Consciousness Studies 2012 (1–2): 194–214. http://www.ingentaconnect.com/
+Wootters, W. K., and W. H. Zurek. 1982. "A Single Quantum Cannot Be Cloned." Nature 299 (5886):
+802-803. doi:10.1038/299802a0.
+Woudenberg, Fred. 1991. "An Evaluation of Delphi." Technological Forecasting and Social Change 40 (2):
+131-150. doi:10.1016/0040-1625(91)90002-W.
+Yampolskiy, Roman V. 2012. "Leakproofing the Singularity: Artificial Intelligence Confinement Prob-
+lem." Journal of Consciousness Studies 2012 (1-2): 194-214. http://www.ingentaconnect.com/
 content/imp/jcs/2012/00000019/F0020001/art00014.
-Yates, J. Frank, Ju-Whei Lee, Winston R. Sieck, Incheol Choi, and Paul C. Price. 2002. “Probability
-Judgment Across Cultures.” In Heuristics and Biases: The Psychology of Intuitive Judgment, edited by
-Thomas Gilovich, Dale Griﬃn, and Daniel Kahneman, 271–291. New York: Cambridge University
+Yates, J. Frank, Ju-Whei Lee, Winston R. Sieck, Incheol Choi, and Paul C. Price. 2002. "Probability
+Judgment Across Cultures." In Heuristics and Biases: The Psychology of Intuitive Judgment, edited by
+Thomas Gilovich, Dale Griﬃn, and Daniel Kahneman, 271-291. New York: Cambridge University
 Press. doi:10.2277/0521796792.
 Yudkowsky, Eliezer. 2001. Creating Friendly AI 1.0: The Analysis and Design of Benevolent Goal Architectures.
 The Singularity Institute, San Francisco, CA, June 15. http://intelligence.org/files/CFAI.
 pdf.
-. 2008a. “Artificial Intelligence as a Positive and Negative Factor in Global Risk.” In Bostrom and
-Ćirković 2008, 308–345.
-. 2008b. “Eﬃcient Cross-Domain Optimization.” Less Wrong (blog), October 28. http : / /
+. 2008a. "Artificial Intelligence as a Positive and Negative Factor in Global Risk." In Bostrom and
+Ćirković 2008, 308-345.
+. 2008b. "Eﬃcient Cross-Domain Optimization." Less Wrong (blog), October 28. http : / /
 lesswrong.com/lw/vb/efficient_crossdomain_optimization/.
-. 2011. “Complex Value Systems in Friendly AI.” In Schmidhuber, Thórisson, and Looks 2011,
-388–393.
+. 2011. "Complex Value Systems in Friendly AI." In Schmidhuber, Thórisson, and Looks 2011,
+388-393.

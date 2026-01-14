@@ -30,6 +30,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import httpx
+from lxml import html as lxml_html
 
 # Local extractors
 try:
@@ -140,33 +141,215 @@ def extract_trafilatura(html: str) -> tuple[str | None, Metadata]:
     else:
         metadata = Metadata()
 
+    # Extract text only - links and images will be injected separately
+    # This avoids trafilatura's buggy link/image handling
     content = trafilatura.extract(
         html,
         output_format="markdown",
         include_formatting=True,
-        include_links=True,  # Preserve hyperlinks
-        include_images=True,
+        include_links=False,
+        include_images=False,
     )
-
-    # Fix trafilatura's link formatting issues (line breaks around links)
-    if content:
-        content = fix_trafilatura_links(content)
 
     return content, metadata
 
 
-def fix_trafilatura_links(content: str) -> str:
-    """Fix trafilatura's line break issues around markdown links."""
+# === Link and Image Injection ===
+
+
+def inject_links(content: str, html: str) -> str:
+    """Inject links from HTML back into markdown content.
+
+    Strategy: For each <a> tag, capture link text + surrounding context,
+    then find that pattern in markdown and wrap the link text with [text](href).
+    """
+    if not content:
+        return content
+
+    try:
+        tree = lxml_html.fromstring(html)
+    except Exception:
+        return content
+
+    # Collect links with context: (before_context, link_text, after_context, href)
+    links_with_context = []
+
+    for a in tree.iter("a"):
+        href = a.get("href", "")
+        if not href:
+            continue
+
+        link_text = a.text_content().strip()
+        if not link_text or len(link_text) < 2:
+            continue
+
+        # Skip anchor-only links
+        if href.startswith("#"):
+            continue
+
+        # Get surrounding text for context
+        # Walk up to find parent with substantial text
+        parent = a.getparent()
+        if parent is not None:
+            parent_text = parent.text_content()
+
+            # Find position of link text in parent
+            pos = parent_text.find(link_text)
+            if pos >= 0:
+                before = parent_text[max(0, pos - 30) : pos].strip()
+                after = parent_text[
+                    pos + len(link_text) : pos + len(link_text) + 30
+                ].strip()
+                links_with_context.append((before, link_text, after, href))
+
+    # Sort by link text length (longest first) to avoid partial replacements
+    links_with_context.sort(key=lambda x: -len(x[1]))
+
     result = content
+    replaced = set()  # Track what we've replaced to avoid duplicates
 
-    # Fix: newline before link -> space before link
-    result = re.sub(r"\n+(\[[^\]]+\]\([^)]+\))", r" \1", result)
+    for before, link_text, after, href in links_with_context:
+        # Skip if we already created this exact markdown link
+        md_link = f"[{link_text}]({href})"
+        if md_link in replaced:
+            continue
 
-    # Fix: link followed by text without space
-    result = re.sub(r"(\]\([^)]+\))([a-zA-Z])", r"\1 \2", result)
+        # Skip if this link text is already a markdown link
+        if f"[{link_text}](" in result:
+            continue
 
-    # Fix: text followed by link without space
-    result = re.sub(r"([a-zA-Z])(\[[^\]]+\]\()", r"\1 \2", result)
+        # Try to find with context first (more precise)
+        if before and after:
+            # Escape special regex chars in the text portions
+            before_esc = re.escape(before[-15:]) if len(before) > 15 else re.escape(before)
+            after_esc = re.escape(after[:15]) if len(after) > 15 else re.escape(after)
+            link_esc = re.escape(link_text)
+
+            pattern = f"({before_esc}\\s*)({link_esc})(\\s*{after_esc})"
+            match = re.search(pattern, result)
+            if match:
+                replacement = f"{match.group(1)}[{link_text}]({href}){match.group(3)}"
+                result = result[: match.start()] + replacement + result[match.end() :]
+                replaced.add(md_link)
+                continue
+
+        # Fallback: just find and replace first occurrence
+        # But only if the link text is reasonably unique (> 5 chars)
+        if len(link_text) > 5 and link_text in result:
+            result = result.replace(link_text, f"[{link_text}]({href})", 1)
+            replaced.add(md_link)
+
+    return result
+
+
+def inject_images(content: str, html: str) -> str:
+    """Inject images from HTML back into markdown content.
+
+    Strategy (from legacy): Walk HTML, track last paragraph as anchor,
+    for each image record (anchor, image_md), then inject after anchor in markdown.
+    """
+    if not content:
+        return content
+
+    try:
+        tree = lxml_html.fromstring(html)
+    except Exception:
+        return content
+
+    # Find content container
+    content_selectors = [
+        './/div[contains(@class,"entry-content")]',
+        './/article//div[contains(@class,"content")]',
+        ".//article",
+        './/div[contains(@class,"post-content")]',
+        './/div[contains(@class,"article-content")]',
+        ".//main",
+    ]
+
+    content_div = None
+    for sel in content_selectors:
+        matches = tree.xpath(sel)
+        if matches:
+            content_div = matches[0]
+            break
+
+    if content_div is None:
+        # Try the whole body
+        bodies = tree.xpath(".//body")
+        if bodies:
+            content_div = bodies[0]
+        else:
+            return content
+
+    # Collect (anchor_text, image_md) pairs
+    image_insertions = []
+    last_text = ""
+
+    for elem in content_div.iter():
+        if elem.tag == "p":
+            text = elem.text_content().strip()
+            if text and len(text) > 20:
+                last_text = text
+        elif elem.tag == "img":
+            src = elem.get("src", "")
+            alt = elem.get("alt", "") or ""
+
+            # Filter: must have image extension
+            if not any(
+                ext in src.lower()
+                for ext in [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]
+            ):
+                continue
+
+            # Skip tiny images (likely icons/tracking pixels)
+            width = elem.get("width", "999")
+            height = elem.get("height", "999")
+            try:
+                if int(width) < 50 or int(height) < 50:
+                    continue
+            except (ValueError, TypeError):
+                pass
+
+            # Skip common non-content images
+            if any(
+                skip in src.lower()
+                for skip in [
+                    "facebook",
+                    "twitter",
+                    "pinterest",
+                    "share",
+                    "logo",
+                    "icon",
+                    "avatar",
+                ]
+            ):
+                continue
+
+            image_md = f"\n\n![{alt}]({src})\n\n"
+            if last_text:
+                image_insertions.append((last_text, image_md))
+
+    # Inject images into markdown
+    result = content
+    inserted_images = set()
+
+    for text_marker, image_md in image_insertions:
+        # Skip duplicates
+        if image_md in inserted_images:
+            continue
+
+        # Use first 40 chars of marker for matching
+        marker_clean = text_marker[:40]
+        marker_escaped = re.escape(marker_clean)
+
+        # Find the marker and insert image after the line
+        pattern = rf"({marker_escaped}[^\n]*\n)"
+        match = re.search(pattern, result)
+
+        if match:
+            insert_pos = match.end()
+            result = result[:insert_pos] + image_md + result[insert_pos:]
+            inserted_images.add(image_md)
 
     return result
 
@@ -307,9 +490,37 @@ async def extract_api_fallback(url: str) -> tuple[str | None, Metadata]:
 # === Cleanup ===
 
 
-def light_cleanup(content: str) -> str:
+def light_cleanup(content: str, title: str | None = None) -> str:
     """Non-LLM cleanup for basic formatting issues."""
     result = content
+
+    # Normalize smart quotes to ASCII (using Unicode escapes for clarity)
+    result = result.replace("\u2018", "'").replace("\u2019", "'")  # Smart single quotes
+    result = result.replace("\u201c", '"').replace("\u201d", '"')  # Smart double quotes
+    result = result.replace("\u2013", "-").replace("\u2014", "-")  # En/em dashes
+
+    # Remove duplicate H1 title if it matches frontmatter title
+    if title:
+        # Normalize for comparison: remove quotes, markdown links, site suffixes
+        def normalize(s):
+            # Remove markdown links but keep text: [text](url) -> text
+            s = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', s)
+            # Remove quotes and extra whitespace
+            s = re.sub(r'["\']', '', s)
+            # Remove common suffixes like "- Wikipedia", "- LessWrong"
+            s = re.sub(r'\s*-\s*(Wikipedia|LessWrong|Medium)$', '', s, flags=re.I)
+            return s.strip().lower()
+
+        title_norm = normalize(title)
+        # Check if content starts with H1 that matches title
+        h1_match = re.match(r"^#\s+(.+?)(\n|$)", result)
+        if h1_match:
+            h1_norm = normalize(h1_match.group(1))
+            # Remove if H1 matches or is substring of title (at least 10 chars overlap)
+            if (h1_norm == title_norm or
+                (len(title_norm) >= 10 and title_norm in h1_norm) or
+                (len(h1_norm) >= 10 and h1_norm in title_norm)):
+                result = result[h1_match.end():].lstrip()
 
     # Fix spacing around asterisks
     result = re.sub(r"\*\s+([^*]+)\s+\*", r"*\1*", result)
@@ -330,7 +541,20 @@ def light_cleanup(content: str) -> str:
 def build_frontmatter(metadata: Metadata) -> str:
     """Build YAML frontmatter."""
     lines = ["---"]
-    lines.append(f'title: "{metadata.title or "Untitled"}"')
+
+    # Escape quotes in title for valid YAML
+    title = metadata.title or "Untitled"
+    # Replace smart quotes with ASCII (using Unicode escapes)
+    title = title.replace("\u2018", "'").replace("\u2019", "'")
+    title = title.replace("\u201c", '"').replace("\u201d", '"')
+    # Escape double quotes by doubling them, or use single quotes if title has doubles
+    if '"' in title:
+        # Use single-quoted YAML string (escape single quotes by doubling)
+        title_escaped = title.replace("'", "''")
+        lines.append(f"title: '{title_escaped}'")
+    else:
+        lines.append(f'title: "{title}"')
+
     lines.append(f"author: {metadata.author or 'Unknown'}")
     if metadata.date:
         lines.append(f"date: {metadata.date}")
@@ -511,8 +735,11 @@ async def process_url(
         base_name = generate_filename(result.metadata, url).replace(".md", "")
 
         if traf_content:
+            # Apply injection to trafilatura output
+            traf_with_injection = inject_links(traf_content, html)
+            traf_with_injection = inject_images(traf_with_injection, html)
             traf_path = work_dir / f"{base_name}_trafilatura.md"
-            traf_path.write_text(frontmatter + traf_content, encoding="utf-8")
+            traf_path.write_text(frontmatter + traf_with_injection, encoding="utf-8")
             result.traf_path = traf_path
 
         if read_content:
@@ -533,12 +760,39 @@ async def process_url(
 
         return result
 
-    # === Simple Mode: Use trafilatura + light cleanup ===
-    if traf_content:
-        content = light_cleanup(traf_content)
+    # === Simple Mode: Choose best extractor ===
+    # LessWrong: trafilatura often picks up wrong title/content, prefer readability
+    is_lesswrong = "lesswrong.com" in url.lower()
+
+    # Check if trafilatura title looks suspicious
+    traf_title = traf_meta.title or ""
+    suspicious_title = (
+        traf_title.isdigit()  # Just a number (e.g., "167")
+        or "fundrais" in traf_title.lower()  # Fundraising banner
+        or len(traf_title) < 5  # Too short
+        or traf_title.upper() == traf_title  # ALL CAPS
+    )
+
+    # Choose extractor
+    if is_lesswrong and read_content:
+        # LessWrong: prefer readability
+        result.metadata.title = read_meta.title  # Use readability's title
+        content = light_cleanup(read_content, result.metadata.title)
+        result.method = "readability"
+    elif suspicious_title and read_content:
+        # Suspicious title: fall back to readability
+        result.metadata.title = read_meta.title
+        content = light_cleanup(read_content, result.metadata.title)
+        result.method = "readability"
+    elif traf_content:
+        # Default: use trafilatura with injection
+        content = inject_links(traf_content, html)
+        content = inject_images(content, html)
+        content = light_cleanup(content, result.metadata.title)
         result.method = "trafilatura"
     elif read_content:
-        content = light_cleanup(read_content)
+        # Readability fallback
+        content = light_cleanup(read_content, result.metadata.title)
         result.method = "readability"
     else:
         # Both failed, try API

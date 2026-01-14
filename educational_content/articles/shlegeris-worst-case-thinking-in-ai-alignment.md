@@ -1,6 +1,6 @@
 ---
-title: "Worst-case thinking in AI alignment"
-author: Buck Shlegeris
+title: "Worst-case thinking in AI alignment - LessWrong"
+author: Buck
 date: 2021-12-23
 source_url: https://www.lesswrong.com/posts/yTvBSFrXhZfL8vr5a/worst-case-thinking-in-ai-alignment
 ---
@@ -25,7 +25,7 @@ For example, if you've built an unaligned AI and you have a team of ten smart hu
 
 In situations like this, I think Eliezer's attitude is basically right: we're being optimized against and so we have to use worst-case thinking and search hard for systems which we can strongly argue are infallible.
 
-One minor disagreement: I'm less into hard takeoffs than he is, so I place less weight than he does on situations where your AI becomes superintelligent enough during training that it can exploit some kind of novel physics to jump an airgap or whatever. (Under my model, such a model probably just waits until it's deployed to the internet–which is one of the first things that AGI developers want to do with it, because that's how you make money with a powerful AI–and then kills everyone.)
+One minor disagreement: I'm less into hard takeoffs than he is, so I place less weight than he does on situations where your AI becomes superintelligent enough during training that it can exploit some kind of novel physics to jump an airgap or whatever. (Under my model, such a model probably just waits until it's deployed to the internet-which is one of the first things that AGI developers want to do with it, because that's how you make money with a powerful AI-and then kills everyone.)
 
 But I fundamentally agree with his rejection of arguments of the form "only a small part of the space of possible AI actions would be devastatingly bad, so things will probably be fine".
 
@@ -39,7 +39,6 @@ I think that AI alignment researchers often conflate these two classes of argume
 
 - The AI will try to kill you if it's misaligned. So if you remove some but not all strategies that any unaligned AI could use to get through your training process, you haven't made much progress at all.
 - But SGD isn't trying to kill you, and so if there exist rare misaligned models in the model space that could make it through the training process and then kill you, what matters is how common they are, not whether they exist at all. If you never instantiate the model, it never gets a chance to pervert your optimization process (barring crazy scenarios with acausal threats or whatever).
-
 (I noticed that I was making a mistake related to mixing up these two classes on Sunday; I then thought about this some more and wrote this post.)
 
 ### You want to solve a problem in as much generality as possible, and so you want to avoid making assumptions that might not hold
@@ -64,9 +63,9 @@ Suppose you are unsure how hard the alignment problem is. Maybe you think that h
 
 Many prominent alignment researchers estimate P(doom) as substantially less than 50%. Those people often focus on scenarios which are surprisingly bad from their perspective basically for this reason.
 
-And conversely, people who think P(doom) > 50% should aim their efforts at worlds that are better than they expected. This is the point that Eliezer makes in [Security Mindset and the Logistic Success Curve](https://intelligence.org/2017/11/26/security-mindset-and-the-logistic-success-curve/): the security-minded character thinks that it's so unlikely that a particular security-lax project will succeed at building a secure system that she doesn't think it's worth her time to try to help them make marginal improvements to their security.
+And conversely, people who think P(doom) &gt; 50% should aim their efforts at worlds that are better than they expected. This is the point that Eliezer makes in [Security Mindset and the Logistic Success Curve](https://intelligence.org/2017/11/26/security-mindset-and-the-logistic-success-curve/): the security-minded character thinks that it's so unlikely that a particular security-lax project will succeed at building a secure system that she doesn't think it's worth her time to try to help them make marginal improvements to their security.
 
-And so, this kind of thinking only pushes you to aim your efforts at surprisingly bad worlds if you're already P(doom) < 50%.
+And so, this kind of thinking only pushes you to aim your efforts at surprisingly bad worlds if you're already P(doom) &lt; 50%.
 
 This type of thinking is common among people who are thinking about global catastrophic biological risks. I don't know of any public documents that are specifically about this point, but you can see an example of this kind of reasoning in Andrew Snyder-Beattie's [Peak defence vs trough defence in biosecurity](https://forum.effectivealtruism.org/posts/w4LRTGCJFFQn6mYKS/peak-defense-vs-trough-defense-in-biosecurity).
 
@@ -86,8 +85,7 @@ Depending on which of these arguments you're making, you should respond very dif
 - If you think that the situation involves a random process selecting over a space that is almost all bad, then you should say "Actually I disagree, I think that in fact the situation we're talking about is probably about as bad as I'm saying; we should argue about what the distribution actually looks like."
 - If you are making worst-case assumptions as part of your problem-solving process, then you should say "I agree that this situation seems sort of surprisingly bad. But I think we should try to solve it anyway, because solving it gives us a solution that is likely to work no matter what the empirical situation turns out to be, and I haven't yet been convinced that my pessimistic assumptions make my problem impossible."
 - If you're making worst-case assumptions because you think that P(doom) is low and you are focusing on scenarios you agree are worse than expected, you should say "I agree that this situation seems sort of surprisingly bad. But I want to work on the situations where I can make the biggest difference, and I think that these surprisingly bad situations are the highest-leverage ones to work on."
-- If you're engaging in Murphyjitsu, you should say "Yeah this probably won't come up, but it still seems like a good idea to try and crush all these low-probability mechanisms by which something bad might happen."
-
+- If you're engaging in Murphyjistu, you should say "Yeah this probably won't come up, but it still seems like a good idea to try and crush all these low-probability mechanisms by which something bad might happen."
 Mary Phuong proposes breaking this down into two questions:
 
 - When should you believe things will go badly, because they in fact will go badly? (you're being optimized against, or the probability of badness is high for some other reason)
