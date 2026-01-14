@@ -8,23 +8,26 @@ type AuthStatus = "loading" | "success" | "error";
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<AuthStatus>("loading");
-  const [errorMessage, setErrorMessage] = useState("");
   const hasValidated = useRef(false);
 
   const code = searchParams.get("code");
   const next = searchParams.get("next") || "/signup";
 
+  // Derive initial state from whether code exists
+  const [status, setStatus] = useState<AuthStatus>(() =>
+    code ? "loading" : "error"
+  );
+  const [errorMessage, setErrorMessage] = useState(() =>
+    code ? "" : "No authentication code provided."
+  );
+
   useEffect(() => {
+    // Skip validation if no code (initial state already set to error)
+    if (!code) return;
+
     // Prevent double validation (React strict mode runs effects twice)
     if (hasValidated.current) return;
     hasValidated.current = true;
-
-    if (!code) {
-      setStatus("error");
-      setErrorMessage("No authentication code provided.");
-      return;
-    }
 
     // Validate code via API
     const origin = encodeURIComponent(window.location.origin);

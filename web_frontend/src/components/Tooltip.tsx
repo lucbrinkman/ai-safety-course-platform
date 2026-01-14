@@ -70,32 +70,30 @@ export function Tooltip({
     return children;
   }
 
+  /* eslint-disable react-hooks/refs -- floating-ui's setReference/setFloating are callback refs (functions), not ref.current access */
+  const childWithRef = cloneElement(children, {
+    ref: refs.setReference,
+    ...getReferenceProps({
+      onClick: (e: React.MouseEvent) => {
+        // Call original onClick if it exists
+        const childProps = children.props as {
+          onClick?: (e: React.MouseEvent) => void;
+        };
+        childProps.onClick?.(e);
+        // Then handle tooltip click behavior
+        handleClick?.();
+      },
+    }),
+  } as React.HTMLAttributes<HTMLElement> & {
+    ref: typeof refs.setReference;
+  });
+
   return (
     <>
-      {cloneElement(children, {
-        ref: refs.setReference,
-        ...getReferenceProps({
-          onClick: (e: React.MouseEvent) => {
-            // Call original onClick if it exists
-            const childProps = children.props as {
-              onClick?: (e: React.MouseEvent) => void;
-            };
-            childProps.onClick?.(e);
-            // Then handle tooltip click behavior
-            handleClick?.();
-          },
-        }),
-      } as React.HTMLAttributes<HTMLElement> & {
-        ref: typeof refs.setReference;
-      })}
+      {childWithRef}
       {isOpen && (
         <FloatingPortal>
-          <div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            {...getFloatingProps()}
-            className="bg-gray-800 text-white text-xs px-2 py-1 rounded z-50"
-          >
+          <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="bg-gray-800 text-white text-xs px-2 py-1 rounded z-50">
             {content}
           </div>
         </FloatingPortal>

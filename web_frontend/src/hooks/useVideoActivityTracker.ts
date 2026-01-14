@@ -3,7 +3,6 @@ import { API_URL } from "../config";
 
 interface VideoActivityTrackerOptions {
   sessionId: number;
-  lessonId: string;
   stageIndex: number;
   heartbeatInterval?: number; // ms, default 30000
   enabled?: boolean;
@@ -11,7 +10,6 @@ interface VideoActivityTrackerOptions {
 
 export function useVideoActivityTracker({
   sessionId,
-  lessonId: _lessonId,
   stageIndex,
   heartbeatInterval = 30_000,
   enabled = true,

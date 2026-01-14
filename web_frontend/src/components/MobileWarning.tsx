@@ -1,29 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface MobileWarningProps {
   onContinue: () => void;
 }
 
+function checkMobile() {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const mobileKeywords = [
+    "android",
+    "webos",
+    "iphone",
+    "ipad",
+    "ipod",
+    "blackberry",
+    "windows phone",
+  ];
+  return mobileKeywords.some((keyword) => userAgent.includes(keyword));
+}
+
 export default function MobileWarning({ onContinue }: MobileWarningProps) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const mobileKeywords = [
-        "android",
-        "webos",
-        "iphone",
-        "ipad",
-        "ipod",
-        "blackberry",
-        "windows phone",
-      ];
-      return mobileKeywords.some((keyword) => userAgent.includes(keyword));
-    };
-
-    setIsMobile(checkMobile());
-  }, []);
+  const [isMobile] = useState(checkMobile);
 
   if (!isMobile) {
     return null;

@@ -3,7 +3,6 @@ import { API_URL } from "../config";
 
 interface ActivityTrackerOptions {
   sessionId: number;
-  lessonId: string;
   stageIndex: number;
   stageType: "article" | "video" | "chat";
   inactivityTimeout?: number; // ms, default 180000 (3 min)
@@ -13,7 +12,6 @@ interface ActivityTrackerOptions {
 
 export function useActivityTracker({
   sessionId,
-  lessonId: _lessonId,
   stageIndex,
   stageType,
   inactivityTimeout = 180_000,
@@ -21,7 +19,8 @@ export function useActivityTracker({
   enabled = true,
 }: ActivityTrackerOptions) {
   const isActiveRef = useRef(false);
-  const lastActivityRef = useRef(Date.now());
+  // Initialize to null, set on first activity to avoid impure Date.now() during render
+  const lastActivityRef = useRef<number | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
   const scrollDepthRef = useRef(0);
 
@@ -89,6 +88,9 @@ export function useActivityTracker({
 
     // Heartbeat interval
     heartbeatIntervalRef.current = window.setInterval(() => {
+      // If no activity recorded yet, don't mark as inactive
+      if (lastActivityRef.current === null) return;
+
       const timeSinceActivity = Date.now() - lastActivityRef.current;
 
       if (timeSinceActivity > inactivityTimeout) {

@@ -16,6 +16,7 @@ type VideoPlayerProps = {
 
 // Extend JSX to include the youtube-video custom element (React 19 style)
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- Required for JSX module augmentation
   namespace JSX {
     interface IntrinsicElements {
       "youtube-video": React.DetailedHTMLProps<
@@ -269,6 +270,7 @@ export default function VideoPlayer({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seekToPosition uses refs and state that are stable
   }, [isDragging, start, duration]);
 
   const showControls = isHovering || isPaused || fragmentEnded;

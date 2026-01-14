@@ -38,8 +38,7 @@ import {
 import { Sentry } from "../errorTracking";
 
 export default function UnifiedLesson() {
-  const { courseId: _courseId, lessonId } = useParams<{
-    courseId?: string;
+  const { lessonId } = useParams<{
     lessonId: string;
   }>();
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -88,7 +87,6 @@ export default function UnifiedLesson() {
   // Activity tracking for article stages (3 min inactivity timeout)
   useActivityTracker({
     sessionId: sessionId ?? 0,
-    lessonId: lessonId ?? "",
     stageIndex: stageIndexForTracking,
     stageType: "article",
     inactivityTimeout: 180_000, // 3 minutes
@@ -102,7 +100,6 @@ export default function UnifiedLesson() {
   // Activity tracking for video stages
   const videoTracker = useVideoActivityTracker({
     sessionId: sessionId ?? 0,
-    lessonId: lessonId ?? "",
     stageIndex: stageIndexForTracking,
     enabled:
       !!sessionId &&
@@ -114,7 +111,6 @@ export default function UnifiedLesson() {
   // Activity tracking for chat stages (5 min inactivity timeout)
   const { triggerActivity: triggerChatActivity } = useActivityTracker({
     sessionId: sessionId ?? 0,
-    lessonId: lessonId ?? "",
     stageIndex: stageIndexForTracking,
     stageType: "chat",
     inactivityTimeout: 300_000, // 5 minutes
@@ -272,7 +268,7 @@ export default function UnifiedLesson() {
         if (shouldTransition) {
           setPendingTransition(true);
         }
-      } catch (e) {
+      } catch {
         // Failure: mark pending message as failed (don't lose user's message)
         if (content) {
           setPendingMessage({ content, status: "failed" });
@@ -282,7 +278,7 @@ export default function UnifiedLesson() {
         setIsLoading(false);
       }
     },
-    [sessionId, triggerChatActivity]
+    [sessionId, triggerChatActivity, lessonId]
   );
 
   const handleRetryMessage = useCallback(() => {

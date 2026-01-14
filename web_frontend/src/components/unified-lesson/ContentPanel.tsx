@@ -146,12 +146,16 @@ export default function ContentPanel({
   // Done reading button with popover
   // Skip popover if already scrolled to bottom OR if content fits without scrolling
   const skipPopover = hasScrolledToBottom || contentFits === true;
+  /* eslint-disable react-hooks/refs -- floating-ui's setReference/setFloating are callback refs (functions), not ref.current access */
+  const buttonRef = skipPopover ? undefined : refs.setReference;
+  const buttonProps = skipPopover ? {} : getReferenceProps();
+
   const doneReadingButton = (
     <>
       <button
-        ref={skipPopover ? undefined : refs.setReference}
+        ref={buttonRef}
         onClick={handleReadButtonClick}
-        {...(skipPopover ? {} : getReferenceProps())}
+        {...buttonProps}
         className="w-full py-2 rounded-lg bg-gray-300 text-black hover:bg-gray-400"
         data-testid="done-reading-button"
       >
@@ -159,12 +163,7 @@ export default function ContentPanel({
       </button>
       {skipPopoverOpen && !skipPopover && (
         <FloatingPortal>
-          <div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            {...getFloatingProps()}
-            className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-xs"
-          >
+          <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()} className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-xs">
             <p className="text-sm text-gray-700 mb-3">
               It looks like you haven't reached the bottom of the article yet.
               What would you like to do?
