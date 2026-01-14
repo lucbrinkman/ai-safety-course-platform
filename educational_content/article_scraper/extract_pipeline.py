@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-Article extraction pipeline with skill-based LLM selection and cleanup.
+Article extraction pipeline using Jina Reader API with local fallbacks.
 
-This pipeline extracts articles using local tools (trafilatura, readability, pymupdf)
-and optionally saves intermediate files for LLM-based selection via Claude Code skills.
+Primary extractor: Jina Reader API (r.jina.ai) - free tier, excellent quality
+Fallbacks: trafilatura, readability-lxml, pymupdf (for PDFs)
+Metadata: trafilatura (for author/date when Jina doesn't provide them)
 
 Modes:
-1. Simple mode (default): trafilatura + light cleanup
+1. Simple mode (default): Jina API + light cleanup
 2. Dual mode (--dual): Save both extractions for skill-based selection
+3. Local-only mode (--local): Skip API, use only local extractors
 
 Usage:
-    # Simple extraction (no LLM needed)
+    # Simple extraction (uses Jina API)
     python extract_pipeline.py "URL" output.md
 
-    # Dual extraction (for skill-based selection)
-    python extract_pipeline.py --dual "URL" --work-dir /tmp/extractions/
+    # Local-only extraction (no API)
+    python extract_pipeline.py --local "URL" output.md
 
     # Batch processing
     python extract_pipeline.py --batch urls.txt --output-dir ./articles/
@@ -114,6 +116,80 @@ async def fetch_pdf_bytes(url: str, timeout: int = 60) -> tuple[bytes, Optional[
             return r.content, None
     except Exception as e:
         return b"", str(e)[:50]
+
+
+# === Jina Reader API ===
+
+# Site-specific CSS selectors for cleaner extraction
+# Only add selectors for sites where Jina's default misses content
+SITE_SELECTORS = {
+    "lesswrong.com": "article, .PostsPage-postContent, .posts-page-content",
+    "alignmentforum.org": "article, .PostsPage-postContent",
+    "wikipedia.org": "#mw-content-text, .mw-parser-output",
+}
+
+
+def get_jina_selector(url: str) -> str | None:
+    """Get site-specific CSS selector for Jina API."""
+    domain = urlparse(url).netloc.lower()
+    for site, selector in SITE_SELECTORS.items():
+        if site in domain:
+            return selector
+    return None
+
+
+async def extract_jina(url: str, timeout: int = 30) -> tuple[str | None, Metadata]:
+    """Extract article using Jina Reader API (r.jina.ai).
+
+    Returns (markdown_content, metadata).
+    Free tier: 10M tokens, 500 RPM.
+    """
+    jina_url = f"https://r.jina.ai/{url}"
+    headers = {"Accept": "text/plain"}
+
+    # Add site-specific selector if available
+    selector = get_jina_selector(url)
+    if selector:
+        headers["X-Target-Selector"] = selector
+
+    try:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            r = await client.get(jina_url, timeout=timeout, headers=headers)
+            r.raise_for_status()
+            response_text = r.text
+    except Exception:
+        return None, Metadata()
+
+    # Parse Jina response format:
+    # Title: ...
+    # URL Source: ...
+    # Published Time: ... (optional)
+    # Markdown Content:
+    # ...
+    metadata = Metadata(url=url)
+    content = ""
+
+    lines = response_text.split("\n")
+    in_content = False
+    content_lines = []
+
+    for line in lines:
+        if in_content:
+            content_lines.append(line)
+        elif line.startswith("Title:"):
+            metadata.title = line[6:].strip()
+        elif line.startswith("Published Time:"):
+            # Extract date from ISO format
+            date_str = line[15:].strip()
+            if date_str and "T" in date_str:
+                metadata.date = date_str.split("T")[0]
+        elif line.startswith("Markdown Content:"):
+            in_content = True
+
+    if content_lines:
+        content = "\n".join(content_lines).strip()
+
+    return content if content else None, metadata
 
 
 # === Local Extractors ===
@@ -620,6 +696,7 @@ async def process_url(
     dual_mode: bool = False,
     work_dir: Optional[Path] = None,
     verbose: bool = False,
+    local_only: bool = False,
 ) -> ExtractionResult:
     """
     Extract article from URL.
@@ -630,6 +707,7 @@ async def process_url(
         dual_mode: If True, save both extractions for skill-based selection
         work_dir: Directory for intermediate files (dual mode)
         verbose: Print progress
+        local_only: If True, skip Jina API and use only local extractors
 
     Returns:
         ExtractionResult with content and metadata
@@ -673,29 +751,88 @@ async def process_url(
 
         return result
 
-    # === HTML Handling ===
+    # === Try Jina API first (unless local_only or dual_mode) ===
+    if not local_only and not dual_mode:
+        if verbose:
+            print("trying Jina API...", end=" ", flush=True)
+
+        jina_content, jina_meta = await extract_jina(url)
+
+        # Check if Jina result looks good
+        jina_ok = (
+            jina_content
+            and len(jina_content) > 200
+            and jina_meta.title
+            and len(jina_meta.title) > 5
+            and not jina_meta.title.isdigit()
+        )
+
+        if jina_ok:
+            if verbose:
+                print(f"OK ({len(jina_content.split())} words)", end="", flush=True)
+
+            # Fetch HTML just for metadata (author/date) since Jina doesn't provide them
+            html, _ = await fetch_html(url)
+            if html:
+                traf_content, traf_meta = extract_trafilatura(html)
+                # Use trafilatura metadata for author/date
+                jina_meta.author = traf_meta.author
+                if not jina_meta.date:
+                    jina_meta.date = traf_meta.date
+                if verbose and traf_meta.author:
+                    print(f" (author: {traf_meta.author})", end="", flush=True)
+
+            if verbose:
+                print()
+
+            result.metadata = jina_meta
+            result.metadata.url = url
+            result.method = "jina"
+            content = light_cleanup(jina_content, result.metadata.title)
+            result.success = True
+            result.content = content
+
+            if output_path:
+                frontmatter = build_frontmatter(result.metadata)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text(frontmatter + content, encoding="utf-8")
+                if verbose:
+                    print(f"  Saved to {output_path}")
+
+            return result
+
+        if verbose:
+            print("poor result, trying local...", end=" ", flush=True)
+
+    # === Fetch HTML for local extraction ===
     html, error = await fetch_html(url)
 
     if error:
         if verbose:
-            print(
-                f"fetch failed ({error}), trying API fallback...", end=" ", flush=True
-            )
+            print(f"fetch failed ({error})")
 
-        content, metadata = await extract_api_fallback(url)
+        # Try Jina as fallback if we haven't already
+        if local_only:
+            result.error = f"fetch_error: {error}"
+            return result
+
+        if verbose:
+            print("  Trying Jina API as fallback...", end=" ", flush=True)
+
+        content, metadata = await extract_jina(url)
         if content:
-            result.method = "api_fallback"
+            result.method = "jina_fallback"
             result.metadata = metadata
             result.metadata.url = url
             result.success = True
-            result.content = content
+            result.content = light_cleanup(content, metadata.title)
             if verbose:
                 print(f"OK ({len(content.split())} words)")
 
             if output_path:
                 frontmatter = build_frontmatter(result.metadata)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(frontmatter + content, encoding="utf-8")
+                output_path.write_text(frontmatter + result.content, encoding="utf-8")
         else:
             result.error = f"all_methods_failed (fetch: {error})"
             if verbose:
@@ -703,9 +840,9 @@ async def process_url(
 
         return result
 
-    # === Dual Extraction ===
+    # === Local Extraction ===
     if verbose:
-        print("extracting...", end=" ", flush=True)
+        print("extracting locally...", end=" ", flush=True)
 
     traf_content, traf_meta = extract_trafilatura(html)
     read_content, read_meta = extract_readability(html)
@@ -851,6 +988,7 @@ async def process_batch(
     dual_mode: bool = False,
     work_dir: Optional[Path] = None,
     verbose: bool = False,
+    local_only: bool = False,
 ) -> list[ExtractionResult]:
     """Process multiple URLs."""
     results = []
@@ -865,6 +1003,7 @@ async def process_batch(
             dual_mode=dual_mode,
             work_dir=work_dir,
             verbose=verbose,
+            local_only=local_only,
         )
 
         # Save with proper filename if not dual mode
@@ -980,6 +1119,12 @@ def main():
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Show detailed progress"
     )
+    parser.add_argument(
+        "--local",
+        "-l",
+        action="store_true",
+        help="Skip Jina API, use only local extractors (trafilatura/readability)",
+    )
 
     args = parser.parse_args()
 
@@ -1003,6 +1148,7 @@ def main():
                 dual_mode=args.dual,
                 work_dir=args.work_dir,
                 verbose=args.verbose,
+                local_only=args.local,
             )
         )
         print_summary(results, dual_mode=args.dual)
@@ -1018,6 +1164,7 @@ def main():
                 dual_mode=args.dual,
                 work_dir=args.work_dir,
                 verbose=args.verbose,
+                local_only=args.local,
             )
         )
 
