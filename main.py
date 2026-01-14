@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
 from fastapi import FastAPI
 
-from core.database import close_engine, check_connection
+from core.database import close_engine, check_connection, reset_engine
 from core import get_allowed_origins, is_dev_mode
 from core.config import check_required_env_vars
 from core.notifications import init_scheduler, shutdown_scheduler
@@ -209,7 +209,8 @@ async def lifespan(app: FastAPI):
     # uvicorn's event loop. This prevents "attached to a different loop" errors
     # that occur when the engine was created in a different context (e.g., during
     # pre-startup checks with asyncio.run(), or when running with uvicorn directly).
-    await close_engine()
+    # Use sync reset to avoid trying to close connections from wrong event loop.
+    reset_engine()
 
     # Database was already checked before uvicorn started (unless --no-db)
     skip_db = os.getenv("SKIP_DB_CHECK", "").lower() in ("true", "1", "yes")
@@ -442,10 +443,11 @@ if __name__ == "__main__":
     if not args.no_db:
         print("Checking database connection...")
         db_ok, db_msg = asyncio.run(check_connection())
-        # IMPORTANT: Dispose engine after check_connection creates it in asyncio.run()'s
+        # IMPORTANT: Reset engine after check_connection creates it in asyncio.run()'s
         # event loop. Otherwise uvicorn's event loop will get "attached to different loop"
         # errors when trying to use the singleton engine created in the wrong loop.
-        asyncio.run(close_engine())
+        # Use sync reset (not async close) to avoid event loop issues.
+        reset_engine()
         if db_ok:
             print(f"✓ Database: {db_msg}")
         else:

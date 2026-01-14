@@ -100,6 +100,18 @@ async def close_engine() -> None:
         _engine = None
 
 
+def reset_engine() -> None:
+    """
+    Reset the engine singleton without closing connections.
+
+    Use this when you need to discard an engine created in a different event loop
+    (e.g., after asyncio.run() in startup checks). The old connections will be
+    garbage collected.
+    """
+    global _engine
+    _engine = None
+
+
 def is_configured() -> bool:
     """Check if database credentials are configured."""
     return bool(os.environ.get("DATABASE_URL"))
