@@ -77,6 +77,7 @@ from fastapi import FastAPI
 
 from core.database import close_engine, check_connection
 from core import get_allowed_origins, is_dev_mode
+from core.config import check_required_env_vars
 from core.notifications import init_scheduler, shutdown_scheduler
 from core.calendar.rsvp import sync_upcoming_meeting_rsvps
 from core.notifications.channels.discord import set_bot as set_notification_bot
@@ -441,6 +442,18 @@ if __name__ == "__main__":
             print(f"✗ Database: {db_msg}")
             print("  └─ Server cannot start without database. Use --no-db to skip.")
             sys.exit(1)
+
+    # Check required environment variables
+    print("Checking environment variables...")
+    env_ok, env_warnings = check_required_env_vars()
+    if not env_ok:
+        print("  └─ Missing required environment variables. Server cannot start.")
+        sys.exit(1)
+    if env_warnings:
+        for warning in env_warnings:
+            print(warning)
+    else:
+        print("✓ Environment variables configured")
 
     # Run with uvicorn
     # Pass app object directly (not string) to avoid module reimport issues

@@ -57,4 +57,7 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_SERVER_ID: ${{ secrets.DISCORD_SERVER_ID }}
+          TEST_CHANNEL_ID: ${{ secrets.TEST_CHANNEL_ID }}
         run: pytest --tb=short -q

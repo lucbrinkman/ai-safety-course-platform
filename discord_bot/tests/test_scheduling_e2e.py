@@ -41,8 +41,8 @@ from core.lessons.course_loader import load_course
 load_dotenv(".env")
 load_dotenv(".env.local", override=True)
 
-# Dev server IDs - set these in .env.local
-DEV_GUILD_ID = int(os.getenv("TEST_GUILD_ID", "0"))
+# Dev server ID - set in .env.local (same as DISCORD_SERVER_ID)
+DEV_GUILD_ID = int(os.getenv("DISCORD_SERVER_ID", "0"))
 TEST_CHANNEL_ID = int(os.getenv("TEST_CHANNEL_ID", "0"))
 # Test users (non-admin bots in the dev server)
 TEST_USER_ID_1 = os.getenv("TEST_USER_ID_1", "0")

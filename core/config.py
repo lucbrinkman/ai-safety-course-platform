@@ -67,3 +67,41 @@ def get_allowed_origins() -> list[str]:
         origins.append(env_frontend)
 
     return origins
+
+
+# Required environment variables for production
+# Format: (name, description, required_in_dev)
+REQUIRED_ENV_VARS = [
+    ("DATABASE_URL", "PostgreSQL connection string", True),
+    ("JWT_SECRET", "Secret key for JWT tokens", True),
+    ("DISCORD_SERVER_ID", "Discord server ID for notifications and nickname sync", False),
+    ("DISCORD_BOT_TOKEN", "Discord bot token", False),
+]
+
+
+def check_required_env_vars() -> tuple[bool, list[str]]:
+    """
+    Check that required environment variables are set.
+
+    Returns:
+        (all_ok, warnings): Tuple of success flag and list of warning messages
+    """
+    warnings = []
+    errors = []
+    in_dev = is_dev_mode()
+
+    for name, description, required_in_dev in REQUIRED_ENV_VARS:
+        value = os.environ.get(name)
+
+        if not value:
+            if is_production():
+                errors.append(f"  ✗ {name}: Not set ({description})")
+            elif required_in_dev or not in_dev:
+                warnings.append(f"  ⚠ {name}: Not set ({description})")
+
+    if errors:
+        for error in errors:
+            print(error)
+        return False, warnings
+
+    return True, warnings

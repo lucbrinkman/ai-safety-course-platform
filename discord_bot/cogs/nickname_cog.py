@@ -4,6 +4,8 @@ Nickname Cog - Syncs display name between web signup and Discord server nickname
 Discord is the source of truth. Database is a cached copy to avoid API rate limits.
 """
 
+import os
+
 import discord
 from discord.ext import commands
 
@@ -21,34 +23,40 @@ _bot = None
 
 async def update_nickname_in_discord(discord_id: str, nickname: str | None) -> bool:
     """
-    Update user's nickname in Discord server(s) if they're a member.
+    Update user's nickname in the configured Discord server.
     Called by web API via core.nickname_sync wrapper.
 
-    Returns True if nickname was updated in at least one guild.
+    Returns True if nickname was updated successfully.
     """
     if _bot is None or not _bot.is_ready():
         return False
 
+    server_id = os.environ.get("DISCORD_SERVER_ID")
+    if not server_id:
+        print("Warning: DISCORD_SERVER_ID not set, cannot update nickname")
+        return False
+
+    guild = _bot.get_guild(int(server_id))
+    if not guild:
+        print(f"Warning: Bot is not in guild {server_id}")
+        return False
+
     user_id = int(discord_id)
-    updated = False
 
-    for guild in _bot.guilds:
-        try:
-            member = guild.get_member(user_id)
-            if not member:
-                try:
-                    member = await guild.fetch_member(user_id)
-                except discord.NotFound:
-                    continue
+    try:
+        member = guild.get_member(user_id)
+        if not member:
+            try:
+                member = await guild.fetch_member(user_id)
+            except discord.NotFound:
+                return False
 
-            await member.edit(nick=nickname)
-            updated = True
-        except discord.Forbidden:
-            pass
-        except discord.HTTPException:
-            pass
-
-    return updated
+        await member.edit(nick=nickname)
+        return True
+    except discord.Forbidden:
+        return False
+    except discord.HTTPException:
+        return False
 
 
 class NicknameCog(commands.Cog):
