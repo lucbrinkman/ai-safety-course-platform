@@ -79,13 +79,13 @@ export default function Availability() {
           Edit Your Availability
         </h1>
         <p className="text-gray-600 mb-6">
-          Please log in with Discord to view and edit your availability.
+          Please sign in with Discord to view and edit your availability.
         </p>
         <button
           onClick={login}
           className="px-6 py-3 bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium rounded-lg transition-colors"
         >
-          Log in with Discord
+          Sign in with Discord
         </button>
       </div>
     );
