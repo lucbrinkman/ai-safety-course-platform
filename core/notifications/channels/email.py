@@ -9,6 +9,7 @@ from sendgrid.helpers.mail import Mail
 
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "team@lensacademy.org")
+FROM_NAME = os.environ.get("FROM_NAME", "Lens Academy")
 
 _client: SendGridAPIClient | None = None
 
@@ -53,7 +54,7 @@ def send_email(
 
     try:
         message = Mail(
-            from_email=FROM_EMAIL,
+            from_email=(FROM_EMAIL, FROM_NAME),
             to_emails=to_email,
             subject=subject,
             plain_text_content=body,

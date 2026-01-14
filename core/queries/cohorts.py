@@ -136,6 +136,7 @@ async def get_available_cohorts(
             cohorts.c.cohort_name,
             cohorts.c.cohort_start_date,
             cohorts.c.course_slug,
+            cohorts.c.duration_days,
         )
         .where(cohorts.c.cohort_start_date > today)
         .where(cohorts.c.status == "active")

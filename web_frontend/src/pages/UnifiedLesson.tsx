@@ -797,6 +797,7 @@ export default function UnifiedLesson() {
             pendingTransition={pendingTransition}
             onConfirmTransition={handleAdvanceStage}
             onContinueChatting={handleContinueChatting}
+            onSkipChat={handleAdvanceStage}
             showDisclaimer={!isChatStage || isViewingOther}
             isReviewing={isReviewing}
             isPreviewing={isPreviewing}

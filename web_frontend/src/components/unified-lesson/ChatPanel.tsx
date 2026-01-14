@@ -26,6 +26,7 @@ type ChatPanelProps = {
   pendingTransition: boolean;
   onConfirmTransition: () => void;
   onContinueChatting: () => void;
+  onSkipChat?: () => void;
   showDisclaimer?: boolean;
   isReviewing?: boolean;
   isPreviewing?: boolean;
@@ -44,6 +45,7 @@ export default function ChatPanel({
   pendingTransition,
   onConfirmTransition,
   onContinueChatting,
+  onSkipChat,
   showDisclaimer = false,
   isReviewing = false,
   isPreviewing = false,
@@ -594,6 +596,20 @@ export default function ChatPanel({
                 Feel free to ask questions.
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Skip chat button - shown in active chat stage */}
+      {!showDisclaimer && !pendingTransition && onSkipChat && (
+        <div className="px-4 py-3 border-t border-gray-100">
+          <div className="max-w-[620px] mx-auto flex justify-center">
+            <button
+              onClick={onSkipChat}
+              className="text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors"
+            >
+              I'm done chatting
+            </button>
           </div>
         </div>
       )}
