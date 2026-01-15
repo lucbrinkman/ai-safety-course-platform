@@ -14,8 +14,10 @@ import {
   advanceStage,
   sendMessage,
   claimSession,
+  getNextLesson,
   RequestTimeoutError,
 } from "../api/lessons";
+import type { LessonCompletionResult } from "../api/lessons";
 import { useAuth } from "../hooks/useAuth";
 import { useAnonymousSession } from "../hooks/useAnonymousSession";
 import { useActivityTracker } from "../hooks/useActivityTracker";
@@ -38,8 +40,9 @@ import {
 import { Sentry } from "../errorTracking";
 
 export default function UnifiedLesson() {
-  const { lessonId } = useParams<{
+  const { lessonId, courseId } = useParams<{
     lessonId: string;
+    courseId?: string;
   }>();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
@@ -67,7 +70,7 @@ export default function UnifiedLesson() {
   const hasTrackedLessonStart = useRef(false);
 
   // Anonymous session flow
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, isInSignupsTable, login } = useAuth();
   const { getStoredSessionId, storeSessionId, clearSessionId } =
     useAnonymousSession(lessonId!);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
@@ -75,6 +78,12 @@ export default function UnifiedLesson() {
 
   // Lesson drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Lesson completion result for completion modal
+  const [lessonCompletionResult, setLessonCompletionResult] = useState<LessonCompletionResult>(null);
+
+  // State for dismissing the completion modal (allows user to stay on lesson)
+  const [completionModalDismissed, setCompletionModalDismissed] = useState(false);
 
   // Messages derived from session (server is source of truth)
   const messages = session?.messages ?? [];
@@ -620,6 +629,23 @@ export default function UnifiedLesson() {
     }
   }, [session?.completed, lessonId]);
 
+  // Fetch next lesson info when lesson completes (only in course context)
+  useEffect(() => {
+    if (!session?.completed || !courseId || !lessonId) return;
+
+    async function fetchNextLesson() {
+      try {
+        const result = await getNextLesson(courseId!, lessonId!);
+        setLessonCompletionResult(result);
+      } catch (e) {
+        console.error("Failed to fetch next lesson:", e);
+        setLessonCompletionResult(null);
+      }
+    }
+
+    fetchNextLesson();
+  }, [session?.completed, courseId, lessonId]);
+
   if (error) {
     return (
       <div className="h-screen flex items-center justify-center bg-stone-50">
@@ -812,10 +838,26 @@ export default function UnifiedLesson() {
         </div>
       </div>
 
-      <LessonCompleteModal
-        isOpen={session.completed || !session.current_stage}
-        lessonTitle={session.lesson_title}
-      />
+      {/* Derive props for modal from lessonCompletionResult */}
+      {(() => {
+        const nextLesson = lessonCompletionResult?.type === "next_lesson"
+          ? { slug: lessonCompletionResult.slug, title: lessonCompletionResult.title }
+          : null;
+        const completedUnit = lessonCompletionResult?.type === "unit_complete"
+          ? lessonCompletionResult.unitNumber
+          : null;
+        return (
+          <LessonCompleteModal
+            isOpen={(session.completed || !session.current_stage) && !completionModalDismissed}
+            lessonTitle={session.lesson_title}
+            courseId={courseId}
+            isInSignupsTable={isInSignupsTable}
+            nextLesson={nextLesson}
+            completedUnit={completedUnit}
+            onClose={() => setCompletionModalDismissed(true)}
+          />
+        );
+      })()}
 
       <AuthPromptModal
         isOpen={showAuthPrompt}

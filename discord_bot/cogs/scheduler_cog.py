@@ -49,6 +49,7 @@ class SchedulerCog(commands.Cog):
         return choices[:25]
 
     @app_commands.command(name="schedule", description="Run scheduling for a cohort")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(
         cohort="The cohort to schedule",

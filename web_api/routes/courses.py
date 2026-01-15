@@ -29,9 +29,12 @@ async def get_next_lesson_endpoint(
     course_slug: str,
     current: str = Query(..., description="Current lesson slug"),
 ):
-    """Get the next lesson after the current one.
+    """Get what comes after the current lesson.
 
-    Returns 204 No Content if there is no next lesson (end of course).
+    Returns:
+        - 200 with {nextLessonSlug, nextLessonTitle} if next item is a lesson
+        - 200 with {completedUnit: N} if next item is a meeting (unit boundary)
+        - 204 No Content if end of course
     """
     try:
         result = get_next_lesson(course_slug, current)
@@ -41,9 +44,13 @@ async def get_next_lesson_endpoint(
     if result is None:
         return Response(status_code=204)
 
+    if result["type"] == "unit_complete":
+        return {"completedUnit": result["unit_number"]}
+
+    # result["type"] == "lesson"
     return {
-        "nextLessonSlug": result.lesson_slug,
-        "nextLessonTitle": result.lesson_title,
+        "nextLessonSlug": result["slug"],
+        "nextLessonTitle": result["title"],
     }
 
 

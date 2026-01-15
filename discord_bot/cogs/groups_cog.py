@@ -83,6 +83,7 @@ class GroupsCog(commands.Cog):
         name="realize-groups",
         description="Create Discord channels for a cohort's groups",
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(cohort="The cohort to create Discord channels for")
     @app_commands.autocomplete(cohort=cohort_autocomplete)

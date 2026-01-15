@@ -353,11 +353,18 @@ if spa_path.exists() and not is_dev_mode():
         """Serve React SPA for all frontend routes.
 
         API routes (/api/*, /auth/*) are excluded - they 404 if no match.
+        Static files (favicon, images, etc.) are served directly.
         Everything else serves index.html and React Router handles it.
         """
         # Don't catch API routes - let them 404 properly
         if full_path.startswith("api/") or full_path.startswith("auth/"):
             raise HTTPException(status_code=404, detail="Not found")
+
+        # Serve static files from dist if they exist (favicon, images, etc.)
+        static_file = spa_path / full_path
+        if static_file.exists() and static_file.is_file():
+            return FileResponse(static_file)
+
         return FileResponse(spa_path / "index.html")
 
 

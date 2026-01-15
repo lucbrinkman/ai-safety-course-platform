@@ -33,8 +33,6 @@ stages:
   # Core reading 2: Wikipedia article on existential risk
   - type: article
     source: articles/wikipedia-existential-risk-from-ai.md
-    from: "Existential risk from artificial intelligence"
-    to: "Two sources of concern stem from the problems of AI"
     introduction: >
       We continue with an overview of the main concepts regarding AI as a source
       of existential threat: what capabilities of this technology are considered

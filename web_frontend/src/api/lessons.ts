@@ -191,17 +191,42 @@ export async function* sendMessage(
   }
 }
 
+interface NextLessonResponse {
+  nextLessonSlug: string;
+  nextLessonTitle: string;
+}
+
+interface CompletedUnitResponse {
+  completedUnit: number;
+}
+
+export type LessonCompletionResult =
+  | { type: "next_lesson"; slug: string; title: string }
+  | { type: "unit_complete"; unitNumber: number }
+  | null;
+
 export async function getNextLesson(
   courseSlug: string,
   currentLessonSlug: string
-): Promise<{ nextLessonSlug: string; nextLessonTitle: string } | null> {
+): Promise<LessonCompletionResult> {
   const res = await fetchWithTimeout(
     `${API_BASE}/api/courses/${courseSlug}/next-lesson?current=${currentLessonSlug}`
   );
   if (!res.ok) throw new Error("Failed to fetch next lesson");
   // 204 No Content means end of course
   if (res.status === 204) return null;
-  return res.json();
+
+  const data: NextLessonResponse | CompletedUnitResponse = await res.json();
+
+  if ("completedUnit" in data) {
+    return { type: "unit_complete", unitNumber: data.completedUnit };
+  }
+
+  return {
+    type: "next_lesson",
+    slug: data.nextLessonSlug,
+    title: data.nextLessonTitle,
+  };
 }
 
 export async function claimSession(

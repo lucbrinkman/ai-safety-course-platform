@@ -15,9 +15,9 @@ from core.lessons.loader import (
 
 def test_load_existing_lesson():
     """Should load a lesson from YAML file."""
-    lesson = load_lesson("intro-to-ai-safety")
-    assert lesson.slug == "intro-to-ai-safety"
-    assert lesson.title == "Introduction to AI Safety"
+    lesson = load_lesson("introduction")
+    assert lesson.slug == "introduction"
+    assert lesson.title == "Introduction"
     assert len(lesson.stages) > 0
 
 
@@ -31,7 +31,7 @@ def test_get_available_lessons():
     """Should return list of available lesson slugs."""
     lessons = get_available_lessons()
     assert isinstance(lessons, list)
-    assert "intro-to-ai-safety" in lessons
+    assert "introduction" in lessons
 
 
 def test_lessons_only_use_allowed_fields():
@@ -40,8 +40,8 @@ def test_lessons_only_use_allowed_fields():
     ALLOWED_TOP_LEVEL = {"slug", "title", "stages", "optionalResources"}
 
     ALLOWED_STAGE_BY_TYPE = {
-        "article": {"type", "source", "from", "to", "optional"},
-        "video": {"type", "source", "from", "to", "optional"},
+        "article": {"type", "source", "from", "to", "optional", "introduction"},
+        "video": {"type", "source", "from", "to", "optional", "introduction", "from_seconds", "to_seconds"},
         "chat": {
             "type",
             "instructions",
@@ -93,6 +93,8 @@ def test_lessons_only_use_allowed_fields():
 
 def test_parse_optional_stages(tmp_path, monkeypatch):
     """Should parse optional field on article and video stages."""
+    import core.lessons.loader as loader_module
+
     # Create a test lesson with optional stages
     test_lesson = {
         "slug": "test-optional",
@@ -112,12 +114,10 @@ def test_parse_optional_stages(tmp_path, monkeypatch):
     lesson_file.write_text(yaml.dump(test_lesson))
 
     # Monkeypatch LESSONS_DIR
-    monkeypatch.setattr("core.lessons.loader.LESSONS_DIR", test_lessons_dir)
+    monkeypatch.setattr(loader_module, "LESSONS_DIR", test_lessons_dir)
 
     # Load and verify
-    from core.lessons.loader import load_lesson
-
-    lesson = load_lesson("test-optional")
+    lesson = loader_module.load_lesson("test-optional")
 
     assert lesson.stages[0].optional is False  # default
     assert lesson.stages[1].optional is True  # explicit

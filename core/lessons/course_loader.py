@@ -4,7 +4,7 @@
 import yaml
 from pathlib import Path
 
-from .types import Course, Module, NextLesson, LessonRef, Meeting
+from .types import Course, Module, LessonRef, Meeting
 from .loader import load_lesson, LessonNotFoundError
 
 
@@ -53,29 +53,48 @@ def get_all_lesson_slugs(course_slug: str) -> list[str]:
     return [item.slug for item in course.progression if isinstance(item, LessonRef)]
 
 
-def get_next_lesson(course_slug: str, current_lesson_slug: str) -> NextLesson | None:
-    """Get the next lesson after the current one."""
-    lesson_slugs = get_all_lesson_slugs(course_slug)
+def get_next_lesson(course_slug: str, current_lesson_slug: str) -> dict | None:
+    """Get what comes after the current lesson in the progression.
 
-    try:
-        current_index = lesson_slugs.index(current_lesson_slug)
-    except ValueError:
+    Returns:
+        - {"type": "lesson", "slug": str, "title": str} if next item is a lesson
+        - {"type": "unit_complete", "unit_number": int} if next item is a meeting
+        - None if end of course or lesson not found
+    """
+    course = load_course(course_slug)
+
+    # Find the current lesson's index in progression
+    current_index = None
+    for i, item in enumerate(course.progression):
+        if isinstance(item, LessonRef) and item.slug == current_lesson_slug:
+            current_index = i
+            break
+
+    if current_index is None:
         return None  # Lesson not in this course
 
+    # Look at the next item in progression
     next_index = current_index + 1
-    if next_index >= len(lesson_slugs):
+    if next_index >= len(course.progression):
         return None  # End of course
 
-    next_lesson_slug = lesson_slugs[next_index]
+    next_item = course.progression[next_index]
 
-    try:
-        next_lesson = load_lesson(next_lesson_slug)
-        return NextLesson(
-            lesson_slug=next_lesson_slug,
-            lesson_title=next_lesson.title,
-        )
-    except LessonNotFoundError:
-        return None
+    if isinstance(next_item, Meeting):
+        return {"type": "unit_complete", "unit_number": next_item.number}
+
+    if isinstance(next_item, LessonRef):
+        try:
+            next_lesson = load_lesson(next_item.slug)
+            return {
+                "type": "lesson",
+                "slug": next_item.slug,
+                "title": next_lesson.title,
+            }
+        except LessonNotFoundError:
+            return None
+
+    return None
 
 
 def get_lessons(course: Course) -> list[LessonRef]:

@@ -312,7 +312,7 @@ async def get_me(request: Request):
     Get current authenticated user info.
 
     Returns 200 always:
-    - If authenticated: { authenticated: true, discord_id, discord_username, discord_avatar_url, user, is_enrolled, in_active_group }
+    - If authenticated: { authenticated: true, discord_id, discord_username, discord_avatar_url, user, is_in_signups_table, is_in_active_group }
     - If not authenticated: { authenticated: false }
     """
     user = await get_optional_user(request)
@@ -338,6 +338,6 @@ async def get_me(request: Request):
         "discord_username": user["username"],
         "discord_avatar_url": avatar_url,
         "user": db_user,
-        "is_enrolled": enrollment_status["is_enrolled"],
-        "in_active_group": enrollment_status["in_active_group"],
+        "is_in_signups_table": enrollment_status["is_in_signups_table"],
+        "is_in_active_group": enrollment_status["is_in_active_group"],
     }
