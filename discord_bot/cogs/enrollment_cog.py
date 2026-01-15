@@ -50,6 +50,7 @@ class EnrollmentCog(commands.Cog):
     @app_commands.command(
         name="availability", description="View and edit your availability"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def availability(self, interaction: discord.Interaction):
         """Generate a web link with an auth code to edit availability."""
@@ -66,6 +67,7 @@ class EnrollmentCog(commands.Cog):
     @app_commands.command(
         name="toggle-facilitator", description="Toggle your facilitator status"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def toggle_facilitator_cmd(self, interaction: discord.Interaction):
         """Toggle whether you are marked as a facilitator."""

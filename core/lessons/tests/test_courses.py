@@ -29,10 +29,21 @@ def test_load_nonexistent_course():
 
 
 def test_get_next_lesson_within_module():
-    """Should return next lesson in same module."""
+    """Should return unit_complete when next item is a meeting."""
     result = get_next_lesson("default", "intro-to-ai-safety")
     assert result is not None
-    assert result.lesson_slug == "intelligence-feedback-loop"
+    # intro-to-ai-safety is followed by meeting: 1 in the progression
+    assert result["type"] == "unit_complete"
+    assert result["unit_number"] == 1
+
+
+def test_get_next_lesson_returns_lesson():
+    """Should return next lesson when there's no meeting in between."""
+    result = get_next_lesson("default", "introduction")
+    assert result is not None
+    assert result["type"] == "lesson"
+    assert result["slug"] == "intro-to-ai-safety"
+    assert "title" in result
 
 
 def test_get_next_lesson_end_of_course():

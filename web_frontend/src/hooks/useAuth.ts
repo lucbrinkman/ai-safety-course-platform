@@ -24,8 +24,8 @@ export interface AuthState {
   discordId: string | null;
   discordUsername: string | null;
   discordAvatarUrl: string | null;
-  isEnrolled: boolean;
-  inActiveGroup: boolean;
+  isInSignupsTable: boolean;
+  isInActiveGroup: boolean;
 }
 
 export interface UseAuthReturn extends AuthState {
@@ -48,8 +48,8 @@ export function useAuth(): UseAuthReturn {
     discordId: null,
     discordUsername: null,
     discordAvatarUrl: null,
-    isEnrolled: false,
-    inActiveGroup: false,
+    isInSignupsTable: false,
+    isInActiveGroup: false,
   });
 
   const fetchUser = useCallback(async () => {
@@ -67,8 +67,8 @@ export function useAuth(): UseAuthReturn {
           discordId: null,
           discordUsername: null,
           discordAvatarUrl: null,
-          isEnrolled: false,
-          inActiveGroup: false,
+          isInSignupsTable: false,
+          isInActiveGroup: false,
         });
         return;
       }
@@ -83,8 +83,8 @@ export function useAuth(): UseAuthReturn {
           discordId: data.discord_id,
           discordUsername: data.discord_username,
           discordAvatarUrl: data.discord_avatar_url,
-          isEnrolled: data.is_enrolled ?? false,
-          inActiveGroup: data.in_active_group ?? false,
+          isInSignupsTable: data.is_in_signups_table ?? false,
+          isInActiveGroup: data.is_in_active_group ?? false,
         });
 
         // Identify user for analytics and error tracking
@@ -112,8 +112,8 @@ export function useAuth(): UseAuthReturn {
           discordId: null,
           discordUsername: null,
           discordAvatarUrl: null,
-          isEnrolled: false,
-          inActiveGroup: false,
+          isInSignupsTable: false,
+          isInActiveGroup: false,
         });
       }
     } catch (error) {
@@ -125,8 +125,8 @@ export function useAuth(): UseAuthReturn {
         discordId: null,
         discordUsername: null,
         discordAvatarUrl: null,
-        isEnrolled: false,
-        inActiveGroup: false,
+        isInSignupsTable: false,
+        isInActiveGroup: false,
       });
     }
   }, []);
@@ -161,8 +161,8 @@ export function useAuth(): UseAuthReturn {
         discordId: null,
         discordUsername: null,
         discordAvatarUrl: null,
-        isEnrolled: false,
-        inActiveGroup: false,
+        isInSignupsTable: false,
+        isInActiveGroup: false,
       });
     } catch (error) {
       console.error("Failed to logout:", error);

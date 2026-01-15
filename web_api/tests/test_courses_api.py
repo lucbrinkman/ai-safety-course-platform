@@ -15,13 +15,22 @@ from main import app
 client = TestClient(app)
 
 
-def test_get_next_lesson():
-    """Should return next lesson info."""
+def test_get_next_lesson_returns_unit_complete():
+    """Should return completedUnit when next item is a meeting."""
     response = client.get("/api/courses/default/next-lesson?current=intro-to-ai-safety")
     assert response.status_code == 200
     data = response.json()
-    assert data["nextLessonSlug"] == "intelligence-feedback-loop"
-    assert data["nextLessonTitle"] == "Intelligence Feedback Loop"
+    # intro-to-ai-safety is followed by meeting: 1 in default course
+    assert data["completedUnit"] == 1
+
+
+def test_get_next_lesson_returns_lesson():
+    """Should return next lesson info when no meeting in between."""
+    response = client.get("/api/courses/default/next-lesson?current=introduction")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["nextLessonSlug"] == "intro-to-ai-safety"
+    assert "nextLessonTitle" in data
 
 
 def test_get_next_lesson_end_of_course():

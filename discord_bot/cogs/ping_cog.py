@@ -21,6 +21,7 @@ class PingCog(commands.Cog):
         await interaction.response.send_message(f"Pong! Latency: {latency}ms")
 
     @app_commands.command(name="test-embed", description="Test embed message")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def embed_test(self, interaction: discord.Interaction):
         """Send a test embed to see how embeds look."""
@@ -83,6 +84,7 @@ We believe that by bringing together motivated individuals from diverse backgrou
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="test-txt", description="Test text file attachment")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def txt_test(self, interaction: discord.Interaction):
         """Send a long text file as attachment to see how Discord collapses it."""
@@ -261,6 +263,7 @@ Sign up with /signup to join a cohort and start learning!
         )
 
     @app_commands.command(name="test-spoiler", description="Test spoiler text")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def spoiler_test(self, interaction: discord.Interaction):
         """Send a long spoiler text to see how Discord handles it."""
@@ -293,6 +296,7 @@ Key concerns include:
     @app_commands.command(
         name="test-collapse", description="Test collapsible content with buttons"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def collapse_test(self, interaction: discord.Interaction):
         """Demonstrate expand/collapse behavior using buttons."""
@@ -304,6 +308,7 @@ Key concerns include:
     @app_commands.command(
         name="test-presence", description="Show your presence and user info"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def test_presence(self, interaction: discord.Interaction):
         """Report all available information about the user including presence data."""
@@ -418,6 +423,7 @@ Key concerns include:
     @app_commands.command(
         name="test-embed-simple", description="Test simple embed with just text"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def test_embed_simple(self, interaction: discord.Interaction):
         """Send a simple embed with just description text, no fields."""
@@ -444,6 +450,7 @@ Researchers are pursuing many different technical approaches to AI safety, inclu
     @app_commands.command(
         name="test-linebreak", description="Test LINE SEPARATOR character"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def test_linebreak(self, interaction: discord.Interaction):
         """Test if Unicode LINE SEPARATOR renders as line break but copies as space."""
@@ -466,6 +473,7 @@ Researchers are pursuing many different technical approaches to AI safety, inclu
     @app_commands.command(
         name="test-spaces", description="Test trailing spaces preservation"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def test_spaces(self, interaction: discord.Interaction):
         """Test if Discord preserves trailing spaces."""
@@ -497,6 +505,7 @@ Researchers are pursuing many different technical approaches to AI safety, inclu
     @app_commands.command(
         name="test-scrollingtext", description="Test streaming chain of thought display"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def scrollingtext_test(self, interaction: discord.Interaction):
         """Simulate streaming chain of thought with cycling last 3 lines."""

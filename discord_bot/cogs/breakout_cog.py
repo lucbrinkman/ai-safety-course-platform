@@ -352,6 +352,7 @@ class BreakoutCog(commands.Cog):
     @app_commands.command(
         name="test-joinvc", description="Have the bot join your voice channel"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def joinvc(self, interaction: discord.Interaction):
         """Have the bot join the caller's voice channel (for testing)."""
@@ -375,6 +376,7 @@ class BreakoutCog(commands.Cog):
         )
 
     @app_commands.command(name="test-leavevc", description="Have the bot leave voice")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     async def leavevc(self, interaction: discord.Interaction):
         """Have the bot leave voice channel."""
@@ -391,6 +393,7 @@ class BreakoutCog(commands.Cog):
     @app_commands.command(
         name="test-voicebots", description="Control voice bots for breakout testing"
     )
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(
         action="join or leave voice channel",
