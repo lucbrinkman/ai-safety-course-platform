@@ -11,11 +11,14 @@ import type { CourseProgress, LessonInfo } from "../types/course";
 import CourseSidebar from "../components/course/CourseSidebar";
 import LessonOverview from "../components/course/LessonOverview";
 import ContentPreviewModal from "../components/course/ContentPreviewModal";
+import HeaderAuthStatus from "../components/unified-lesson/HeaderAuthStatus";
+import { useAuth } from "../hooks/useAuth";
 import { DISCORD_INVITE_URL } from "../config";
 
 export default function CourseOverview() {
   const { courseId = "default" } = useParams();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
     null
@@ -112,12 +115,13 @@ export default function CourseOverview() {
       {/* Nav Header */}
       <nav className="border-b border-slate-200/50 bg-stone-50">
         <div className="px-6 flex items-center justify-between h-14">
-          <a href="/" className="flex items-center">
+          <a href="/" className="flex items-center gap-2">
             <img
-              src="/assets/Logo plus name.png"
+              src="/assets/Logo only.png"
               alt="Lens Academy"
-              className="h-8"
+              className="h-7"
             />
+            <span className="text-lg font-semibold text-slate-800">Lens Academy</span>
           </a>
           <div className="flex items-center gap-4">
             <Link
@@ -130,8 +134,9 @@ export default function CourseOverview() {
               href={DISCORD_INVITE_URL}
               className="px-5 py-2 rounded-full border-2 border-slate-200 text-slate-700 font-medium text-sm hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
             >
-              Join Our Discord Server
+              Join us on Discord
             </a>
+            <HeaderAuthStatus onLoginClick={login} />
           </div>
         </div>
       </nav>

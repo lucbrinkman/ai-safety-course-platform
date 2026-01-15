@@ -341,25 +341,24 @@ async def health():
     }
 
 
-# SPA routes - serve React app for frontend routes (only in production, not dev mode)
+# SPA catch-all - serve React app for frontend routes (only in production, not dev mode)
 if spa_path.exists() and not is_dev_mode():
-
-    @app.get("/signup")
-    @app.get("/auth/code")
-    @app.get("/prototype/interactive-lesson")
-    async def spa():
-        """Serve React SPA for frontend routes."""
-        return FileResponse(spa_path / "index.html")
-
-    @app.get("/lesson/{lesson_id}")
-    async def spa_lesson(lesson_id: str):
-        """Serve React SPA for lesson page."""
-        return FileResponse(spa_path / "index.html")
-
-    # Mount static assets from built SPA
+    # Mount static assets from built SPA first (before catch-all)
     assets_path = spa_path / "assets"
     if assets_path.exists():
         app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def spa_catchall(full_path: str):
+        """Serve React SPA for all frontend routes.
+
+        API routes (/api/*, /auth/*) are excluded - they 404 if no match.
+        Everything else serves index.html and React Router handles it.
+        """
+        # Don't catch API routes - let them 404 properly
+        if full_path.startswith("api/") or full_path.startswith("auth/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        return FileResponse(spa_path / "index.html")
 
 
 if __name__ == "__main__":

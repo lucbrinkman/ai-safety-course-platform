@@ -154,12 +154,12 @@ export default function Facilitator() {
     return (
       <div className="py-8 max-w-6xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-4">Facilitator Panel</h1>
-        <p className="mb-4">Please log in to access the facilitator panel.</p>
+        <p className="mb-4">Please sign in to access the facilitator panel.</p>
         <button
           onClick={login}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Log in with Discord
+          Sign in with Discord
         </button>
       </div>
     );

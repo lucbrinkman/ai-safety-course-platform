@@ -112,6 +112,8 @@ export function useAuth(): UseAuthReturn {
           discordId: null,
           discordUsername: null,
           discordAvatarUrl: null,
+          isEnrolled: false,
+          inActiveGroup: false,
         });
       }
     } catch (error) {
@@ -123,6 +125,8 @@ export function useAuth(): UseAuthReturn {
         discordId: null,
         discordUsername: null,
         discordAvatarUrl: null,
+        isEnrolled: false,
+        inActiveGroup: false,
       });
     }
   }, []);
@@ -157,6 +161,8 @@ export function useAuth(): UseAuthReturn {
         discordId: null,
         discordUsername: null,
         discordAvatarUrl: null,
+        isEnrolled: false,
+        inActiveGroup: false,
       });
     } catch (error) {
       console.error("Failed to logout:", error);
