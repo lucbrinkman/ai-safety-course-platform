@@ -1,5 +1,9 @@
 # web_api/tests/test_courses_api.py
-"""Tests for course API endpoints."""
+"""Tests for course API endpoints.
+
+These tests dynamically discover course structure rather than hardcoding
+specific lesson names. This makes tests resilient to content changes.
+"""
 
 import sys
 from pathlib import Path
@@ -11,57 +15,112 @@ sys.path.insert(0, str(project_root))
 import pytest
 from fastapi.testclient import TestClient
 from main import app
+from core.lessons.course_loader import load_course, get_all_lesson_slugs
+from core.lessons.types import LessonRef, Meeting
 
 client = TestClient(app)
 
 
+# --- Helper functions for dynamic course discovery ---
+
+
+def get_first_lesson_before_meeting(course_slug: str) -> str | None:
+    """Find first lesson that's followed by a meeting."""
+    course = load_course(course_slug)
+    for i, item in enumerate(course.progression[:-1]):
+        if isinstance(item, LessonRef) and isinstance(course.progression[i + 1], Meeting):
+            return item.slug
+    return None
+
+
+def get_first_lesson_before_lesson(course_slug: str) -> str | None:
+    """Find first lesson that's followed by another lesson."""
+    course = load_course(course_slug)
+    for i, item in enumerate(course.progression[:-1]):
+        if isinstance(item, LessonRef) and isinstance(course.progression[i + 1], LessonRef):
+            return item.slug
+    return None
+
+
+def get_last_lesson(course_slug: str) -> str | None:
+    """Find the last lesson in the course."""
+    course = load_course(course_slug)
+    for item in reversed(course.progression):
+        if isinstance(item, LessonRef):
+            return item.slug
+    return None
+
+
+# --- API Tests ---
+
+
 def test_get_next_lesson_returns_unit_complete():
     """Should return completedUnit when next item is a meeting."""
-    response = client.get("/api/courses/default/next-lesson?current=introduction")
+    lesson_slug = get_first_lesson_before_meeting("default")
+    if lesson_slug is None:
+        pytest.skip("No lesson→meeting pattern in default course")
+
+    response = client.get(f"/api/courses/default/next-lesson?current={lesson_slug}")
     assert response.status_code == 200
     data = response.json()
-    # introduction is followed by meeting: 1 in default course
-    assert data["completedUnit"] == 1
+    assert "completedUnit" in data
+    assert isinstance(data["completedUnit"], int)
 
 
 def test_get_next_lesson_returns_lesson():
     """Should return next lesson info when no meeting in between."""
-    # Test with coming-soon which has another coming-soon after it
-    # The course has multiple coming-soon lessons between meetings
-    response = client.get("/api/courses/default/next-lesson?current=coming-soon")
+    lesson_slug = get_first_lesson_before_lesson("default")
+    if lesson_slug is None:
+        pytest.skip("No lesson→lesson pattern in default course")
+
+    response = client.get(f"/api/courses/default/next-lesson?current={lesson_slug}")
     assert response.status_code == 200
     data = response.json()
-    # Could be next lesson or unit_complete depending on position
-    assert "nextLessonSlug" in data or "completedUnit" in data
+    assert "nextLessonSlug" in data
+    assert "nextLessonTitle" in data
+    assert isinstance(data["nextLessonSlug"], str)
+    assert isinstance(data["nextLessonTitle"], str)
 
 
 def test_get_next_lesson_end_of_course():
-    """Should return unit_complete for last meeting at end of course."""
-    # The course ends with meeting: 4, so the last lesson returns unit_complete
-    # We can't easily test "end of course" without knowing the exact last lesson
-    # This test verifies the endpoint works for a known lesson
-    response = client.get("/api/courses/default/next-lesson?current=introduction")
+    """Should return appropriate response for last lesson."""
+    last_lesson = get_last_lesson("default")
+    if last_lesson is None:
+        pytest.skip("No lessons found in default course")
+
+    response = client.get(f"/api/courses/default/next-lesson?current={last_lesson}")
     assert response.status_code == 200
+    # Last lesson returns either unit_complete (if followed by meeting)
+    # or could potentially return null/empty for course end
 
 
 def test_get_next_lesson_invalid_course():
     """Should return 404 for invalid course."""
-    response = client.get(
-        "/api/courses/nonexistent/next-lesson?current=intro-to-ai-safety"
-    )
+    response = client.get("/api/courses/nonexistent/next-lesson?current=any-lesson")
     assert response.status_code == 404
 
 
+def test_get_next_lesson_invalid_lesson():
+    """Should return 204 No Content for lesson not in course (same as end of course)."""
+    response = client.get("/api/courses/default/next-lesson?current=nonexistent-lesson")
+    # API returns 204 No Content when lesson not found in course
+    # (same behavior as reaching end of course)
+    assert response.status_code == 204
+
+
 def test_get_course_progress_returns_units():
-    """Should return course progress with units instead of modules."""
+    """Should return course progress with units."""
     response = client.get("/api/courses/default/progress")
     assert response.status_code == 200
     data = response.json()
 
     # Should have course info
     assert "course" in data
+    assert "slug" in data["course"]
+    assert "title" in data["course"]
     assert data["course"]["slug"] == "default"
-    assert data["course"]["title"] == "AI Safety Fundamentals"
+    assert isinstance(data["course"]["title"], str)
+    assert len(data["course"]["title"]) > 0
 
     # Should have units, not modules
     assert "units" in data
@@ -70,16 +129,24 @@ def test_get_course_progress_returns_units():
     # Should have at least one unit
     assert len(data["units"]) >= 1
 
-    # First unit should have meetingNumber and lessons
+    # First unit should have expected structure
     unit = data["units"][0]
     assert "meetingNumber" in unit
-    assert unit["meetingNumber"] == 1
+    assert isinstance(unit["meetingNumber"], int)
     assert "lessons" in unit
     assert len(unit["lessons"]) >= 1
 
-    # Each lesson should have optional field
+    # Each lesson should have required fields
     lesson = unit["lessons"][0]
     assert "slug" in lesson
     assert "title" in lesson
     assert "optional" in lesson
+    assert isinstance(lesson["slug"], str)
+    assert isinstance(lesson["title"], str)
     assert isinstance(lesson["optional"], bool)
+
+
+def test_get_course_progress_invalid_course():
+    """Should return 404 for invalid course."""
+    response = client.get("/api/courses/nonexistent/progress")
+    assert response.status_code == 404

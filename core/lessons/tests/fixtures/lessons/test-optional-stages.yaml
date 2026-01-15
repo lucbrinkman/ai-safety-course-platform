@@ -1,0 +1,16 @@
+# core/lessons/tests/fixtures/lessons/test-optional-stages.yaml
+slug: test-optional-stages
+title: Test Optional Stages
+
+stages:
+  - type: article
+    source: articles/test.md
+  - type: article
+    source: articles/optional.md
+    optional: true
+  - type: video
+    source: videos/test.md
+    optional: true
+    introduction: Video intro text
+  - type: chat
+    instructions: Discuss the content

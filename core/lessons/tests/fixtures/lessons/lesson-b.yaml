@@ -1,0 +1,6 @@
+# core/lessons/tests/fixtures/lessons/lesson-b.yaml
+slug: lesson-b
+title: Lesson B
+stages:
+  - type: chat
+    instructions: Lesson B instructions

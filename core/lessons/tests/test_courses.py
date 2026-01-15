@@ -1,5 +1,9 @@
 # core/lessons/tests/test_courses.py
-"""Tests for course loader."""
+"""Tests for course loader.
+
+Logic tests use fixtures in core/lessons/tests/fixtures/ via patch_all_dirs.
+Content validation tests are in test_content_validation.py.
+"""
 
 import pytest
 from core.lessons.course_loader import (
@@ -14,12 +18,12 @@ from core.lessons.course_loader import (
 from core.lessons.types import Course, LessonRef, Meeting
 
 
-def test_load_existing_course():
+def test_load_existing_course(patch_all_dirs):
     """Should load a course from YAML file."""
-    course = load_course("default")
-    assert course.slug == "default"
-    assert course.title == "AI Safety Fundamentals"
-    assert len(course.progression) > 0
+    course = load_course("test-course")
+    assert course.slug == "test-course"
+    assert course.title == "Test Course"
+    assert len(course.progression) == 6  # 4 lessons + 2 meetings
 
 
 def test_load_nonexistent_course():
@@ -28,85 +32,42 @@ def test_load_nonexistent_course():
         load_course("nonexistent-course")
 
 
-def test_get_next_lesson_within_module():
+def test_get_next_lesson_within_module(patch_all_dirs):
     """Should return unit_complete when next item is a meeting."""
-    result = get_next_lesson("default", "introduction")
+    # lesson-b is followed by meeting: 1 in test-course
+    result = get_next_lesson("test-course", "lesson-b")
     assert result is not None
-    # introduction is followed by meeting: 1 in the progression
     assert result["type"] == "unit_complete"
     assert result["unit_number"] == 1
 
 
-def test_get_next_lesson_returns_lesson():
+def test_get_next_lesson_returns_lesson(patch_all_dirs):
     """Should return next lesson when there's no meeting in between."""
-    # After meeting 1, we have coming-soon lessons before meeting 2
-    # Get a lesson that has another lesson after it (not a meeting)
-    result = get_next_lesson("default", "coming-soon")
-    # coming-soon appears multiple times, so the first one should return the next coming-soon
-    # This test may need adjustment based on actual course structure
+    # lesson-a is followed by lesson-b in test-course
+    result = get_next_lesson("test-course", "lesson-a")
     assert result is not None
+    assert result["type"] == "lesson"
+    assert result["slug"] == "lesson-b"
+    assert result["title"] == "Lesson B"
 
 
-def test_get_next_lesson_end_of_course():
-    """Test get_next_lesson behavior with duplicate slugs.
-
-    Note: When a lesson slug appears multiple times in a course (like 'coming-soon'),
-    get_next_lesson returns the item after the FIRST occurrence of that slug.
-    This is expected behavior - courses should use unique slugs for proper navigation.
-    """
-    # coming-soon appears multiple times, so get_next_lesson finds the first occurrence
-    # The first coming-soon (after meeting 1) is followed by another coming-soon
-    result = get_next_lesson("default", "coming-soon")
-    assert result is not None
-    # Could be lesson or unit_complete depending on course structure
-    assert result["type"] in ["lesson", "unit_complete"]
-
-
-def test_get_next_lesson_unknown_lesson():
-    """Should return None for lesson not in course."""
-    result = get_next_lesson("default", "nonexistent-lesson")
+def test_get_next_lesson_end_of_course(patch_all_dirs):
+    """Should return None at end of course."""
+    # lesson-d is the last item in test-course
+    result = get_next_lesson("test-course", "lesson-d")
     assert result is None
 
 
-def test_get_all_lesson_slugs():
+def test_get_next_lesson_unknown_lesson(patch_all_dirs):
+    """Should return None for lesson not in course."""
+    result = get_next_lesson("test-course", "nonexistent-lesson")
+    assert result is None
+
+
+def test_get_all_lesson_slugs(patch_all_dirs):
     """Should return flat list of all lesson slugs in order."""
-    lesson_slugs = get_all_lesson_slugs("default")
-    assert isinstance(lesson_slugs, list)
-    assert "introduction" in lesson_slugs
-    assert "coming-soon" in lesson_slugs
-    # Order should be introduction first
-    assert lesson_slugs.index("introduction") < lesson_slugs.index("coming-soon")
-
-
-from core.lessons.loader import get_available_lessons, load_lesson
-
-
-def test_all_lessons_have_unique_slugs():
-    """All lesson YAML files should have unique slugs."""
-    lesson_files = get_available_lessons()
-    slugs_seen = {}
-
-    for lesson_file in lesson_files:
-        lesson = load_lesson(lesson_file)
-        if lesson.slug in slugs_seen:
-            pytest.fail(
-                f"Duplicate lesson slug '{lesson.slug}' found in "
-                f"'{lesson_file}.yaml' and '{slugs_seen[lesson.slug]}.yaml'"
-            )
-        slugs_seen[lesson.slug] = lesson_file
-
-
-def test_course_manifest_references_existing_lessons():
-    """All lesson slugs in course manifest should exist as files."""
-    course = load_course("default")
-    available = set(get_available_lessons())
-
-    for item in course.progression:
-        if isinstance(item, LessonRef):
-            if item.slug not in available:
-                pytest.fail(
-                    f"Course 'default' references non-existent lesson: '{item.slug}'"
-                )
+    lesson_slugs = get_all_lesson_slugs("test-course")
+    assert lesson_slugs == ["lesson-a", "lesson-b", "lesson-c", "lesson-d"]
 
 
 # --- Tests for new helper functions (Task 2) ---
@@ -199,27 +160,20 @@ def test_get_due_by_meeting_unknown_lesson():
 # --- Tests for course loader with progression format (Task 3) ---
 
 
-def test_load_course_parses_progression_types():
-    """load_course should correctly parse LessonRefs and Meetings from YAML.
+def test_load_course_parses_progression_types(patch_all_dirs):
+    """load_course should correctly parse LessonRefs and Meetings from YAML."""
+    course = load_course("test-course")
 
-    Tests parsing logic, not specific course content.
-    """
-    course = load_course("default")
-
-    # Should have a non-empty progression
-    assert len(course.progression) > 0
-
-    # Progression should contain both LessonRefs and Meetings
     lesson_refs = [item for item in course.progression if isinstance(item, LessonRef)]
     meetings = [item for item in course.progression if isinstance(item, Meeting)]
 
-    assert len(lesson_refs) > 0, "Course should have at least one lesson"
-    assert len(meetings) > 0, "Course should have at least one meeting"
+    assert len(lesson_refs) == 4
+    assert len(meetings) == 2
 
-    # Each LessonRef should have a slug
-    for ref in lesson_refs:
-        assert ref.slug, "LessonRef should have a non-empty slug"
+    # Check lesson refs
+    assert lesson_refs[0].slug == "lesson-a"
+    assert lesson_refs[2].optional is True  # lesson-c is optional
 
-    # Each Meeting should have a number
-    for meeting in meetings:
-        assert meeting.number >= 1, "Meeting should have a positive number"
+    # Check meetings
+    assert meetings[0].number == 1
+    assert meetings[1].number == 2

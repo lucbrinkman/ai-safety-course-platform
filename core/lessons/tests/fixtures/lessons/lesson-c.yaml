@@ -1,0 +1,6 @@
+# core/lessons/tests/fixtures/lessons/lesson-c.yaml
+slug: lesson-c
+title: Lesson C
+stages:
+  - type: chat
+    instructions: Lesson C instructions

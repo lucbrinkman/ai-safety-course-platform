@@ -1,0 +1,6 @@
+# core/lessons/tests/fixtures/lessons/lesson-d.yaml
+slug: lesson-d
+title: Lesson D
+stages:
+  - type: chat
+    instructions: Lesson D instructions
