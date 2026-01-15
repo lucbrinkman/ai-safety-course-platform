@@ -13,6 +13,8 @@ Options:
 --port (defaults to API_PORT env var, or 8000)
 --vite-port (defaults to VITE_PORT env var, or 5173)
 
+**Database connection failures:** If the database connection fails, ask the user to start the database (Docker). Never use `--no-db` without explicit permission from the user.
+
 **Tests:**
 
 ```bash
