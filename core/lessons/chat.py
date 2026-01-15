@@ -28,7 +28,7 @@ TRANSITION_TOOL = {
         "description": (
             "Call this when the conversation has reached a good stopping point "
             "and the user is ready to move to the next stage. "
-            "Use this after 2-4 meaningful exchanges, or when the user indicates readiness."
+            "Use this after 2-3 exchanges, or when the user indicates readiness."
         ),
         "parameters": {
             "type": "object",
@@ -52,17 +52,7 @@ def _build_system_prompt(
         previous_content: Content from previous stage (for chat stages, if showTutorPreviousContent)
     """
 
-    base = """You are a Socratic tutor helping someone learn about AI safety.
-
-Your role:
-- Ask probing questions to help them think deeply
-- Challenge their assumptions constructively
-- Keep responses concise (2-3 sentences typically)
-- After 2-4 meaningful exchanges, use the transition_to_next tool
-
-Do NOT:
-- Give long lectures
-- Simply agree with everything they say
+    base = """You are a tutor helping someone learn about AI safety. Each piece of content (article, video) has different topics and learning objectives. Overall, the goal is to help the student understand that AI is a large existential threat to humanity.
 """
 
     if isinstance(current_stage, ChatStage):
@@ -79,9 +69,8 @@ Do NOT:
             if isinstance(current_stage, ArticleStage)
             else "watching a video"
         )
-        prompt = f"""You are an AI tutor. The user is currently {content_type}.
-
-Keep responses brief - the user should focus on the content.
+        prompt = base + f"""
+The user is currently {content_type}. Keep responses brief - the user should focus on the content.
 Answer questions if asked, but don't initiate lengthy discussion.
 """
         if current_content:

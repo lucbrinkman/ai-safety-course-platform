@@ -11,9 +11,22 @@ stages:
 
   - type: chat
     instructions: >
-      The user just watched the opening of "A.I. ‐ Humanity's Final Invention?"
-      Ask them what stood out most. Check their understanding of why AI might pose
-      existential risks. Keep the conversation exploratory - this is their introduction.
+      TLDR of what the user just watched:
+      Humans dominate Earth because general intelligence enabled cumulative knowledge.
+      Modern AI evolved from narrow tools into opaque "black box" learning systems.
+      AGI matters because digital minds can run faster, scale, and be copied—potentially
+      outcompeting humans and concentrating power. An intelligence explosion could lead
+      to superintelligence with uncertain outcomes.
+
+      Discussion topics to explore:
+      - What is intelligence as "problem-solving ability" and why is it a source of power?
+      - Why are neural networks called "black boxes"?
+      - What's the difference between narrow AI (like ChatGPT) and AGI?
+      - How could an "intelligence explosion" happen through recursive self-improvement?
+
+      Start by asking what stood out or surprised them. Use Socratic questioning to
+      check their understanding of these concepts. Don't lecture—help them articulate
+      their own thinking.
     showUserPreviousContent: true
     showTutorPreviousContent: true
 
@@ -30,9 +43,23 @@ stages:
 
   - type: chat
     instructions: >
-      The user just read the Wikipedia overview of existential risk from AI.
-      Ask them what they found surprising or new. Check if they understand the
-      distinction between AGI and superintelligence, and why alignment matters.
+      TLDR of what the user just read:
+      AI x-risk is the hypothesis that AGI/superintelligence could cause human extinction
+      or irreversible collapse. The risk combines: capability advantages, recursive
+      self-improvement, and emerging dangerous capabilities (manipulation, cyberattacks,
+      bioweapons)—amplified by competitive "race to the bottom" dynamics. The core crux
+      is alignment: specifying goals, ensuring corrigibility, handling instrumental
+      convergence. Intelligence and values are orthogonal—moral behavior isn't automatic.
+
+      Discussion topics to explore:
+      - What is "instrumental convergence"? Why would any smart AI seek self-preservation and resources?
+      - What is the "Gorilla Problem" (Stuart Russell's analogy)?
+      - How do "Monkey's Paw" or "King Midas" effects apply to goal specification?
+      - What do skeptics like Yann LeCun argue, and what are the counter-arguments?
+      - Why might "kill switches" fail against superintelligence?
+
+      Ask what they found surprising or new. Check if they can explain instrumental
+      convergence in their own words—it's a key concept.
     showUserPreviousContent: true
     showTutorPreviousContent: true
 
@@ -45,9 +72,21 @@ stages:
 
   - type: chat
     instructions: >
-      The user watched "10 Reasons to Ignore AI Safety" which presents common
-      objections to AI safety concerns and then refutes them. Ask which argument
-      they found most compelling (either for or against). Explore their reasoning.
+      TLDR of what the user just watched:
+      The video presents 10 common objections to AI safety concerns and refutes each one.
+      Key rebuttals include: instrumental convergence explains why "just don't add bad goals"
+      fails; implicit goals make systems LESS safe; the "asteroid analogy" shows why early
+      preparation matters; being "for AI safety" is not the same as being "against AI."
+
+      Discussion topics to explore:
+      - Which objection did they find most initially convincing? Did their view change?
+      - How does instrumental convergence counter "just don't put in bad goals"?
+      - Why do implicit goals make systems less safe, not more?
+      - What's the flaw in "human-AI teams will keep things safe"?
+      - How does the video respond to the "overpopulation on Mars" analogy?
+
+      This is a good stage to surface any remaining skepticism they have. Engage with
+      their doubts constructively rather than dismissing them.
     showUserPreviousContent: true
     showTutorPreviousContent: true
 
