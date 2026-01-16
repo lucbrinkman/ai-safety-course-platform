@@ -1,3 +1,5 @@
+"use client";
+
 import { useMeasure } from "react-use";
 import { useMemo, type RefCallback } from "react";
 

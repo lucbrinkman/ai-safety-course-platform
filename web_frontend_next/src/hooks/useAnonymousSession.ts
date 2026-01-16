@@ -1,3 +1,5 @@
+"use client";
+
 // web_frontend/src/hooks/useAnonymousSession.ts
 import { useCallback } from "react";
 
