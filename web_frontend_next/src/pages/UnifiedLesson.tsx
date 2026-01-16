@@ -1,6 +1,6 @@
-// web_frontend/src/pages/UnifiedLesson.tsx
+"use client";
+
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
 import type {
   SessionState,
   PendingMessage,
@@ -36,11 +36,14 @@ import {
 } from "../analytics";
 import { Sentry } from "../errorTracking";
 
-export default function UnifiedLesson() {
-  const { lessonId, courseId } = useParams<{
-    lessonId: string;
-    courseId?: string;
-  }>();
+interface UnifiedLessonProps {
+  courseId?: string;
+  lessonSlug: string;
+}
+
+export default function UnifiedLesson({ courseId, lessonSlug }: UnifiedLessonProps) {
+  // Use lessonSlug as lessonId for API compatibility
+  const lessonId = lessonSlug;
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
   const [pendingMessage, setPendingMessage] = useState<PendingMessage | null>(
