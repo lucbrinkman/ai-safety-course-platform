@@ -42,7 +42,7 @@ export function LessonHeader({
   return (
     <header
       ref={refs.containerRef}
-      className="bg-white border-b border-gray-200 px-4 py-3 z-40"
+      className="relative bg-white border-b border-gray-200 px-4 py-3 z-40"
     >
       <div className={`flex ${needsTwoRows ? 'flex-col gap-3' : 'items-center justify-between'}`}>
         {/* First row: Logo/title + (progress bar if single row) + controls */}
@@ -64,21 +64,22 @@ export function LessonHeader({
             </h1>
           </div>
 
-          {/* Center section: Progress bar (inline if single row) */}
-          {!needsTwoRows && (
-            <div ref={refs.centerRef} className="flex-shrink-0">
-              <StageProgressBar
-                stages={stages}
-                currentStageIndex={currentStageIndex}
-                viewingStageIndex={viewingStageIndex}
-                onStageClick={onStageClick}
-                onPrevious={onPrevious}
-                onNext={onNext}
-                canGoPrevious={canGoPrevious}
-                canGoNext={canGoNext}
-              />
-            </div>
-          )}
+          {/* Center section: Progress bar (inline if single row, hidden measurement otherwise) */}
+          <div
+            ref={refs.centerRef}
+            className={`flex-shrink-0 ${needsTwoRows ? 'invisible absolute' : ''}`}
+          >
+            <StageProgressBar
+              stages={stages}
+              currentStageIndex={currentStageIndex}
+              viewingStageIndex={viewingStageIndex}
+              onStageClick={onStageClick}
+              onPrevious={onPrevious}
+              onNext={onNext}
+              canGoPrevious={canGoPrevious}
+              canGoNext={canGoNext}
+            />
+          </div>
 
           {/* Right section: Controls */}
           <div
