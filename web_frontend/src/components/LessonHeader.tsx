@@ -44,13 +44,15 @@ export function LessonHeader({
       ref={refs.containerRef}
       className="relative bg-white border-b border-gray-200 px-4 py-3 z-40"
     >
-      <div className={`flex ${needsTwoRows ? 'flex-col gap-3' : 'items-center justify-between'}`}>
-        {/* First row: Logo/title + (progress bar if single row) + controls */}
-        <div className="flex items-center justify-between">
+      <div className={needsTwoRows ? 'flex flex-col gap-3' : ''}>
+        {/* First row: Spacer pattern for soft centering */}
+        {/* [Left] [spacer flex-1] [Center] [spacer flex-1] [Right] */}
+        {/* Spacers try to be equal, so center is centered. When sides grow, spacers shrink and center yields */}
+        <div className="flex items-center">
           {/* Left section: Logo and title */}
           <div
             ref={refs.leftRef}
-            className={`flex items-center gap-2 ${needsTruncation ? 'min-w-0' : ''} mr-4`}
+            className={`flex items-center gap-2 ${needsTruncation ? 'min-w-0' : ''}`}
           >
             <a href="/" className="flex items-center gap-1.5 shrink-0">
               <img src="/assets/Logo only.png" alt="Lens Academy" className="h-6" />
@@ -64,10 +66,13 @@ export function LessonHeader({
             </h1>
           </div>
 
-          {/* Center section: Progress bar (inline if single row, hidden measurement otherwise) */}
+          {/* Left spacer */}
+          <div className="flex-1 min-w-3" />
+
+          {/* Center section: Progress bar */}
           <div
             ref={refs.centerRef}
-            className={`flex-shrink-0 ${needsTwoRows ? 'invisible absolute' : ''}`}
+            className={needsTwoRows ? 'invisible fixed -left-[9999px]' : 'shrink-0'}
           >
             <StageProgressBar
               stages={stages}
@@ -81,10 +86,13 @@ export function LessonHeader({
             />
           </div>
 
+          {/* Right spacer */}
+          <div className="flex-1 min-w-3" />
+
           {/* Right section: Controls */}
           <div
             ref={refs.rightRef}
-            className="flex items-center gap-4 shrink-0"
+            className="flex items-center gap-4"
           >
             {isViewingOther ? (
               <button
