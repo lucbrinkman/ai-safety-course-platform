@@ -1,28 +1,43 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { initPostHog, capturePageView, hasConsent } from "@/analytics";
 import { initSentry } from "@/errorTracking";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const originalTitleRef = useRef<string | null>(null);
 
-  // Add environment label prefix to document title (e.g., "ONE - Lens Academy")
+  // Add environment label prefix to document title (e.g., "dev2 - Lens Academy")
+  // Re-runs on pathname change and uses MutationObserver for async title updates
   useEffect(() => {
     const envLabel = process.env.NEXT_PUBLIC_ENV_LABEL;
-    if (envLabel && typeof document !== "undefined") {
-      // Store original title on first run
-      if (originalTitleRef.current === null) {
-        originalTitleRef.current = document.title;
+    if (!envLabel || typeof document === "undefined") return;
+
+    const prefixTitle = () => {
+      const currentTitle = document.title;
+      if (currentTitle && !currentTitle.startsWith(`${envLabel} - `)) {
+        document.title = `${envLabel} - ${currentTitle}`;
       }
-      // Only prefix if not already prefixed
-      if (!document.title.startsWith(`${envLabel} - `)) {
-        document.title = `${envLabel} - ${originalTitleRef.current || document.title}`;
-      }
+    };
+
+    // Prefix immediately and after a short delay (for async title updates)
+    prefixTitle();
+    const timeoutId = setTimeout(prefixTitle, 100);
+
+    // Watch for title changes (Next.js metadata updates title after render)
+    const titleElement = document.querySelector("title");
+    let observer: MutationObserver | null = null;
+    if (titleElement) {
+      observer = new MutationObserver(prefixTitle);
+      observer.observe(titleElement, { childList: true, characterData: true, subtree: true });
     }
-  }, []);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer?.disconnect();
+    };
+  }, [pathname]);
 
   // Initialize analytics if user previously consented
   useEffect(() => {

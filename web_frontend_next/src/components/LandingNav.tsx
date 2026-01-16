@@ -1,16 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { DiscordInviteButton, UserMenu } from "./nav";
 
-const DISCORD_INVITE_URL = "https://discord.gg/nn7HrjFZ8E";
-
-interface LandingNavProps {
-  user: {
-    discord_username?: string;
-    discord_avatar_url?: string;
-    [key: string]: unknown;
-  } | null;
-}
-
-export function LandingNav({ user }: LandingNavProps) {
+export function LandingNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-stone-50/70 border-b border-slate-200/50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,34 +25,8 @@ export function LandingNav({ user }: LandingNavProps) {
             >
               Course
             </Link>
-            {user && user.discord_username ? (
-              <div className="flex items-center gap-2">
-                {user.discord_avatar_url && (
-                  <img
-                    src={user.discord_avatar_url}
-                    alt={user.discord_username}
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <span className="text-sm text-slate-700">
-                  {user.discord_username}
-                </span>
-              </div>
-            ) : (
-              /* Use <a> not <Link> - this redirects to FastAPI (external) */
-              <a
-                href="/auth/discord?next=/course"
-                className="text-slate-600 font-medium text-sm hover:text-slate-900 transition-colors duration-200"
-              >
-                Sign in
-              </a>
-            )}
-            <a
-              href={DISCORD_INVITE_URL}
-              className="px-5 py-2 rounded-full border-2 border-slate-200 text-slate-700 font-medium text-sm hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
-            >
-              Join Our Discord Server
-            </a>
+            <DiscordInviteButton />
+            <UserMenu signInRedirect="/course" />
           </div>
         </div>
       </div>

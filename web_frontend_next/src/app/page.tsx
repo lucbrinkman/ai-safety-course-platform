@@ -1,13 +1,10 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/api-server";
 import { LandingNav } from "@/components/LandingNav";
 
-export default async function LandingPage() {
-  const user = await getCurrentUser();
-
+export default function LandingPage() {
   return (
     <div className="h-screen bg-stone-50 text-slate-900 antialiased flex flex-col overflow-hidden">
-      <LandingNav user={user} />
+      <LandingNav />
 
       {/* Hero */}
       <main className="flex-1 flex items-center justify-center px-4 pt-16 relative bg-white">

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { DISCORD_INVITE_URL } from "../config";
 import CookieSettings from "./CookieSettings";
+import { DiscordInviteButton, UserMenu } from "./nav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [showCookieSettings, setShowCookieSettings] = useState(false);
@@ -28,12 +28,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               >
                 Course
               </Link>
-              <a
-                href={DISCORD_INVITE_URL}
-                className="px-5 py-2 rounded-full border-2 border-slate-200 text-slate-700 font-medium text-sm hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
-              >
-                Join us on Discord
-              </a>
+              <DiscordInviteButton />
+              <UserMenu />
             </div>
           </div>
         </div>

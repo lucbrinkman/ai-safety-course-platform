@@ -14,9 +14,7 @@ import type { CourseProgress, LessonInfo } from "../types/course";
 import CourseSidebar from "../components/course/CourseSidebar";
 import LessonOverview from "../components/course/LessonOverview";
 import ContentPreviewModal from "../components/course/ContentPreviewModal";
-import HeaderAuthStatus from "../components/unified-lesson/HeaderAuthStatus";
-import { useAuth } from "../hooks/useAuth";
-import { DISCORD_INVITE_URL } from "../config";
+import { DiscordInviteButton, UserMenu } from "../components/nav";
 
 interface CourseOverviewProps {
   courseId?: string;
@@ -24,7 +22,6 @@ interface CourseOverviewProps {
 
 export default function CourseOverview({ courseId = "default" }: CourseOverviewProps) {
   const router = useRouter();
-  const { login } = useAuth();
 
   const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
     null
@@ -136,13 +133,8 @@ export default function CourseOverview({ courseId = "default" }: CourseOverviewP
             >
               Course
             </Link>
-            <a
-              href={DISCORD_INVITE_URL}
-              className="px-5 py-2 rounded-full border-2 border-slate-200 text-slate-700 font-medium text-sm hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
-            >
-              Join us on Discord
-            </a>
-            <HeaderAuthStatus onLoginClick={login} />
+            <DiscordInviteButton />
+            <UserMenu />
           </div>
         </div>
       </nav>
